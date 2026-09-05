@@ -14,4 +14,5 @@ accessibility, bảo mật dữ liệu trên thiết bị và kiểm thử.
 - [Authentication](./authentication.md) — in-progress
 - [Daily check-in và streak](./daily-checkin.md) — in-progress
 - [Missions và energy](./missions-energy.md) — in-progress
+- [Journey và Library](./journey-library.md) — in-progress
 - [Profile overview](./profile-overview.md) — in-progress

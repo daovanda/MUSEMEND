@@ -34,7 +34,7 @@ class SupabaseMissionRepository implements MissionRepository {
             'estimated_minutes',
           )
           .eq('is_active', true)
-          .order('id'),
+          .order('id', ascending: true),
       _client
           .from('travel_progress')
           .select('current_energy, journey_energy_used, journey_status')

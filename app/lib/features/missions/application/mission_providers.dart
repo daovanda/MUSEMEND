@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:musemend/core/supabase/supabase_client_provider.dart';
 import 'package:musemend/features/checkin/application/reflect_providers.dart';
 import 'package:musemend/features/checkin/application/reflect_state.dart';
+import 'package:musemend/features/journey/application/journey_providers.dart';
 import 'package:musemend/features/missions/data/supabase_mission_repository.dart';
 import 'package:musemend/features/missions/domain/mission_completion.dart';
 import 'package:musemend/features/missions/domain/mission_dashboard.dart';
@@ -49,6 +50,7 @@ class MissionsController extends AsyncNotifier<MissionDashboard> {
     final succeeded = await _mutate((_) async {
       completion = await _repository.complete(missionId);
     });
+    if (succeeded) ref.invalidate(journeyControllerProvider);
     return succeeded ? completion : null;
   }
 
