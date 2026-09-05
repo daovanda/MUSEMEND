@@ -1,0 +1,3 @@
+[functions.musemend-cleanup]
+verify_jwt = false
+
