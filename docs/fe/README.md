@@ -13,3 +13,5 @@ accessibility, bảo mật dữ liệu trên thiết bị và kiểm thử.
 - [Application foundation](./application-foundation.md) — implemented
 - [Authentication](./authentication.md) — in-progress
 - [Daily check-in và streak](./daily-checkin.md) — in-progress
+- [Missions và energy](./missions-energy.md) — in-progress
+- [Profile overview](./profile-overview.md) — in-progress

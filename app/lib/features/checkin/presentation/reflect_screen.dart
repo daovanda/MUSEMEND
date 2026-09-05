@@ -4,6 +4,7 @@ import 'package:musemend/app/theme/muse_colors.dart';
 import 'package:musemend/features/checkin/application/reflect_providers.dart';
 import 'package:musemend/features/checkin/application/reflect_state.dart';
 import 'package:musemend/features/checkin/domain/mood.dart';
+import 'package:musemend/features/missions/presentation/missions_section.dart';
 
 class ReflectScreen extends ConsumerStatefulWidget {
   const ReflectScreen({super.key});
@@ -190,6 +191,7 @@ class _ReflectScreenState extends ConsumerState<ReflectScreen> {
                     data.today == null ? 'Lưu check-in' : 'Cập nhật check-in',
                   ),
                 ),
+                const MissionsSection(),
               ],
             );
           },
