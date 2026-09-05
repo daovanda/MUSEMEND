@@ -10,5 +10,6 @@ accessibility, bảo mật dữ liệu trên thiết bị và kiểm thử.
 ## Features
 
 - [UI/UX direction từ Figma](./ui-design-direction.md) — in-progress
-
-Chưa có feature Flutter được triển khai.
+- [Application foundation](./application-foundation.md) — implemented
+- [Authentication](./authentication.md) — in-progress
+- [Daily check-in và streak](./daily-checkin.md) — in-progress

@@ -125,7 +125,7 @@ app/assets/
 
 - Cần bản export chính thức của artwork/logo/icon trước khi làm pixel-perfect.
 - Cần chốt mapping các nhãn cảm xúc phong phú sang năm enum mood trong DB.
-- Cần chốt package/bundle ID trước khi sinh project Android/iOS.
+- Package/bundle ID đã chốt là `com.musemend.app` cho Android và iOS.
 - Full interactive map chưa có asset/spec đủ chắc chắn; P0 dùng journey card/list.
 - Figma có thể chứa exploration ngoài P0; phạm vi feature theo roadmap MVP đã chốt
   được ưu tiên hơn việc triển khai tất cả frame.
@@ -136,4 +136,3 @@ app/assets/
 - [Frontend index](./README.md)
 - [Daily check-in và streak](../db/daily-checkins-streak.md)
 - [Journey và rewards](../db/journey-rewards.md)
-

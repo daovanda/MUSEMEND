@@ -101,10 +101,11 @@ background, IoT/wearable, audio library và bản đồ quốc tế.
 
 ## Quyết định đang chờ
 
-- Android application ID và iOS bundle ID.
 - Export chính thức artwork/logo/icon từ Figma.
 - Project Supabase Production trước public release.
 - Mapping các nhãn mood phong phú trong Figma sang năm enum chuẩn.
+
+Android application ID và iOS bundle ID đã chốt là `com.musemend.app`.
 
 ## Liên kết
 
@@ -112,4 +113,3 @@ background, IoT/wearable, audio library và bản đồ quốc tế.
 - [CI/CD](./ci-cd.md)
 - [UI/UX direction](../fe/ui-design-direction.md)
 - [Database contracts](../db/README.md)
-

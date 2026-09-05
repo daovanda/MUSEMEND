@@ -29,7 +29,7 @@ Mọi developer và coding agent phải đọc:
 ## Cấu trúc
 
 ```text
-app/                 Flutter Android/iOS (đang khởi tạo)
+app/                 Flutter Android/iOS (`com.musemend.app`)
 docs/                tài liệu kiến trúc, feature, DB và vận hành
 supabase/
   migrations/        nguồn sự thật của schema
@@ -38,6 +38,21 @@ supabase/
 tools/db-validation/ validator migration PostgreSQL nhúng
 .github/workflows/   CI và deploy Dev/Production
 ```
+
+## Chạy Flutter client
+
+Yêu cầu Flutter 3.29.2. Tạo cấu hình cục bộ từ file mẫu và điền Supabase Dev URL
+cùng publishable key; file thật đã được `.gitignore` bảo vệ:
+
+```powershell
+Copy-Item app/config/dev.example.json app/config/dev.json
+cd app
+flutter pub get
+flutter run --dart-define-from-file=config/dev.json
+```
+
+Mobile app chỉ được dùng publishable key. Không đặt service-role key, database
+password hoặc cleanup secret trong `app/config/` hay mã Dart.
 
 ## Kiểm tra backend cục bộ
 
@@ -48,9 +63,15 @@ npm ci --prefix tools/db-validation
 node tools/db-validation/validate.mjs
 ```
 
-Các lệnh Flutter và cấu hình môi trường sẽ được bổ sung khi module `app/` được
-scaffold. Không lưu service-role key, database password hoặc cleanup secret trong
-repository hay mobile app.
+Kiểm tra Flutter trước khi tạo PR:
+
+```powershell
+cd app
+dart format --output=none --set-exit-if-changed lib test
+flutter analyze
+flutter test
+flutter build apk --debug --dart-define-from-file=config/dev.json
+```
 
 ## Git flow
 
