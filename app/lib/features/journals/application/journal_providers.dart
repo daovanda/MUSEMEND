@@ -1,12 +1,24 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:musemend/core/supabase/supabase_client_provider.dart';
 import 'package:musemend/features/journals/data/supabase_journal_repository.dart';
+import 'package:musemend/features/journals/data/journal_image_picker.dart';
 import 'package:musemend/features/journals/domain/journal_entry.dart';
+import 'package:musemend/features/journals/domain/journal_media.dart';
 import 'package:musemend/features/journals/domain/journal_repository.dart';
 
 final journalRepositoryProvider = Provider<JournalRepository>((ref) {
   return SupabaseJournalRepository(ref.watch(supabaseClientProvider));
 });
+
+final journalImagePickerProvider = Provider<JournalImagePicker>((ref) {
+  return JournalImagePicker();
+});
+
+final journalMediaUrlProvider = FutureProvider.autoDispose
+    .family<String, String>(
+      (ref, storagePath) =>
+          ref.watch(journalRepositoryProvider).createMediaUrl(storagePath),
+    );
 
 final journalControllerProvider =
     AsyncNotifierProvider<JournalController, List<JournalEntry>>(
@@ -43,6 +55,20 @@ class JournalController extends AsyncNotifier<List<JournalEntry>> {
 
   Future<bool> open(String id) =>
       _mutate(() => _repository.openFutureLetter(id));
+
+  Future<JournalImageResult> attachImage(String journalId) async {
+    try {
+      final (result, image) = await ref.read(journalImagePickerProvider).pick();
+      if (result != JournalImageResult.success || image == null) return result;
+      state = const AsyncLoading();
+      await _repository.attachImage(journalId, image);
+      state = AsyncData(await _repository.loadEntries());
+      return JournalImageResult.success;
+    } catch (error, stackTrace) {
+      state = AsyncError(error, stackTrace);
+      return JournalImageResult.failed;
+    }
+  }
 
   Future<bool> delete(String id) => _mutate(() => _repository.delete(id));
 

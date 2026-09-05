@@ -1,3 +1,5 @@
+import 'package:musemend/features/journals/domain/journal_media.dart';
+
 enum JournalKind { daily, futureLetter }
 
 class JournalEntry {
@@ -11,6 +13,7 @@ class JournalEntry {
     this.deliverAt,
     this.status,
     this.openedAt,
+    this.media = const [],
   });
 
   final String id;
@@ -22,4 +25,5 @@ class JournalEntry {
   final DateTime? deliverAt;
   final String? status;
   final DateTime? openedAt;
+  final List<JournalMedia> media;
 }

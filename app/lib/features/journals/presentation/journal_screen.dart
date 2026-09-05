@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:musemend/app/theme/muse_colors.dart';
 import 'package:musemend/features/journals/application/journal_providers.dart';
 import 'package:musemend/features/journals/domain/journal_entry.dart';
+import 'package:musemend/features/journals/domain/journal_media.dart';
 
 class JournalScreen extends ConsumerWidget {
   const JournalScreen({super.key});
@@ -64,6 +65,9 @@ class JournalScreen extends ConsumerWidget {
                                       entry: entry,
                                       onTap:
                                           () => _openEntry(context, ref, entry),
+                                      onAttach:
+                                          () =>
+                                              _attachImage(context, ref, entry),
                                       onDelete:
                                           () => _delete(context, ref, entry),
                                     ),
@@ -176,6 +180,27 @@ class JournalScreen extends ConsumerWidget {
     _showResult(context, deleted, 'Đã xóa mục nhật ký.');
   }
 
+  Future<void> _attachImage(
+    BuildContext context,
+    WidgetRef ref,
+    JournalEntry entry,
+  ) async {
+    final result = await ref
+        .read(journalControllerProvider.notifier)
+        .attachImage(entry.id);
+    if (!context.mounted || result == JournalImageResult.canceled) return;
+    final message = switch (result) {
+      JournalImageResult.success => 'Ảnh đã được lưu riêng tư.',
+      JournalImageResult.tooLarge => 'Ảnh vượt quá giới hạn 10 MiB.',
+      JournalImageResult.unsupported => 'Chỉ hỗ trợ JPG, PNG, WebP hoặc HEIC.',
+      JournalImageResult.failed => 'Chưa thể tải ảnh lên. Hãy thử lại.',
+      JournalImageResult.canceled => '',
+    };
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
   void _showResult(BuildContext context, bool success, String successMessage) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -191,29 +216,37 @@ class JournalScreen extends ConsumerWidget {
   }
 }
 
-class _JournalCard extends StatelessWidget {
+class _JournalCard extends ConsumerWidget {
   const _JournalCard({
     required this.entry,
     required this.onTap,
+    required this.onAttach,
     required this.onDelete,
   });
 
   final JournalEntry entry;
   final VoidCallback onTap;
+  final VoidCallback onAttach;
   final VoidCallback onDelete;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isLetter = entry.kind == JournalKind.futureLetter;
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
         onTap: onTap,
         contentPadding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
-        leading: CircleAvatar(
-          backgroundColor: isLetter ? MuseColors.lavender : MuseColors.mint,
-          child: Icon(isLetter ? Icons.mail_outline : Icons.auto_stories),
-        ),
+        leading:
+            entry.media.isEmpty
+                ? CircleAvatar(
+                  backgroundColor:
+                      isLetter ? MuseColors.lavender : MuseColors.mint,
+                  child: Icon(
+                    isLetter ? Icons.mail_outline : Icons.auto_stories,
+                  ),
+                )
+                : _PrivateImage(media: entry.media.first),
         title: Text(
           entry.title?.trim().isNotEmpty == true
               ? entry.title!
@@ -228,10 +261,24 @@ class _JournalCard extends StatelessWidget {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
-        trailing: IconButton(
-          tooltip: 'Xóa',
-          onPressed: onDelete,
-          icon: const Icon(Icons.delete_outline),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              tooltip: 'Thêm ảnh riêng tư',
+              onPressed: onAttach,
+              icon: Badge(
+                isLabelVisible: entry.media.isNotEmpty,
+                label: Text('${entry.media.length}'),
+                child: const Icon(Icons.add_photo_alternate_outlined),
+              ),
+            ),
+            IconButton(
+              tooltip: 'Xóa',
+              onPressed: onDelete,
+              icon: const Icon(Icons.delete_outline),
+            ),
+          ],
         ),
       ),
     );
@@ -243,6 +290,45 @@ class _JournalCard extends StatelessWidget {
   static String _preview(String value) {
     final clean = value.trim().replaceAll(RegExp(r'\s+'), ' ');
     return clean.isEmpty ? 'Chưa có nội dung' : clean;
+  }
+}
+
+class _PrivateImage extends ConsumerWidget {
+  const _PrivateImage({required this.media});
+
+  final JournalMedia media;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final signedUrl = ref.watch(journalMediaUrlProvider(media.storagePath));
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: SizedBox.square(
+        dimension: 48,
+        child: signedUrl.when(
+          loading:
+              () => const ColoredBox(
+                color: MuseColors.mint,
+                child: Icon(Icons.image_outlined),
+              ),
+          error:
+              (_, _) => const ColoredBox(
+                color: MuseColors.mint,
+                child: Icon(Icons.broken_image_outlined),
+              ),
+          data:
+              (url) => Image.network(
+                url,
+                fit: BoxFit.cover,
+                errorBuilder:
+                    (_, _, _) => const ColoredBox(
+                      color: MuseColors.mint,
+                      child: Icon(Icons.broken_image_outlined),
+                    ),
+              ),
+        ),
+      ),
+    );
   }
 }
 

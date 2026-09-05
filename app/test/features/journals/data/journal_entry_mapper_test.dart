@@ -36,10 +36,18 @@ void main() {
           'opened_at': null,
         },
       ],
+      [
+        {
+          'id': 'media-id',
+          'journal_id': 'daily-id',
+          'storage_path': 'user/daily-id/photo.jpg',
+        },
+      ],
     ]);
 
     expect(entries.first.kind, JournalKind.daily);
     expect(entries.first.content, 'Một ngày dịu dàng.');
+    expect(entries.first.media.single.id, 'media-id');
     expect(entries.last.kind, JournalKind.futureLetter);
     expect(entries.last.status, 'scheduled');
     expect(entries.last.openedAt, isNull);

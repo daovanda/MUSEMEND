@@ -1,13 +1,16 @@
 import 'package:musemend/features/journals/data/journal_entry_mapper.dart';
 import 'package:musemend/features/journals/domain/journal_entry.dart';
+import 'package:musemend/features/journals/domain/journal_media.dart';
 import 'package:musemend/features/journals/domain/journal_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 class SupabaseJournalRepository implements JournalRepository {
   SupabaseJournalRepository(this._client);
 
   final SupabaseClient _client;
   static const _mapper = JournalEntryMapper();
+  static const _uuid = Uuid();
 
   @override
   Future<List<JournalEntry>> loadEntries() async {
@@ -22,6 +25,12 @@ class SupabaseJournalRepository implements JournalRepository {
       _client
           .from('future_letters')
           .select('journal_id, content, deliver_at, status, opened_at'),
+      _client
+          .from('journal_media')
+          .select('id, journal_id, storage_path')
+          .eq('media_type', 'image')
+          .eq('upload_status', 'completed')
+          .order('order_index', ascending: true),
     ]);
     return _mapper.fromResponses(responses);
   }
@@ -67,6 +76,61 @@ class SupabaseJournalRepository implements JournalRepository {
   @override
   Future<void> openFutureLetter(String id) async {
     await _client.rpc('open_future_letter', params: {'p_journal_id': id});
+  }
+
+  @override
+  Future<void> attachImage(String journalId, PickedJournalImage image) async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) throw StateError('Authenticated user required.');
+    final fileName = '${_uuid.v4()}.${image.extension}';
+    final path = '$userId/$journalId/$fileName';
+    Object? lastError;
+
+    for (var attempt = 0; attempt < 3; attempt++) {
+      try {
+        await _client.storage
+            .from('journal-media')
+            .uploadBinary(
+              path,
+              image.bytes,
+              fileOptions: FileOptions(
+                cacheControl: '3600',
+                contentType: image.mimeType,
+                upsert: false,
+              ),
+            );
+      } catch (error) {
+        lastError = error;
+      }
+
+      try {
+        await _client.rpc(
+          'attach_journal_media',
+          params: {
+            'p_journal_id': journalId,
+            'p_path': path,
+            'p_type': 'image',
+            'p_thumbnail': null,
+          },
+        );
+        return;
+      } catch (error) {
+        lastError = error;
+        if (attempt < 2) {
+          await Future<void>.delayed(
+            Duration(milliseconds: 250 * (attempt + 1)),
+          );
+        }
+      }
+    }
+    throw lastError ?? StateError('Image attachment failed.');
+  }
+
+  @override
+  Future<String> createMediaUrl(String storagePath) {
+    return _client.storage
+        .from('journal-media')
+        .createSignedUrl(storagePath, 300);
   }
 
   @override
