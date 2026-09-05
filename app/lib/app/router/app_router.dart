@@ -7,10 +7,14 @@ import 'package:musemend/features/auth/presentation/sign_in_screen.dart';
 import 'package:musemend/features/checkin/presentation/reflect_screen.dart';
 import 'package:musemend/features/journals/presentation/journal_screen.dart';
 import 'package:musemend/features/library/presentation/library_screen.dart';
+import 'package:musemend/features/notifications/application/notification_providers.dart';
 import 'package:musemend/features/profile/presentation/profile_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final auth = ref.watch(authSessionProvider);
+  final initialNotificationJournalId = ref.watch(
+    initialNotificationJournalIdProvider,
+  );
   final router = GoRouter(
     initialLocation: '/splash',
     redirect: (context, state) {
@@ -21,7 +25,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       if (isLoading) return isSplash ? null : '/splash';
       if (!isSignedIn) return isAuthRoute ? null : '/sign-in';
-      if (isAuthRoute || isSplash) return '/reflect';
+      if (isAuthRoute || isSplash) {
+        return initialNotificationJournalId == null ? '/reflect' : '/journal';
+      }
       return null;
     },
     routes: [

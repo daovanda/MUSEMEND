@@ -10,6 +10,7 @@ Tab Journal hỗ trợ MVP:
 - tải tối đa 50 daily journal và future letter gần nhất;
 - tạo/sửa nhật ký ngày với tiêu đề và nội dung;
 - tạo/sửa thư tương lai, chọn ngày nhắc và đọc/mở trước hạn;
+- tùy chọn lên lịch nhắc cục bộ khi lưu thư tương lai;
 - chọn ảnh JPG/PNG/WebP/HEIC tối đa 10 MiB, upload private và xem preview bằng
   signed URL 5 phút;
 - pull-to-refresh, trạng thái loading/empty/retry;
@@ -45,6 +46,12 @@ khai báo `NSPhotoLibraryUsageDescription` cho hành động do user chủ độ
 không xin camera vì MVP chưa chụp ảnh trực tiếp. Manifest main có INTERNET để bản
 release truy cập Supabase, thay vì chỉ hoạt động ở debug/profile.
 
+Khi user chọn nhắc trên thiết bị, app chỉ xin quyền notification sau thao tác lưu
+chủ động. Lịch nhắc dùng múi giờ `Asia/Ho_Chi_Minh`, payload chỉ chứa journal UUID;
+title/body hệ điều hành là nội dung chung, không đưa nội dung riêng tư của thư ra
+lock screen. Nếu quyền bị từ chối hoặc plugin lỗi, thư trên Supabase vẫn được lưu
+và UI thông báo rõ reminder cục bộ chưa bật.
+
 UI giới hạn title 120 và content 10.000 ký tự, yêu cầu content không rỗng. Ngày
 giao thư mới phải từ ngày mai đến tối đa 10 năm; adapter gửi timestamp UTC. DB vẫn
 là nguồn xác thực cuối cùng, kiểm tra owner bằng `auth.uid()` và cho phép đọc/sửa
@@ -62,6 +69,9 @@ analytics. Nội dung hiện là plaintext được RLS bảo vệ, chưa có E2
 - Android E2E đã xác nhận Photo Picker → private upload → attach RPC → reload →
   signed preview. Audit DB xác nhận bucket private, metadata/object khớp 1:1 và
   mọi path đều đúng prefix owner/journal. Picker vẫn cần kiểm thử trên thiết bị iOS.
+- Android E2E đã xác nhận runtime permission được xin sau khi lưu và AlarmManager
+  có lịch `ScheduledNotificationReceiver`; callback khi chạm notification mở tab
+  Journal. Cấu hình iOS đã có nhưng cần nghiệm thu trên thiết bị thật.
 - DB integration test hiện có bao phủ save journal, mở thư sớm, notification đến
   hạn và soft-delete.
 
@@ -74,4 +84,5 @@ analytics. Nội dung hiện là plaintext được RLS bảo vệ, chưa có E2
 - Khi chuyển local-first cần version/conflict policy; không để cache làm giảm RLS.
 
 Liên quan: [Journal DB và Storage](../db/journals-media.md),
+[Notification cục bộ và inbox](./notifications-inbox.md),
 [Application foundation](./application-foundation.md).

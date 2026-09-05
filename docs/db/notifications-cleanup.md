@@ -1,13 +1,13 @@
 # Notifications, cleanup và account deletion
 
-Trạng thái: `implemented` ở database/cleanup; notification Android/iOS chưa triển khai  
+Trạng thái: `implemented` ở database/cleanup và Android client; iOS chưa nghiệm thu
 Cập nhật: 2026-09-05
 
 ## Mục tiêu và phạm vi
 
 Miền này tạo inbox notification khi future letter đến hạn, soft-delete dữ liệu,
-điều phối xóa object Storage và hoàn tất xóa Auth account. Nó chưa gửi local/push
-notification tới thiết bị.
+điều phối xóa object Storage và hoàn tất xóa Auth account. Flutter đã đọc inbox và
+lên lịch local notification; push notification đa thiết bị chưa nằm trong MVP.
 
 ## Mô hình dữ liệu
 
@@ -30,8 +30,9 @@ hạn vẫn nhận due notification khi đến thời điểm.
 
 Client đọc own `notifications` qua RLS và gọi
 `mark_notification_read(p_id)` để đặt `read_at` lần đầu. Flutter phải tự fetch hoặc
-subscribe bảng này và kết nối `flutter_local_notifications`/FCM; DB row không tự
-hiện thông báo hệ điều hành.
+subscribe bảng này; DB row không tự hiện thông báo hệ điều hành. MVP hiện fetch tối
+đa 30 row mới nhất, local reminder được lên lịch ngay khi user lưu thư, còn FCM và
+Realtime subscription chưa triển khai.
 
 ## Soft-delete và retention
 
@@ -92,8 +93,9 @@ Queue/account request không lộ cho client. Các hàm internal không có exec
 
 Integration test xác nhận due letter tạo đúng notification, soft-delete journal ẩn
 dữ liệu và ownership giữa hai account. Chưa có automated test cho queue lease/retry,
-Storage delete thật, Auth delete, cron delivery, secret rotation, notification
-Flutter/FCM hoặc account deletion end-to-end.
+Storage delete thật, Auth delete, cron delivery, secret rotation, notification iOS/
+FCM hoặc account deletion end-to-end. Android đã xác nhận quyền runtime, lịch alarm,
+callback mở Journal; mapper inbox có unit test.
 
 ## Migration, rollback và giới hạn
 
@@ -113,4 +115,3 @@ Giới hạn đang biết:
 
 Liên quan: [journals-media.md](./journals-media.md),
 [migrations-testing.md](./migrations-testing.md).
-

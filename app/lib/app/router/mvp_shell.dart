@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:musemend/features/checkin/application/reflect_providers.dart';
+import 'package:musemend/features/notifications/application/notification_providers.dart';
 
 class MvpShell extends ConsumerStatefulWidget {
   const MvpShell({required this.navigationShell, super.key});
@@ -14,16 +17,31 @@ class MvpShell extends ConsumerStatefulWidget {
 
 class _MvpShellState extends ConsumerState<MvpShell>
     with WidgetsBindingObserver {
+  StreamSubscription<String>? _notificationSubscription;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    final service = ref.read(notificationServiceProvider);
+    _notificationSubscription = service.journalOpenRequests.listen(
+      (_) => _openJournal(),
+    );
+    if (service.takePendingJournalId() != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _openJournal());
+    }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _notificationSubscription?.cancel();
     super.dispose();
+  }
+
+  void _openJournal() {
+    if (!mounted) return;
+    widget.navigationShell.goBranch(1);
   }
 
   @override

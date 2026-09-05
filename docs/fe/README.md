@@ -16,4 +16,5 @@ accessibility, bảo mật dữ liệu trên thiết bị và kiểm thử.
 - [Missions và energy](./missions-energy.md) — in-progress
 - [Journey và Library](./journey-library.md) — in-progress
 - [Daily Journal và Future Letter](./journals-future-letters.md) — in-progress
+- [Notification cục bộ và inbox](./notifications-inbox.md) — in-progress
 - [Profile overview](./profile-overview.md) — in-progress

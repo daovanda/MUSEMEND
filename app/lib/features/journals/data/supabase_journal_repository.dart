@@ -36,12 +36,12 @@ class SupabaseJournalRepository implements JournalRepository {
   }
 
   @override
-  Future<void> saveDaily({
+  Future<String> saveDaily({
     String? id,
     required String title,
     required String content,
   }) async {
-    await _save(
+    return _save(
       type: 'daily',
       id: id,
       data: {
@@ -54,13 +54,13 @@ class SupabaseJournalRepository implements JournalRepository {
   }
 
   @override
-  Future<void> saveFutureLetter({
+  Future<String> saveFutureLetter({
     String? id,
     required String title,
     required String content,
     required DateTime deliverAt,
   }) async {
-    await _save(
+    return _save(
       type: 'future_letter',
       id: id,
       data: {
@@ -138,15 +138,19 @@ class SupabaseJournalRepository implements JournalRepository {
     await _client.rpc('soft_delete_journal', params: {'p_journal_id': id});
   }
 
-  Future<void> _save({
+  Future<String> _save({
     required String type,
     required String? id,
     required Map<String, dynamic> data,
   }) async {
-    await _client.rpc(
+    final result = await _client.rpc(
       'save_journal',
       params: {'p_type': type, 'p_data': data, 'p_journal_id': id},
     );
+    if (result is! String) {
+      throw const FormatException('save_journal returned an invalid id.');
+    }
+    return result;
   }
 
   String? _nullable(String value) {

@@ -31,20 +31,20 @@ class JournalController extends AsyncNotifier<List<JournalEntry>> {
   @override
   Future<List<JournalEntry>> build() => _repository.loadEntries();
 
-  Future<bool> saveDaily({
+  Future<String?> saveDaily({
     String? id,
     required String title,
     required String content,
-  }) => _mutate(
+  }) => _save(
     () => _repository.saveDaily(id: id, title: title, content: content),
   );
 
-  Future<bool> saveFutureLetter({
+  Future<String?> saveFutureLetter({
     String? id,
     required String title,
     required String content,
     required DateTime deliverAt,
-  }) => _mutate(
+  }) => _save(
     () => _repository.saveFutureLetter(
       id: id,
       title: title,
@@ -71,6 +71,18 @@ class JournalController extends AsyncNotifier<List<JournalEntry>> {
   }
 
   Future<bool> delete(String id) => _mutate(() => _repository.delete(id));
+
+  Future<String?> _save(Future<String> Function() operation) async {
+    state = const AsyncLoading();
+    try {
+      final id = await operation();
+      state = AsyncData(await _repository.loadEntries());
+      return id;
+    } catch (error, stackTrace) {
+      state = AsyncError(error, stackTrace);
+      return null;
+    }
+  }
 
   Future<void> reload() async {
     state = const AsyncLoading();

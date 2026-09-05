@@ -4,6 +4,8 @@ import 'package:musemend/app/theme/muse_colors.dart';
 import 'package:musemend/features/journals/application/journal_providers.dart';
 import 'package:musemend/features/journals/domain/journal_entry.dart';
 import 'package:musemend/features/journals/domain/journal_media.dart';
+import 'package:musemend/features/notifications/application/notification_providers.dart';
+import 'package:musemend/features/notifications/domain/future_letter_reminder.dart';
 
 class JournalScreen extends ConsumerWidget {
   const JournalScreen({super.key});
@@ -122,7 +124,7 @@ class JournalScreen extends ConsumerWidget {
         .read(journalControllerProvider.notifier)
         .saveDaily(id: entry?.id, title: draft.title, content: draft.content);
     if (!context.mounted) return;
-    _showResult(context, saved, 'Nhật ký đã được lưu.');
+    _showResult(context, saved != null, 'Nhật ký đã được lưu.');
   }
 
   Future<void> _editLetter(
@@ -144,7 +146,33 @@ class JournalScreen extends ConsumerWidget {
           deliverAt: draft.deliverAt,
         );
     if (!context.mounted) return;
-    _showResult(context, saved, 'Thư tương lai đã được lưu.');
+    var reminderScheduled = false;
+    if (saved != null && draft.notifyOnDevice) {
+      try {
+        final service = ref.read(notificationServiceProvider);
+        final allowed = await service.requestPermission();
+        if (allowed) {
+          await service.scheduleFutureLetter(
+            FutureLetterReminder(journalId: saved, deliverAt: draft.deliverAt),
+          );
+          reminderScheduled = true;
+        }
+      } catch (_) {
+        reminderScheduled = false;
+      }
+    } else if (saved != null) {
+      try {
+        await ref.read(notificationServiceProvider).cancelFutureLetter(saved);
+      } catch (_) {
+        // The server copy is still valid when a local reminder cannot be removed.
+      }
+    }
+    if (!context.mounted) return;
+    final message =
+        saved != null && draft.notifyOnDevice && !reminderScheduled
+            ? 'Đã lưu thư, nhưng chưa thể bật nhắc trên thiết bị.'
+            : 'Thư tương lai đã được lưu.';
+    _showResult(context, saved != null, message);
   }
 
   Future<void> _delete(
@@ -176,6 +204,9 @@ class JournalScreen extends ConsumerWidget {
     final deleted = await ref
         .read(journalControllerProvider.notifier)
         .delete(entry.id);
+    if (deleted && entry.kind == JournalKind.futureLetter) {
+      await ref.read(notificationServiceProvider).cancelFutureLetter(entry.id);
+    }
     if (!context.mounted) return;
     _showResult(context, deleted, 'Đã xóa mục nhật ký.');
   }
@@ -419,6 +450,7 @@ class _LetterEditorDialogState extends State<_LetterEditorDialog> {
   late DateTime _delivery =
       widget.entry?.deliverAt?.toLocal() ??
       DateTime.now().add(const Duration(days: 1));
+  bool _notifyOnDevice = true;
 
   @override
   void dispose() {
@@ -443,8 +475,8 @@ class _LetterEditorDialogState extends State<_LetterEditorDialog> {
             TextField(
               controller: _content,
               onChanged: (_) => setState(() {}),
-              minLines: 5,
-              maxLines: 10,
+              minLines: 3,
+              maxLines: 6,
               maxLength: 10000,
               decoration: const InputDecoration(labelText: 'Lời nhắn'),
             ),
@@ -454,6 +486,15 @@ class _LetterEditorDialogState extends State<_LetterEditorDialog> {
               subtitle: Text(_JournalCard._date(_delivery)),
               trailing: const Icon(Icons.calendar_month_outlined),
               onTap: _pickDate,
+            ),
+            CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              value: _notifyOnDevice,
+              onChanged: (value) {
+                setState(() => _notifyOnDevice = value ?? false);
+              },
+              title: const Text('Nhắc tôi trên thiết bị'),
+              subtitle: const Text('Ứng dụng sẽ xin quyền khi bạn lưu thư.'),
             ),
           ],
         ),
@@ -469,7 +510,12 @@ class _LetterEditorDialogState extends State<_LetterEditorDialog> {
                   ? null
                   : () => Navigator.pop(
                     context,
-                    _LetterDraft(_title.text, _content.text, _delivery),
+                    _LetterDraft(
+                      _title.text,
+                      _content.text,
+                      _delivery,
+                      _notifyOnDevice,
+                    ),
                   ),
           child: const Text('Lưu'),
         ),
@@ -508,9 +554,15 @@ class _JournalDraft {
 }
 
 class _LetterDraft extends _JournalDraft {
-  const _LetterDraft(super.title, super.content, this.deliverAt);
+  const _LetterDraft(
+    super.title,
+    super.content,
+    this.deliverAt,
+    this.notifyOnDevice,
+  );
 
   final DateTime deliverAt;
+  final bool notifyOnDevice;
 }
 
 class _EmptyJournal extends StatelessWidget {
