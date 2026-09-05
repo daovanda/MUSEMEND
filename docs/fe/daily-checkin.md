@@ -15,6 +15,8 @@ ngày theo giờ Việt Nam. P0 dùng năm mood chuẩn `great/good/okay/sad/awf
 `upsert_daily_checkin(p_mood, p_energy_level, p_note)`; đọc row hôm nay qua RLS.
 `ReflectController` tải streak/check-in, còn `ReflectScreen` chỉ render và gửi yêu
 cầu. Khi app resume, shell gọi lại RPC; DB đảm bảo idempotent trong cùng ngày.
+Adapter ánh xạ trường domain `note` sang cột DB `note_short`; presentation không
+phụ thuộc trực tiếp vào tên cột Postgres.
 
 ## Quy tắc dữ liệu và lỗi
 

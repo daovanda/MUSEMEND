@@ -1,3 +1,4 @@
+import 'package:musemend/features/checkin/data/daily_checkin_dto.dart';
 import 'package:musemend/features/checkin/domain/app_visit.dart';
 import 'package:musemend/features/checkin/domain/checkin_repository.dart';
 import 'package:musemend/features/checkin/domain/daily_checkin.dart';
@@ -14,10 +15,10 @@ class SupabaseCheckinRepository implements CheckinRepository {
     final row =
         await _client
             .from('daily_checkins')
-            .select('id, checkin_date, mood, energy_level, note')
+            .select('id, checkin_date, mood, energy_level, note_short')
             .eq('checkin_date', _vietnamDateString())
             .maybeSingle();
-    return row == null ? null : _mapCheckin(row);
+    return row == null ? null : DailyCheckinDto.fromMap(row).toDomain();
   }
 
   @override
@@ -44,17 +45,9 @@ class SupabaseCheckinRepository implements CheckinRepository {
         'p_note': _nullableTrim(note),
       },
     );
-    return _mapCheckin(_singleObject(result, 'upsert_daily_checkin'));
-  }
-
-  DailyCheckin _mapCheckin(Map<String, dynamic> row) {
-    return DailyCheckin(
-      id: row['id'] as String,
-      checkinDate: DateTime.parse(row['checkin_date'] as String),
-      mood: Mood.fromDatabase(row['mood'] as String),
-      energyLevel: (row['energy_level'] as num?)?.toInt(),
-      note: row['note'] as String?,
-    );
+    return DailyCheckinDto.fromMap(
+      _singleObject(result, 'upsert_daily_checkin'),
+    ).toDomain();
   }
 
   Map<String, dynamic> _singleObject(Object? value, String operation) {
