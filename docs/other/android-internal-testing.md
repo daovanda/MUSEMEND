@@ -1,6 +1,6 @@
 # Android Internal Testing
 
-**Trạng thái:** `in-progress`  
+**Trạng thái:** `in-progress`
 **Cập nhật:** 2026-09-06
 
 ## 1. Mục tiêu và phạm vi
