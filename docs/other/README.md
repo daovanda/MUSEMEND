@@ -14,6 +14,8 @@ quyết định, hệ quả và trạng thái.
 - [CI/CD](./ci-cd.md): workflow, quality gate, deploy Dev/Production và giới hạn hiện tại.
 - [GitHub Environments](./github-environments.md): variables, secrets và production approval.
 - [Android QA Release](./android-qa-release.md): ký APK, GitHub Release và phân phối QA.
+- [Nghiệm thu Android trên thiết bị thật](./android-device-qa-acceptance.md):
+  checklist P0, bảo mật, lỗi mạng và biên bản PASS/FAIL.
 - [Android Internal Testing cũ](./android-internal-testing.md): phương án Google Play đã deprecated.
 - [Runbook phát hành](./release-runbook.md): chuẩn bị, deploy, xác minh và xử lý sự cố.
 - [Privacy và safety MVP](./privacy-safety.md): disclaimer, dữ liệu riêng tư và các chặn trước public release.

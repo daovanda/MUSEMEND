@@ -6,12 +6,21 @@ Supabase Auth, PostgreSQL/RLS/RPC, Storage, Edge Functions và Cron.
 
 ## Trạng thái
 
-Dự án đang ở giai đoạn xây dựng MVP đầu tiên:
+Dự án đã có Android internal MVP để bắt đầu nghiệm thu trên thiết bị thật:
 
 - Database MVP, migrations, RLS/RPC và dữ liệu catalog demo đã có.
 - Edge Function cleanup và scheduler đã được triển khai ở môi trường Supabase Dev.
-- CI/CD cho Flutter + Supabase đã được định nghĩa.
-- Flutter client đang được khởi tạo theo kiến trúc feature-first.
+- Flutter client feature-first đã có các vertical slice Auth/Profile, Reflect,
+  Mission/Energy, Journey/Library, Journal/Media, Future Letter và notification.
+- CI/CD Flutter + Supabase đang hoạt động; CI trên `develop` phát hành APK release
+  đã ký dưới dạng GitHub prerelease.
+- iOS hiện được kiểm tra bằng simulator build; signing/TestFlight và thiết bị thật
+  được tạm hoãn.
+
+Bản Android QA đầu tiên:
+[MuseMend `0.1.0+1`](https://github.com/daovanda/MUSEMEND/releases/tag/qa-v0.1.0-1-e679e367ade5).
+Kết quả QA thiết bị thật phải được ghi theo
+[checklist nghiệm thu Android](./docs/other/android-device-qa-acceptance.md).
 
 Không sử dụng repository hoặc môi trường hiện tại như production cho tới khi hoàn
 tất checklist QA/release.

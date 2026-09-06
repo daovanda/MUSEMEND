@@ -1,6 +1,6 @@
 # Android QA Release qua GitHub Releases
 
-**Trạng thái:** `in-progress`
+**Trạng thái:** `implemented`
 **Cập nhật:** 2026-09-06
 
 ## 1. Mục tiêu và phạm vi
@@ -30,6 +30,12 @@ QA tải APK, kiểm tra checksum và cài thủ công
 
 Workflow là `.github/workflows/distribute-android-qa-release.yml`. Nó chạy sau
 CI thành công trên `develop` hoặc khi owner gọi thủ công từ `develop`.
+
+Luồng đã được xác minh lần đầu bằng Release
+[`qa-v0.1.0-1-e679e367ade5`](https://github.com/daovanda/MUSEMEND/releases/tag/qa-v0.1.0-1-e679e367ade5)
+từ commit `e679e367ade59bb2db044fbb2fdd501829f3e895` sau khi CI và deploy Development
+đều thành công. Việc phát hành artifact đã hoàn tất; nghiệm thu thiết bị thật được
+theo dõi riêng trong checklist liên kết ở cuối tài liệu.
 
 APK debug của workflow `CI` vẫn được lưu 7 ngày dưới dạng artifact. Artifact đó
 chỉ dùng để kiểm tra nhanh, không phải kênh phát hành QA chính thức.
@@ -108,6 +114,7 @@ workflow, không đưa source MVP vào `main`.
 ## Liên quan
 
 - [CI/CD](./ci-cd.md)
+- [Nghiệm thu Android trên thiết bị thật](./android-device-qa-acceptance.md)
 - [GitHub Environments](./github-environments.md)
 - [Android Internal Testing cũ](./android-internal-testing.md)
 - [Runbook phát hành](./release-runbook.md)
