@@ -20,6 +20,11 @@ final journalMediaUrlProvider = FutureProvider.autoDispose
           ref.watch(journalRepositoryProvider).createMediaUrl(storagePath),
     );
 
+final journalEntryProvider = FutureProvider.autoDispose
+    .family<JournalEntry?, String>(
+      (ref, id) => ref.watch(journalRepositoryProvider).loadEntry(id),
+    );
+
 final journalControllerProvider =
     AsyncNotifierProvider<JournalController, List<JournalEntry>>(
       JournalController.new,

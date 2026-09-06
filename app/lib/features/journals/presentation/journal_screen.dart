@@ -8,12 +8,34 @@ import 'package:musemend/features/notifications/application/notification_provide
 import 'package:musemend/features/notifications/domain/future_letter_reminder.dart';
 import 'package:musemend/features/profile/application/profile_providers.dart';
 
-class JournalScreen extends ConsumerWidget {
-  const JournalScreen({super.key});
+class JournalScreen extends ConsumerStatefulWidget {
+  const JournalScreen({this.requestedEntryId, super.key});
+
+  final String? requestedEntryId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<JournalScreen> createState() => _JournalScreenState();
+}
+
+class _JournalScreenState extends ConsumerState<JournalScreen> {
+  String? _handledEntryId;
+
+  @override
+  void didUpdateWidget(covariant JournalScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.requestedEntryId != oldWidget.requestedEntryId) {
+      _handledEntryId = null;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final entries = ref.watch(journalControllerProvider);
+    final requestedEntry = switch (widget.requestedEntryId) {
+      final id? => ref.watch(journalEntryProvider(id)),
+      null => null,
+    };
+    requestedEntry?.whenData(_scheduleRequestedEntry);
     return ColoredBox(
       color:
           Theme.of(context).brightness == Brightness.dark
@@ -86,6 +108,22 @@ class JournalScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  void _scheduleRequestedEntry(JournalEntry? entry) {
+    final requestedId = widget.requestedEntryId;
+    if (requestedId == null || _handledEntryId == requestedId) return;
+    _handledEntryId = requestedId;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (entry == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Không tìm thấy mục nhật ký này.')),
+        );
+        return;
+      }
+      _openEntry(context, ref, entry);
+    });
   }
 
   Future<void> _openEntry(

@@ -3,6 +3,7 @@ import 'package:musemend/features/journals/domain/journal_media.dart';
 
 abstract interface class JournalRepository {
   Future<List<JournalEntry>> loadEntries();
+  Future<JournalEntry?> loadEntry(String id);
 
   Future<String> saveDaily({
     String? id,

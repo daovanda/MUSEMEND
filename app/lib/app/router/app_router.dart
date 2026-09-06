@@ -26,7 +26,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (isLoading) return isSplash ? null : '/splash';
       if (!isSignedIn) return isAuthRoute ? null : '/sign-in';
       if (isAuthRoute || isSplash) {
-        return initialNotificationJournalId == null ? '/reflect' : '/journal';
+        return initialNotificationJournalId == null
+            ? '/reflect'
+            : Uri(
+              path: '/journal',
+              queryParameters: {'open': initialNotificationJournalId},
+            ).toString();
       }
       return null;
     },
@@ -56,7 +61,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/journal',
-                builder: (context, state) => const JournalScreen(),
+                builder:
+                    (context, state) => JournalScreen(
+                      requestedEntryId: state.uri.queryParameters['open'],
+                    ),
               ),
             ],
           ),

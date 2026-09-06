@@ -1,7 +1,7 @@
 # Notification cục bộ và inbox
 
 Trạng thái: `in-progress`
-Cập nhật: 2026-09-05
+Cập nhật: 2026-09-06
 
 ## Phạm vi MVP
 
@@ -10,10 +10,11 @@ Cập nhật: 2026-09-05
 - Android/iOS lên lịch local notification vào `deliver_at` theo
   `Asia/Ho_Chi_Minh`.
 - Profile hiển thị tối đa 30 notification server mới nhất, gồm trạng thái đã đọc.
-- Chạm notification hệ điều hành hoặc notification trong inbox mở tab Journal.
+- Chạm notification hệ điều hành hoặc notification trong inbox mở đúng journal
+  được nhắc, sau khi session và RLS đã xác thực quyền đọc.
 
-Push notification đa thiết bị, badge đồng bộ, Realtime subscription và màn hình
-chi tiết định tuyến tới đúng journal ID chưa nằm trong lát cắt này.
+Push notification đa thiết bị, badge đồng bộ và Realtime subscription chưa nằm
+trong lát cắt này.
 
 ## Kiến trúc
 
@@ -25,9 +26,11 @@ chi tiết định tuyến tới đúng journal ID chưa nằm trong lát cắt 
 - presentation inbox được ghép vào Profile; app shell chỉ nhận yêu cầu điều hướng.
 
 `NotificationService` được khởi tạo một lần trong bootstrap để nhận cả cold-start
-payload. Cold start giữ journal ID ban đầu qua provider để router chọn `/journal`
-sau khi khôi phục session; foreground callback chuyển branch trực tiếp. Payload
-không được dùng để bypass auth hay query dữ liệu ngoài RLS.
+payload. Cold start giữ journal ID ban đầu qua provider; foreground callback chuyển
+tới `/journal?open=<uuid>`. `JournalScreen` tải riêng bản ghi theo ID thay vì phụ
+thuộc giới hạn 50 row của danh sách, rồi mở editor tương ứng. ID không tồn tại hoặc
+không thuộc user chỉ tạo thông báo “không tìm thấy”; payload không được dùng để
+bypass auth hay query dữ liệu ngoài RLS.
 
 ## Supabase contract và bảo mật
 
@@ -48,11 +51,13 @@ alarm. iOS hoãn request alert/badge/sound đến lúc user bật nhắc khi lư
 
 ## Kiểm thử
 
-- Unit test mapper bao phủ row đã đọc/chưa đọc.
+- Unit test mapper bao phủ row đã đọc/chưa đọc; widget test xác nhận journal ID từ
+  deep-link mở đúng editor.
 - Analyze, toàn bộ Flutter tests và APK debug build phải đạt.
 - Android emulator đã xác nhận dialog không che tùy chọn trên màn hình 720×1280,
   runtime permission được cấp, AlarmManager giữ scheduled receiver và foreground
-  lẫn cold-start notification callback đều mở tab Journal.
+  lẫn cold-start notification callback đều mở tab Journal. Việc mở đúng editor theo
+  ID được kiểm chứng tự động; cần lặp lại tương tác notification trên bản APK mới.
 - iOS cần kiểm thử trên thiết bị thật.
 
 Liên quan: [Daily Journal và Future Letter](./journals-future-letters.md),

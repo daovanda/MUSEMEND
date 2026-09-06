@@ -1,7 +1,7 @@
 # Daily Journal và Future Letter
 
 Trạng thái: `in-progress`
-Cập nhật: 2026-09-05
+Cập nhật: 2026-09-06
 
 ## Phạm vi triển khai
 
@@ -15,6 +15,8 @@ Tab Journal hỗ trợ MVP:
 - chọn ảnh JPG/PNG/WebP/HEIC tối đa 10 MiB, upload private và xem preview bằng
   signed URL 5 phút;
 - pull-to-refresh, trạng thái loading/empty/retry;
+- mở trực tiếp đúng journal theo ID từ local notification hoặc inbox, kể cả khi
+  bản ghi nằm ngoài 50 mục mới nhất;
 - xác nhận rồi xóa mềm journal.
 
 Yearly journal, tag, audio/video/PDF attachment và tìm kiếm chưa nằm trong lát cắt
@@ -27,6 +29,8 @@ UI này.
 - domain model không phụ thuộc response Supabase;
 - mapper ghép `journals` với subtype `daily_journals`/`future_letters`;
 - repository là ranh giới để thay bằng local-first adapter sau MVP;
+- repository có query owner-scoped theo ID dành cho deep-link; RLS trả rỗng với ID
+  không thuộc session hiện tại;
 - Riverpod controller tải lại danh sách sau mỗi mutation;
 - presentation không chứa Supabase client.
 
@@ -64,6 +68,7 @@ analytics. Nội dung hiện là plaintext được RLS bảo vệ, chưa có E2
 ## Kiểm thử và nghiệm thu
 
 - Unit test mapper bao phủ daily/future-letter response.
+- Widget test bao phủ journal deep-link mở đúng editor mục tiêu.
 - DB integration test bao phủ chuẩn hóa tag, atomic wrapper và cross-user guard.
 - Flutter test, analyze và APK build phải đạt.
 - Android E2E với tài khoản QA đã xác nhận tạo daily atomically, tạo future letter
@@ -84,7 +89,7 @@ analytics. Nội dung hiện là plaintext được RLS bảo vệ, chưa có E2
 - Thêm yearly journal/goals/highlights/lessons.
 - Giữ pending upload qua app restart khi chuyển sang local-first; hiện retry nằm
   trong cùng phiên upload.
-- Thêm tag, tìm kiếm, detail route và UI khôi phục trong thời gian xóa mềm.
+- Thêm quản lý tag, tìm kiếm và UI khôi phục trong thời gian xóa mềm.
 - Khi chuyển local-first cần version/conflict policy; không để cache làm giảm RLS.
 
 Liên quan: [Journal DB và Storage](../db/journals-media.md),

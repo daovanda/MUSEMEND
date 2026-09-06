@@ -11,6 +11,9 @@ class SupabaseJournalRepository implements JournalRepository {
   final SupabaseClient _client;
   static const _mapper = JournalEntryMapper();
   static const _uuid = Uuid();
+  static final _uuidPattern = RegExp(
+    r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
+  );
 
   @override
   Future<List<JournalEntry>> loadEntries() async {
@@ -38,6 +41,41 @@ class SupabaseJournalRepository implements JournalRepository {
       _client.from('journal_tag_assignments').select('journal_id, tag_id'),
     ]);
     return _mapper.fromResponses(responses);
+  }
+
+  @override
+  Future<JournalEntry?> loadEntry(String id) async {
+    if (!_uuidPattern.hasMatch(id)) return null;
+    final responses = await Future.wait<dynamic>([
+      _client
+          .from('journals')
+          .select('id, journal_type, title, updated_at')
+          .eq('id', id)
+          .inFilter('journal_type', ['daily', 'future_letter'])
+          .limit(1),
+      _client
+          .from('daily_journals')
+          .select('journal_id, entry_date, content')
+          .eq('journal_id', id),
+      _client
+          .from('future_letters')
+          .select('journal_id, content, deliver_at, status, opened_at')
+          .eq('journal_id', id),
+      _client
+          .from('journal_media')
+          .select('id, journal_id, storage_path')
+          .eq('journal_id', id)
+          .eq('media_type', 'image')
+          .eq('upload_status', 'completed')
+          .order('order_index', ascending: true),
+      _client.from('journal_tags').select('id, name').order('name'),
+      _client
+          .from('journal_tag_assignments')
+          .select('journal_id, tag_id')
+          .eq('journal_id', id),
+    ]);
+    final entries = _mapper.fromResponses(responses);
+    return entries.isEmpty ? null : entries.single;
   }
 
   @override

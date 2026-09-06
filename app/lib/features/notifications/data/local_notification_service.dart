@@ -112,7 +112,10 @@ class LocalNotificationService implements NotificationService {
     if (payload == null || !payload.startsWith('journal:')) return;
     final journalId = payload.substring('journal:'.length);
     if (journalId.isEmpty) return;
-    _pendingJournalId = journalId;
-    _journalOpenRequests.add(journalId);
+    if (_journalOpenRequests.hasListener) {
+      _journalOpenRequests.add(journalId);
+    } else {
+      _pendingJournalId = journalId;
+    }
   }
 }

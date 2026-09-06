@@ -25,10 +25,13 @@ class _MvpShellState extends ConsumerState<MvpShell>
     WidgetsBinding.instance.addObserver(this);
     final service = ref.read(notificationServiceProvider);
     _notificationSubscription = service.journalOpenRequests.listen(
-      (_) => _openJournal(),
+      _openJournal,
     );
-    if (service.takePendingJournalId() != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _openJournal());
+    final pendingJournalId = service.takePendingJournalId();
+    if (pendingJournalId != null) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _openJournal(pendingJournalId),
+      );
     }
   }
 
@@ -39,9 +42,11 @@ class _MvpShellState extends ConsumerState<MvpShell>
     super.dispose();
   }
 
-  void _openJournal() {
+  void _openJournal(String journalId) {
     if (!mounted) return;
-    widget.navigationShell.goBranch(1);
+    context.go(
+      Uri(path: '/journal', queryParameters: {'open': journalId}).toString(),
+    );
   }
 
   @override

@@ -142,7 +142,14 @@ class ProfileScreen extends ConsumerWidget {
                                           )
                                           .open(items[index]);
                                       if (opened && context.mounted) {
-                                        context.go('/journal');
+                                        context.go(
+                                          Uri(
+                                            path: '/journal',
+                                            queryParameters: {
+                                              'open': items[index].journalId,
+                                            },
+                                          ).toString(),
+                                        );
                                       }
                                     },
                                   ),

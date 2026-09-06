@@ -14,7 +14,7 @@ Cập nhật: 2026-09-06
 | Journal | mapper, atomic RPC/RLS | daily/future letter, mở sớm, soft-delete |
 | Media | DB policy/metadata audit | Photo Picker, private upload, signed preview |
 | Tags | atomic/cross-user integration | tạo/assign/reload hai tag |
-| Notification | mapper, alarm config | runtime permission, alarm, foreground/cold deep-link |
+| Notification | mapper, alarm config, journal-ID deep-link widget | runtime permission, alarm, foreground/cold deep-link |
 | Deletion | transaction rollback | dialog bị khóa trước chuỗi xác nhận; không xóa account QA thật |
 | Offline | HTTP timeout + widget error/retry | network recovery smoke-test; device cut-off cần lặp lại |
 
