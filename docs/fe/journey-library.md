@@ -1,7 +1,7 @@
 # Journey và Library
 
 Trạng thái: `in-progress`
-Cập nhật: 2026-09-05
+Cập nhật: 2026-09-06
 
 ## Phạm vi hiện đã triển khai
 
@@ -14,7 +14,10 @@ Tab Library đọc dashboard hành trình của user đang đăng nhập và hi�
 - thao tác bắt đầu hành trình/đến tỉnh tiếp theo và đồng bộ tiến độ.
 
 Màn hình hỗ trợ pull-to-refresh, loading, lỗi có thể thử lại và trạng thái rỗng.
-Asset của catalog MVP chưa có nên hiện dùng icon Material thay thế.
+Asset của catalog MVP chưa có nên hiện dùng icon Material thay thế. Repository đã
+map `asset_path` của landmark/food/item cùng `cover_asset_path` và
+`map_asset_path` của province để có thể thay placeholder khi content được publish;
+`NULL` luôn được xử lý như fallback, không tải URL do người dùng cung cấp.
 
 ## Kiến trúc
 

@@ -67,6 +67,8 @@ class JourneyDashboardMapper {
         completionPercent:
             (unlocked?['completion_percent'] as num?)?.toInt() ?? 0,
         checkpoints: provinceCheckpoints,
+        coverAssetPath: provinceRow['cover_asset_path'] as String?,
+        mapAssetPath: provinceRow['map_asset_path'] as String?,
       );
     }
 
@@ -123,6 +125,7 @@ class JourneyDashboardMapper {
             unlockedAt: DateTime.parse(unlock['unlocked_at'] as String),
             isViewed: unlock['is_viewed'] as bool,
             isEquipped: unlock['is_equipped'] as bool? ?? false,
+            assetPath: item['asset_path'] as String?,
           );
         })
         .toList(growable: false);

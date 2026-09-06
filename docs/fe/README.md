@@ -10,9 +10,11 @@ accessibility, bảo mật dữ liệu trên thiết bị và kiểm thử.
 ## Features
 
 - [UI/UX direction từ Figma](./ui-design-direction.md) — in-progress
+- [Frontend asset manifest](./assets.md) — in-progress
 - [Application foundation](./application-foundation.md) — implemented
 - [Authentication](./authentication.md) — in-progress
 - [Daily check-in và streak](./daily-checkin.md) — in-progress
+- [Màn Bầu trời (Reflect)](./sky-screen.md) — in-progress
 - [Missions và energy](./missions-energy.md) — in-progress
 - [Journey và Library](./journey-library.md) — in-progress
 - [Daily Journal và Future Letter](./journals-future-letters.md) — in-progress

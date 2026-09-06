@@ -6,7 +6,11 @@ import 'package:musemend/features/missions/domain/mission_template.dart';
 import 'package:musemend/features/missions/domain/user_mission.dart';
 
 class MissionsSection extends ConsumerWidget {
-  const MissionsSection({super.key});
+  const MissionsSection({this.skyStyle = false, super.key});
+
+  /// Uses the rounded, grouped presentation from the Figma sky frame while
+  /// keeping the same server-backed mission actions and default presentation.
+  final bool skyStyle;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -47,13 +51,14 @@ class MissionsSection extends ConsumerWidget {
                   _EnergyCard(
                     current: dashboard.energy.currentEnergy,
                     available: dashboard.energy.availableEnergy,
+                    skyStyle: skyStyle,
                   ),
                   const SizedBox(height: 20),
                   Row(
                     children: [
                       Expanded(
                         child: Text(
-                          'Nhiệm vụ hôm nay',
+                          skyStyle ? 'Chăm sóc hôm nay' : 'Nhiệm vụ hôm nay',
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                       ),
@@ -69,6 +74,7 @@ class MissionsSection extends ConsumerWidget {
                         mission: mission,
                         onComplete: () => _complete(context, ref, mission),
                         onSkip: () => _skip(context, ref, mission),
+                        skyStyle: skyStyle,
                       ),
                     ),
                   const SizedBox(height: 8),
@@ -195,15 +201,23 @@ class MissionsSection extends ConsumerWidget {
 }
 
 class _EnergyCard extends StatelessWidget {
-  const _EnergyCard({required this.current, required this.available});
+  const _EnergyCard({
+    required this.current,
+    required this.available,
+    this.skyStyle = false,
+  });
 
   final int current;
   final int available;
+  final bool skyStyle;
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: MuseColors.lavender.withValues(alpha: 0.82),
+      color:
+          skyStyle
+              ? const Color(0xFFEDE6FA).withValues(alpha: .9)
+              : MuseColors.lavender.withValues(alpha: 0.82),
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: Row(
@@ -218,7 +232,7 @@ class _EnergyCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Năng lượng tích lũy',
+                    skyStyle ? 'Năng lượng hôm nay' : 'Năng lượng tích lũy',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   Text(
@@ -239,18 +253,20 @@ class _MissionCard extends StatelessWidget {
     required this.mission,
     required this.onComplete,
     required this.onSkip,
+    this.skyStyle = false,
   });
 
   final UserMission mission;
   final VoidCallback onComplete;
   final VoidCallback onSkip;
+  final bool skyStyle;
 
   @override
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(10, 8, 8, 8),
+        padding: EdgeInsets.fromLTRB(skyStyle ? 14 : 10, 8, 8, 8),
         child: Row(
           children: [
             IconButton(
@@ -264,7 +280,10 @@ class _MissionCard extends StatelessWidget {
                 children: [
                   Text(
                     mission.title,
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: MuseColors.ink,
+                      fontWeight: skyStyle ? FontWeight.w700 : null,
+                    ),
                   ),
                   if (mission.description case final description?)
                     Text(
