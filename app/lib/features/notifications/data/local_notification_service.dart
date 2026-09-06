@@ -97,6 +97,12 @@ class LocalNotificationService implements NotificationService {
     await _plugin.cancel(_notificationId(journalId));
   }
 
+  @override
+  Future<void> cancelAll() async {
+    await initialize();
+    await _plugin.cancelAll();
+  }
+
   int _notificationId(String journalId) {
     final compact = journalId.replaceAll('-', '');
     return int.parse(compact.substring(0, 7), radix: 16);

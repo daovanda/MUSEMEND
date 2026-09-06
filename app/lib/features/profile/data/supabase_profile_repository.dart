@@ -22,4 +22,38 @@ class SupabaseProfileRepository implements ProfileRepository {
       settings: results[1],
     ).toDomain();
   }
+
+  @override
+  Future<void> updateProfileSettings({
+    required String? displayName,
+    required String cloudName,
+    required String themeMode,
+    required bool soundEnabled,
+    required bool notificationEnabled,
+  }) async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) throw StateError('Authenticated user required.');
+    await _client
+        .from('user_settings')
+        .update({
+          'cloud_name': cloudName,
+          'theme_mode': themeMode,
+          'sound_enabled': soundEnabled,
+          'notification_enabled': notificationEnabled,
+        })
+        .eq('user_id', userId)
+        .select('user_id')
+        .single();
+    await _client
+        .from('profiles')
+        .update({'display_name': displayName})
+        .eq('id', userId)
+        .select('id')
+        .single();
+  }
+
+  @override
+  Future<void> requestAccountDeletion() async {
+    await _client.rpc('request_account_deletion');
+  }
 }

@@ -6,6 +6,7 @@ import 'package:musemend/features/journals/domain/journal_entry.dart';
 import 'package:musemend/features/journals/domain/journal_media.dart';
 import 'package:musemend/features/notifications/application/notification_providers.dart';
 import 'package:musemend/features/notifications/domain/future_letter_reminder.dart';
+import 'package:musemend/features/profile/application/profile_providers.dart';
 
 class JournalScreen extends ConsumerWidget {
   const JournalScreen({super.key});
@@ -14,7 +15,10 @@ class JournalScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final entries = ref.watch(journalControllerProvider);
     return ColoredBox(
-      color: MuseColors.cream,
+      color:
+          Theme.of(context).brightness == Brightness.dark
+              ? Theme.of(context).colorScheme.surface
+              : MuseColors.cream,
       child: SafeArea(
         child: RefreshIndicator(
           onRefresh: ref.read(journalControllerProvider.notifier).reload,
@@ -116,13 +120,19 @@ class JournalScreen extends ConsumerWidget {
           (_) => _JournalEditorDialog(
             title: entry?.title ?? '',
             content: entry?.content ?? '',
+            tags: entry?.tags.map((tag) => tag.name).toList() ?? const [],
             heading: entry == null ? 'Viết cho hôm nay' : 'Sửa nhật ký',
           ),
     );
     if (draft == null) return;
     final saved = await ref
         .read(journalControllerProvider.notifier)
-        .saveDaily(id: entry?.id, title: draft.title, content: draft.content);
+        .saveDaily(
+          id: entry?.id,
+          title: draft.title,
+          content: draft.content,
+          tags: draft.tags,
+        );
     if (!context.mounted) return;
     _showResult(context, saved != null, 'Nhật ký đã được lưu.');
   }
@@ -134,7 +144,17 @@ class JournalScreen extends ConsumerWidget {
   }) async {
     final draft = await showDialog<_LetterDraft>(
       context: context,
-      builder: (_) => _LetterEditorDialog(entry: entry),
+      builder:
+          (_) => _LetterEditorDialog(
+            entry: entry,
+            notificationsEnabled:
+                ref
+                    .read(accountOverviewProvider)
+                    .value
+                    ?.settings
+                    .notificationEnabled ??
+                false,
+          ),
     );
     if (draft == null) return;
     final saved = await ref
@@ -144,6 +164,7 @@ class JournalScreen extends ConsumerWidget {
           title: draft.title,
           content: draft.content,
           deliverAt: draft.deliverAt,
+          tags: draft.tags,
         );
     if (!context.mounted) return;
     var reminderScheduled = false;
@@ -268,6 +289,7 @@ class _JournalCard extends ConsumerWidget {
       child: ListTile(
         onTap: onTap,
         contentPadding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
+        isThreeLine: entry.tags.isNotEmpty,
         leading:
             entry.media.isEmpty
                 ? CircleAvatar(
@@ -285,12 +307,28 @@ class _JournalCard extends ConsumerWidget {
               ? 'Thư gửi tương lai'
               : 'Một ngày của tôi',
         ),
-        subtitle: Text(
-          isLetter
-              ? 'Hẹn ${_date(entry.deliverAt!)} · ${entry.openedAt == null ? 'chưa mở' : 'đã mở'}'
-              : '${_date(entry.entryDate!)} · ${_preview(entry.content)}',
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              isLetter
+                  ? 'Hẹn ${_date(entry.deliverAt!)} · ${entry.openedAt == null ? 'chưa mở' : 'đã mở'}'
+                  : '${_date(entry.entryDate!)} · ${_preview(entry.content)}',
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            if (entry.tags.isNotEmpty)
+              Wrap(
+                spacing: 6,
+                children: [
+                  for (final tag in entry.tags)
+                    Text(
+                      '#${tag.name}',
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                ],
+              ),
+          ],
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
@@ -367,11 +405,13 @@ class _JournalEditorDialog extends StatefulWidget {
   const _JournalEditorDialog({
     required this.title,
     required this.content,
+    required this.tags,
     required this.heading,
   });
 
   final String title;
   final String content;
+  final List<String> tags;
   final String heading;
 
   @override
@@ -381,11 +421,13 @@ class _JournalEditorDialog extends StatefulWidget {
 class _JournalEditorDialogState extends State<_JournalEditorDialog> {
   late final _title = TextEditingController(text: widget.title);
   late final _content = TextEditingController(text: widget.content);
+  late final _tags = TextEditingController(text: widget.tags.join(', '));
 
   @override
   void dispose() {
     _title.dispose();
     _content.dispose();
+    _tags.dispose();
     super.dispose();
   }
 
@@ -405,10 +447,19 @@ class _JournalEditorDialogState extends State<_JournalEditorDialog> {
             TextField(
               controller: _content,
               onChanged: (_) => setState(() {}),
-              minLines: 5,
-              maxLines: 10,
+              minLines: 3,
+              maxLines: 6,
               maxLength: 10000,
               decoration: const InputDecoration(labelText: 'Nội dung'),
+            ),
+            TextField(
+              controller: _tags,
+              onChanged: (_) => setState(() {}),
+              maxLength: 320,
+              decoration: const InputDecoration(
+                labelText: 'Tag (phân cách bằng dấu phẩy)',
+                helperText: 'Tối đa 8 tag, mỗi tag 40 ký tự',
+              ),
             ),
           ],
         ),
@@ -420,11 +471,15 @@ class _JournalEditorDialogState extends State<_JournalEditorDialog> {
         ),
         FilledButton(
           onPressed:
-              _content.text.trim().isEmpty
+              _content.text.trim().isEmpty || !_validTags(_tags.text)
                   ? null
                   : () => Navigator.pop(
                     context,
-                    _JournalDraft(_title.text, _content.text),
+                    _JournalDraft(
+                      _title.text,
+                      _content.text,
+                      _tagNames(_tags.text),
+                    ),
                   ),
           child: const Text('Lưu'),
         ),
@@ -434,9 +489,13 @@ class _JournalEditorDialogState extends State<_JournalEditorDialog> {
 }
 
 class _LetterEditorDialog extends StatefulWidget {
-  const _LetterEditorDialog({required this.entry});
+  const _LetterEditorDialog({
+    required this.entry,
+    required this.notificationsEnabled,
+  });
 
   final JournalEntry? entry;
+  final bool notificationsEnabled;
 
   @override
   State<_LetterEditorDialog> createState() => _LetterEditorDialogState();
@@ -447,15 +506,19 @@ class _LetterEditorDialogState extends State<_LetterEditorDialog> {
   late final _content = TextEditingController(
     text: widget.entry?.content ?? '',
   );
+  late final _tags = TextEditingController(
+    text: widget.entry?.tags.map((tag) => tag.name).join(', ') ?? '',
+  );
   late DateTime _delivery =
       widget.entry?.deliverAt?.toLocal() ??
       DateTime.now().add(const Duration(days: 1));
-  bool _notifyOnDevice = true;
+  late bool _notifyOnDevice = widget.notificationsEnabled;
 
   @override
   void dispose() {
     _title.dispose();
     _content.dispose();
+    _tags.dispose();
     super.dispose();
   }
 
@@ -475,10 +538,19 @@ class _LetterEditorDialogState extends State<_LetterEditorDialog> {
             TextField(
               controller: _content,
               onChanged: (_) => setState(() {}),
-              minLines: 3,
-              maxLines: 6,
+              minLines: 2,
+              maxLines: 4,
               maxLength: 10000,
               decoration: const InputDecoration(labelText: 'Lời nhắn'),
+            ),
+            TextField(
+              controller: _tags,
+              onChanged: (_) => setState(() {}),
+              maxLength: 320,
+              decoration: const InputDecoration(
+                labelText: 'Tag (phân cách bằng dấu phẩy)',
+                helperText: 'Tối đa 8 tag, mỗi tag 40 ký tự',
+              ),
             ),
             ListTile(
               contentPadding: EdgeInsets.zero,
@@ -490,11 +562,18 @@ class _LetterEditorDialogState extends State<_LetterEditorDialog> {
             CheckboxListTile(
               contentPadding: EdgeInsets.zero,
               value: _notifyOnDevice,
-              onChanged: (value) {
-                setState(() => _notifyOnDevice = value ?? false);
-              },
+              onChanged:
+                  widget.notificationsEnabled
+                      ? (value) {
+                        setState(() => _notifyOnDevice = value ?? false);
+                      }
+                      : null,
               title: const Text('Nhắc tôi trên thiết bị'),
-              subtitle: const Text('Ứng dụng sẽ xin quyền khi bạn lưu thư.'),
+              subtitle: Text(
+                widget.notificationsEnabled
+                    ? 'Ứng dụng sẽ xin quyền khi bạn lưu thư.'
+                    : 'Hãy bật thông báo trong Hồ sơ trước.',
+              ),
             ),
           ],
         ),
@@ -506,13 +585,14 @@ class _LetterEditorDialogState extends State<_LetterEditorDialog> {
         ),
         FilledButton(
           onPressed:
-              _content.text.trim().isEmpty
+              _content.text.trim().isEmpty || !_validTags(_tags.text)
                   ? null
                   : () => Navigator.pop(
                     context,
                     _LetterDraft(
                       _title.text,
                       _content.text,
+                      _tagNames(_tags.text),
                       _delivery,
                       _notifyOnDevice,
                     ),
@@ -547,22 +627,40 @@ class _LetterEditorDialogState extends State<_LetterEditorDialog> {
 }
 
 class _JournalDraft {
-  const _JournalDraft(this.title, this.content);
+  const _JournalDraft(this.title, this.content, this.tags);
 
   final String title;
   final String content;
+  final List<String> tags;
 }
 
 class _LetterDraft extends _JournalDraft {
   const _LetterDraft(
     super.title,
     super.content,
+    super.tags,
     this.deliverAt,
     this.notifyOnDevice,
   );
 
   final DateTime deliverAt;
   final bool notifyOnDevice;
+}
+
+List<String> _tagNames(String value) {
+  final names = <String>[];
+  final normalized = <String>{};
+  for (final raw in value.split(',')) {
+    final name = raw.trim();
+    if (name.isEmpty || !normalized.add(name.toLowerCase())) continue;
+    names.add(name);
+  }
+  return names;
+}
+
+bool _validTags(String value) {
+  final names = _tagNames(value);
+  return names.length <= 8 && names.every((name) => name.length <= 40);
 }
 
 class _EmptyJournal extends StatelessWidget {

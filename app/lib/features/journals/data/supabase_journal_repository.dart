@@ -31,6 +31,11 @@ class SupabaseJournalRepository implements JournalRepository {
           .eq('media_type', 'image')
           .eq('upload_status', 'completed')
           .order('order_index', ascending: true),
+      _client
+          .from('journal_tags')
+          .select('id, name')
+          .order('name', ascending: true),
+      _client.from('journal_tag_assignments').select('journal_id, tag_id'),
     ]);
     return _mapper.fromResponses(responses);
   }
@@ -40,6 +45,7 @@ class SupabaseJournalRepository implements JournalRepository {
     String? id,
     required String title,
     required String content,
+    required List<String> tags,
   }) async {
     return _save(
       type: 'daily',
@@ -50,6 +56,7 @@ class SupabaseJournalRepository implements JournalRepository {
         'content': content.trim(),
         'is_draft': false,
       },
+      tags: tags,
     );
   }
 
@@ -59,6 +66,7 @@ class SupabaseJournalRepository implements JournalRepository {
     required String title,
     required String content,
     required DateTime deliverAt,
+    required List<String> tags,
   }) async {
     return _save(
       type: 'future_letter',
@@ -70,6 +78,7 @@ class SupabaseJournalRepository implements JournalRepository {
         'deliver_at': deliverAt.toUtc().toIso8601String(),
         'recipient_type': 'self',
       },
+      tags: tags,
     );
   }
 
@@ -142,10 +151,16 @@ class SupabaseJournalRepository implements JournalRepository {
     required String type,
     required String? id,
     required Map<String, dynamic> data,
+    required List<String> tags,
   }) async {
     final result = await _client.rpc(
-      'save_journal',
-      params: {'p_type': type, 'p_data': data, 'p_journal_id': id},
+      'save_journal_with_tags',
+      params: {
+        'p_type': type,
+        'p_data': data,
+        'p_names': tags,
+        'p_journal_id': id,
+      },
     );
     if (result is! String) {
       throw const FormatException('save_journal returned an invalid id.');

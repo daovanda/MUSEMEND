@@ -8,6 +8,7 @@ abstract interface class JournalRepository {
     String? id,
     required String title,
     required String content,
+    required List<String> tags,
   });
 
   Future<String> saveFutureLetter({
@@ -15,6 +16,7 @@ abstract interface class JournalRepository {
     required String title,
     required String content,
     required DateTime deliverAt,
+    required List<String> tags,
   });
 
   Future<void> openFutureLetter(String id);

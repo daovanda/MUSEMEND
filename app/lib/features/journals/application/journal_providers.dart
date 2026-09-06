@@ -35,8 +35,14 @@ class JournalController extends AsyncNotifier<List<JournalEntry>> {
     String? id,
     required String title,
     required String content,
+    required List<String> tags,
   }) => _save(
-    () => _repository.saveDaily(id: id, title: title, content: content),
+    () => _repository.saveDaily(
+      id: id,
+      title: title,
+      content: content,
+      tags: tags,
+    ),
   );
 
   Future<String?> saveFutureLetter({
@@ -44,12 +50,14 @@ class JournalController extends AsyncNotifier<List<JournalEntry>> {
     required String title,
     required String content,
     required DateTime deliverAt,
+    required List<String> tags,
   }) => _save(
     () => _repository.saveFutureLetter(
       id: id,
       title: title,
       content: content,
       deliverAt: deliverAt,
+      tags: tags,
     ),
   );
 

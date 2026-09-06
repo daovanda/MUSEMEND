@@ -14,7 +14,10 @@ class LibraryScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dashboard = ref.watch(journeyControllerProvider);
     return ColoredBox(
-      color: MuseColors.lavender,
+      color:
+          Theme.of(context).brightness == Brightness.dark
+              ? Theme.of(context).colorScheme.surface
+              : MuseColors.lavender,
       child: SafeArea(
         child: RefreshIndicator(
           onRefresh: ref.read(journeyControllerProvider.notifier).reload,

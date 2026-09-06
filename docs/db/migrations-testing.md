@@ -16,7 +16,7 @@ lược expand → migrate → contract khi có client cũ.
 
 ## Lịch sử đã áp dụng
 
-Audit Supabase remote ngày 2026-09-05 xác nhận đủ 11 migration:
+Audit Supabase remote ngày 2026-09-06 xác nhận đủ 12 migration:
 
 | Version | Migration | Trách nhiệm |
 |---|---|---|
@@ -31,6 +31,7 @@ Audit Supabase remote ngày 2026-09-05 xác nhận đủ 11 migration:
 | `20260905042933` | `fix_checkin_rpc_signature` | Loại overload `smallint` |
 | `20260905043212` | `restrict_checkin_rpc` | Khóa lại execute ACL check-in |
 | `20260905053723` | `schedule_cleanup_worker` | `pg_net` cron + Vault secret |
+| `20260906001034` | `mvp_journal_tags_rpc` | Atomic journal + tags và ownership guard |
 
 ## Quy ước migration
 
@@ -66,13 +67,15 @@ trên PostgreSQL/Supabase thật.
 - custom reward 5, complete idempotent, energy/journey/reward cơ bản;
 - daily/yearly/future-letter save và quan hệ cùng owner;
 - due notification và soft-delete visibility.
+- journal tags chuẩn hóa/khử trùng, lưu atomic và chặn gắn tag chéo user;
+- cột profile/settings được phép, cột trạng thái bị chặn và account deletion khóa profile.
 
 Chưa có test cho:
 
 - matrix RLS/column grants đầy đủ và role `anon`;
 - concurrent calls, deadlock/load, mọi constraint và invalid payload;
 - Storage MIME/size/object policies qua API thật;
-- cleanup lease/retry, cron/HTTP, hard delete Storage/Auth và account deletion E2E;
+- cleanup lease/retry, cron/HTTP, hard delete Storage/Auth và account deletion worker E2E;
 - catalog đầy đủ, migration từ dữ liệu production lớn và rollback/restore;
 - Flutter contract hoặc local/push notification.
 
@@ -97,4 +100,3 @@ cần được hoàn thiện trước khi có dữ liệu người dùng thật.
 
 Liên quan: [README](./README.md),
 [notifications-cleanup.md](./notifications-cleanup.md).
-

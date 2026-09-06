@@ -67,11 +67,18 @@ class _ReflectScreenState extends ConsumerState<ReflectScreen> {
     state.whenData(_hydrate);
 
     return DecoratedBox(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [MuseColors.sky, MuseColors.cream, MuseColors.mint],
+          colors:
+              Theme.of(context).brightness == Brightness.dark
+                  ? [
+                    Theme.of(context).colorScheme.surface,
+                    Theme.of(context).colorScheme.surfaceContainer,
+                    Theme.of(context).colorScheme.surface,
+                  ]
+                  : [MuseColors.sky, MuseColors.cream, MuseColors.mint],
         ),
       ),
       child: SafeArea(
@@ -192,6 +199,17 @@ class _ReflectScreenState extends ConsumerState<ReflectScreen> {
                   ),
                 ),
                 const MissionsSection(),
+                const SizedBox(height: 12),
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.health_and_safety_outlined),
+                    title: const Text('Một khoảng dừng để tự lắng nghe'),
+                    subtitle: const Text(
+                      'MuseMend hỗ trợ phản tư, không chẩn đoán và không thay '
+                      'thế chuyên gia y tế hoặc sức khỏe tâm thần.',
+                    ),
+                  ),
+                ),
               ],
             );
           },

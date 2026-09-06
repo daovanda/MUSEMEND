@@ -17,8 +17,9 @@ router và shell bốn vùng Reflect/Journal/Library/Profile.
 - `lib/core/` chứa cấu hình và adapter provider dùng chung.
 - `lib/features/` tổ chức feature-first theo domain/data/application/presentation.
 
-Riverpod cung cấp dependency/state; go_router redirect theo session. Journal và
-Library hiện chỉ là màn hình giữ chỗ, không được xem là feature đã hoàn thành.
+Riverpod cung cấp dependency/state; go_router redirect theo session. Các tab
+Reflect, Journal, Library và Profile đều đã nối repository/Supabase cho phạm vi MVP.
+Theme hỗ trợ system/light/dark; nền pastel tự chuyển sang surface token ở dark mode.
 
 ## Cấu hình và interface
 
@@ -31,6 +32,11 @@ Library hiện chỉ là màn hình giữ chỗ, không được xem là feature
 Thiếu/sai cấu hình làm bootstrap dừng sớm. Client không nhận service-role key,
 database password hay cleanup secret. Router không đưa token/PII vào URL và xóa
 giao diện authenticated khi session mất.
+
+Mọi request Supabase dùng `TimeoutHttpClient` với giới hạn 20 giây để mất mạng
+không giữ loading vô hạn. Các request độc lập ở màn Reflect được khởi chạy song
+song; UI chuyển sang error/retry khi timeout. Upload lớn vẫn bị giới hạn 10 MiB và
+cần theo dõi timeout thực tế trên mạng di động trước public release.
 
 ## Kiểm thử và nghiệm thu
 

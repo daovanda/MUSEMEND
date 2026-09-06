@@ -1,28 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:musemend/app/theme/muse_colors.dart';
 
-ThemeData buildMuseTheme() {
+ThemeData buildMuseTheme([Brightness brightness = Brightness.light]) {
   final scheme = ColorScheme.fromSeed(
     seedColor: MuseColors.coral,
-    brightness: Brightness.light,
-    surface: MuseColors.cream,
+    brightness: brightness,
+    surface: brightness == Brightness.light ? MuseColors.cream : null,
   );
   return ThemeData(
     useMaterial3: true,
     colorScheme: scheme,
-    scaffoldBackgroundColor: MuseColors.cream,
-    textTheme: const TextTheme(
+    scaffoldBackgroundColor:
+        brightness == Brightness.light ? MuseColors.cream : scheme.surface,
+    textTheme: TextTheme(
       headlineSmall: TextStyle(
-        color: MuseColors.ink,
+        color: scheme.onSurface,
         fontWeight: FontWeight.w700,
       ),
-      titleLarge: TextStyle(color: MuseColors.ink, fontWeight: FontWeight.w700),
-      bodyLarge: TextStyle(color: MuseColors.ink, height: 1.45),
-      bodyMedium: TextStyle(color: MuseColors.mutedInk, height: 1.4),
+      titleLarge: TextStyle(
+        color: scheme.onSurface,
+        fontWeight: FontWeight.w700,
+      ),
+      bodyLarge: TextStyle(color: scheme.onSurface, height: 1.45),
+      bodyMedium: TextStyle(color: scheme.onSurfaceVariant, height: 1.4),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: Colors.white.withValues(alpha: 0.78),
+      fillColor: scheme.surfaceContainerHighest.withValues(alpha: 0.78),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(18),
         borderSide: BorderSide.none,
@@ -30,7 +34,7 @@ ThemeData buildMuseTheme() {
     ),
     cardTheme: CardTheme(
       elevation: 0,
-      color: Colors.white.withValues(alpha: 0.82),
+      color: scheme.surfaceContainerHigh.withValues(alpha: 0.92),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
     ),
     filledButtonTheme: FilledButtonThemeData(

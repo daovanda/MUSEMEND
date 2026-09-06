@@ -1,11 +1,12 @@
 import 'package:musemend/features/journals/domain/journal_entry.dart';
 import 'package:musemend/features/journals/domain/journal_media.dart';
+import 'package:musemend/features/journals/domain/journal_tag.dart';
 
 class JournalEntryMapper {
   const JournalEntryMapper();
 
   List<JournalEntry> fromResponses(List<dynamic> responses) {
-    if (responses.length != 4) {
+    if (responses.length != 6) {
       throw const FormatException('Incomplete journal response.');
     }
     final journals = _rows(responses[0]);
@@ -27,6 +28,19 @@ class JournalEntryMapper {
             ),
           );
     }
+    final tagsById = {
+      for (final row in _rows(responses[4]))
+        row['id'] as String: JournalTag(
+          id: row['id'] as String,
+          name: row['name'] as String,
+        ),
+    };
+    final tagsByJournal = <String, List<JournalTag>>{};
+    for (final row in _rows(responses[5])) {
+      final tag = tagsById[row['tag_id'] as String];
+      if (tag == null) continue;
+      tagsByJournal.putIfAbsent(row['journal_id'] as String, () => []).add(tag);
+    }
 
     return journals
         .map((journal) {
@@ -45,6 +59,7 @@ class JournalEntryMapper {
               updatedAt: DateTime.parse(journal['updated_at'] as String),
               entryDate: DateTime.parse(detail['entry_date'] as String),
               media: List.unmodifiable(mediaByJournal[id] ?? const []),
+              tags: List.unmodifiable(tagsByJournal[id] ?? const []),
             );
           }
           if (type == 'future_letter') {
@@ -62,6 +77,7 @@ class JournalEntryMapper {
               status: detail['status'] as String,
               openedAt: _date(detail['opened_at']),
               media: List.unmodifiable(mediaByJournal[id] ?? const []),
+              tags: List.unmodifiable(tagsByJournal[id] ?? const []),
             );
           }
           throw FormatException('Unsupported journal type: $type');

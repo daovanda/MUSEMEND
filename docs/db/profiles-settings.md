@@ -56,8 +56,9 @@ serialize các thay đổi năng lượng/phần thưởng của một user.
 ## Kiểm thử và tiêu chí nghiệm thu
 
 Integration test tạo hai `auth.users`; trigger bootstrap cho phép cả hai gọi RPC.
-Test phân tách user xác nhận user B không thấy journal của user A. Chưa có assertion
-riêng cho mọi cột settings được phép/cấm hoặc cho từng OAuth provider.
+Test xác nhận user B không thấy journal của user A, user được sửa đúng các cột
+profile/settings đã cấp, không sửa được `account_status`, và deletion request khóa
+profile. Chưa có assertion riêng cho từng OAuth provider.
 
 ## Migration, rollback và tương thích
 
@@ -75,4 +76,3 @@ giai đoạn rollout. Không rollback bằng cách sửa baseline.
 
 Liên quan: [migrations-testing.md](./migrations-testing.md),
 [notifications-cleanup.md](./notifications-cleanup.md).
-

@@ -10,6 +10,7 @@ Tab Journal hỗ trợ MVP:
 - tải tối đa 50 daily journal và future letter gần nhất;
 - tạo/sửa nhật ký ngày với tiêu đề và nội dung;
 - tạo/sửa thư tương lai, chọn ngày nhắc và đọc/mở trước hạn;
+- nhập tối đa 8 tag phân cách bằng dấu phẩy và hiển thị tag trên journal card;
 - tùy chọn lên lịch nhắc cục bộ khi lưu thư tương lai;
 - chọn ảnh JPG/PNG/WebP/HEIC tối đa 10 MiB, upload private và xem preview bằng
   signed URL 5 phút;
@@ -31,8 +32,8 @@ UI này.
 
 ## RPC, validation và bảo mật
 
-Mọi create/update gọi `save_journal()` để parent và subtype được lưu trong cùng
-transaction. Mở thư gọi `open_future_letter()`; xóa gọi
+Mọi create/update gọi `save_journal_with_tags()` để parent, subtype và tag
+assignments được lưu trong cùng transaction. Mở thư gọi `open_future_letter()`; xóa gọi
 `soft_delete_journal()`. Client không INSERT/UPDATE trực tiếp các bảng journal.
 
 Ảnh được chọn qua platform picker, giảm chiều rộng tối đa 2048 px và upload vào
@@ -63,12 +64,15 @@ analytics. Nội dung hiện là plaintext được RLS bảo vệ, chưa có E2
 ## Kiểm thử và nghiệm thu
 
 - Unit test mapper bao phủ daily/future-letter response.
+- DB integration test bao phủ chuẩn hóa tag, atomic wrapper và cross-user guard.
 - Flutter test, analyze và APK build phải đạt.
 - Android E2E với tài khoản QA đã xác nhận tạo daily atomically, tạo future letter
   hẹn ngày mai, mở sớm và reload vẫn giữ đúng nội dung/trạng thái đã mở.
 - Android E2E đã xác nhận Photo Picker → private upload → attach RPC → reload →
   signed preview. Audit DB xác nhận bucket private, metadata/object khớp 1:1 và
   mọi path đều đúng prefix owner/journal. Picker vẫn cần kiểm thử trên thiết bị iOS.
+- Android E2E đã xác nhận thêm hai tag vào daily journal, reload hiển thị đúng và
+  audit Supabase Dev thấy đúng hai assignments.
 - Android E2E đã xác nhận runtime permission được xin sau khi lưu và AlarmManager
   có lịch `ScheduledNotificationReceiver`; callback khi chạm notification mở tab
   Journal. Cấu hình iOS đã có nhưng cần nghiệm thu trên thiết bị thật.

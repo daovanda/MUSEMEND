@@ -67,6 +67,8 @@ hoặc object của A; soft-delete ẩn ngay và cleanup vật lý theo retentio
 
 ### P0.6 — Future letter và local notification
 
+Trạng thái: `implemented` trên Android; iOS chờ nghiệm thu thiết bị thật.
+
 - Tạo/sửa/đọc/mở sớm thư; schedule/reschedule local notification.
 - Đồng bộ notification inbox DB và deep-link.
 
@@ -75,6 +77,8 @@ notification của người khác.
 
 ### P0.7 — Profile, settings và xóa tài khoản
 
+Trạng thái: `implemented` trên Android; xóa thật chỉ kiểm thử transaction rollback.
+
 - Tên hiển thị/tên mây, theme, âm thanh, notification setting.
 - Privacy/terms, sign-out và request account deletion.
 
@@ -82,6 +86,8 @@ notification của người khác.
 cleanup xử lý Auth + DB + Storage idempotently.
 
 ### P0.8 — QA và release readiness
+
+Trạng thái: `in-progress`; internal Android MVP đạt, public/iOS release còn blocker.
 
 - Disclaimer: hỗ trợ phản tư, không chẩn đoán/thay chuyên gia.
 - Test Android/iOS, mạng chậm/mất mạng, permission denied, expired session.

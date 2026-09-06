@@ -43,11 +43,18 @@ void main() {
           'storage_path': 'user/daily-id/photo.jpg',
         },
       ],
+      [
+        {'id': 'tag-id', 'name': 'Bình yên'},
+      ],
+      [
+        {'journal_id': 'daily-id', 'tag_id': 'tag-id'},
+      ],
     ]);
 
     expect(entries.first.kind, JournalKind.daily);
     expect(entries.first.content, 'Một ngày dịu dàng.');
     expect(entries.first.media.single.id, 'media-id');
+    expect(entries.first.tags.single.name, 'Bình yên');
     expect(entries.last.kind, JournalKind.futureLetter);
     expect(entries.last.status, 'scheduled');
     expect(entries.last.openedAt, isNull);

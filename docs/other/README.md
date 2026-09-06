@@ -14,3 +14,5 @@ quyết định, hệ quả và trạng thái.
 - [CI/CD](./ci-cd.md): workflow, quality gate, deploy Dev/Production và giới hạn hiện tại.
 - [GitHub Environments](./github-environments.md): variables, secrets và production approval.
 - [Runbook phát hành](./release-runbook.md): chuẩn bị, deploy, xác minh và xử lý sự cố.
+- [Privacy và safety MVP](./privacy-safety.md): disclaimer, dữ liệu riêng tư và các chặn trước public release.
+- [Ma trận QA MVP](./mvp-qa.md): bằng chứng Android nội bộ, giới hạn iOS và public release.

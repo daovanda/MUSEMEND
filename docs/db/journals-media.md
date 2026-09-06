@@ -79,6 +79,13 @@ khi cả journal lẫn tag đều nhìn thấy qua RLS. Hiện privilege không 
 trực tiếp cho `journal_tags`, dù policy là `FOR ALL`; app chưa có contract xóa tag
 hoàn chỉnh.
 
+Flutter MVP lưu journal và tag qua `save_journal_with_tags()`. Wrapper gọi
+`save_journal()` và `set_journal_tags()` trong cùng transaction, nên parent/subtype
+và assignments cùng commit hoặc rollback. `set_journal_tags()` kiểm tra owner,
+khử trùng theo tên đã trim/lowercase, giới hạn 8 tag mỗi journal và 40 ký tự mỗi
+tag. Nó không xóa tag khỏi danh mục khi bỏ assignment; quản lý/xóa danh mục đầy đủ
+thuộc P1.
+
 ## Storage contract
 
 Bucket `journal-media` là private, giới hạn 50 MiB. MIME allow-list:
@@ -113,9 +120,10 @@ làm nguồn tin cậy.
 ## Kiểm thử
 
 Integration test xác nhận lưu daily nguyên tử, chặn check-in khác chủ, thay arrays
-yearly, đọc/mở future letter sớm, tạo due notification và ẩn journal sau soft-delete.
-Chưa test upload Storage thật, MIME/size, thumbnail, tag privileges, cleanup sau 30
-ngày, payload malformed đầy đủ hoặc concurrent save.
+yearly, đọc/mở future letter sớm, tạo due notification, ẩn journal sau soft-delete,
+chuẩn hóa tag và chặn gắn tag chéo user. Chưa test đầy đủ tag table privileges qua
+Data API, MIME/size, thumbnail, cleanup sau 30 ngày, payload malformed đầy đủ hoặc
+concurrent save.
 
 ## Migration, rollback và giới hạn
 

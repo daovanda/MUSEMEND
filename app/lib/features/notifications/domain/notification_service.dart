@@ -7,4 +7,5 @@ abstract interface class NotificationService {
   Future<bool> requestPermission();
   Future<void> scheduleFutureLetter(FutureLetterReminder reminder);
   Future<void> cancelFutureLetter(String journalId);
+  Future<void> cancelAll();
 }

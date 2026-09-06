@@ -54,11 +54,18 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     final operation = ref.watch(authControllerProvider);
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [MuseColors.sky, MuseColors.cream, MuseColors.lavender],
+            colors:
+                Theme.of(context).brightness == Brightness.dark
+                    ? [
+                      Theme.of(context).colorScheme.surface,
+                      Theme.of(context).colorScheme.surfaceContainer,
+                      Theme.of(context).colorScheme.surface,
+                    ]
+                    : [MuseColors.sky, MuseColors.cream, MuseColors.lavender],
           ),
         ),
         child: SafeArea(
