@@ -32,6 +32,11 @@ publishable key từ Repository variables, kiểm tra chúng tồn tại rồi t
 trị bằng `--dart-define` khi build APK Development và iOS Simulator. APK tester vì
 thế kết nối cùng Supabase Development đã deploy thay vì dừng ở lỗi cấu hình.
 
+Bản Android QA dùng cùng package `com.musemend.app` nhưng được build thành APK
+release và ký bằng upload key chỉ có trong CI Environment, sau đó đính kèm vào
+GitHub Release. Signing không nằm trong Flutter domain model; Gradle chỉ nhận các
+biến secret ở tầng build.
+
 ## Validation, lỗi và bảo mật
 
 Thiếu/sai cấu hình làm bootstrap dừng sớm. Client không nhận service-role key,
