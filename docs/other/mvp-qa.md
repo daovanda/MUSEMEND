@@ -7,7 +7,7 @@ Cập nhật: 2026-09-06
 
 | Miền | Automated | Android emulator + Supabase Dev |
 |---|---|---|
-| Auth/Profile | DTO/widget test, RLS/column grants | session restore, profile load/update, sign-out |
+| Auth/Profile | DTO/widget, 320×568 + text 200%, RLS/column grants | session restore, profile load/update, sign-out |
 | Check-in | mood/DTO, RPC transaction | một check-in/ngày, sửa, streak |
 | Mission/Energy | mapper/domain, RPC idempotency | custom reward 5, complete không cộng đôi |
 | Journey/Library | mapper, reward integration | start, checkpoint, landmark/food unlock |

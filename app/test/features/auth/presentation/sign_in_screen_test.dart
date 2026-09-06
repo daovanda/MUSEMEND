@@ -31,6 +31,41 @@ void main() {
     expect(find.text('Email chưa đúng định dạng.'), findsOneWidget);
     expect(find.text('Mật khẩu cần ít nhất 8 ký tự.'), findsOneWidget);
   });
+
+  testWidgets('remains usable on a small screen at 200 percent text scale', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 568);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(_FakeAuthRepository()),
+        ],
+        child: MaterialApp(
+          builder:
+              (context, child) => MediaQuery(
+                data: MediaQuery.of(
+                  context,
+                ).copyWith(textScaler: const TextScaler.linear(2)),
+                child: child!,
+              ),
+          home: const SignInScreen(),
+        ),
+      ),
+    );
+
+    final submit = find.widgetWithText(FilledButton, 'Đăng nhập');
+    await tester.ensureVisible(submit);
+    await tester.pumpAndSettle();
+
+    expect(submit, findsOneWidget);
+    expect(tester.getSize(submit).height, greaterThanOrEqualTo(48));
+    expect(tester.takeException(), isNull);
+  });
 }
 
 class _FakeAuthRepository implements AuthRepository {

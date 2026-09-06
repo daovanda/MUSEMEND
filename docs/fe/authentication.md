@@ -1,7 +1,7 @@
 # Authentication client
 
 **Trạng thái:** `in-progress`
-**Cập nhật:** 2026-09-05
+**Cập nhật:** 2026-09-06
 
 ## Mục tiêu và phạm vi
 
@@ -32,9 +32,11 @@ publishable key. RLS vẫn là lớp phân quyền dữ liệu, không dựa và
 
 ## Kiểm thử và nghiệm thu
 
-Widget test kiểm tra chuyển sign-up và validation. Integration/QA còn phải kiểm tra
-sign-up thực tạo đủ row bootstrap, session restore, expired session, sign-out và
-hai tài khoản không truy cập chéo.
+Widget test kiểm tra chuyển sign-up, validation và khả năng cuộn/sử dụng trên màn
+hình 320×568 ở text scale 200%; nút submit vẫn giữ vùng chạm tối thiểu 48 px.
+Android QA đã xác nhận đăng nhập, session restore và sign-out. Database integration
+kiểm tra bootstrap cùng cách ly hai tài khoản. Còn phải nghiệm thu account/session
+token hết hạn cưỡng bức và luồng sign-up có email confirmation trên cấu hình thật.
 
 ## Tương thích, rollback và việc còn lại
 
