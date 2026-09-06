@@ -78,9 +78,11 @@ jobs:
           commit_sha="$(git rev-parse HEAD)"
           short_sha="$(git rev-parse --short=12 HEAD)"
           release_tag="qa-v${release_version//+/-}-${short_sha}"
-          echo "commit_sha=$commit_sha" >> "$GITHUB_OUTPUT"
-          echo "release_tag=$release_tag" >> "$GITHUB_OUTPUT"
-          echo "release_version=$release_version" >> "$GITHUB_OUTPUT"
+          {
+            echo "commit_sha=$commit_sha"
+            echo "release_tag=$release_tag"
+            echo "release_version=$release_version"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -158,8 +160,8 @@ jobs:
           } > "$notes_file"
 
           gh release create "$RELEASE_TAG" \
-            release-assets/musemend-${RELEASE_TAG}.apk \
-            release-assets/musemend-${RELEASE_TAG}.apk.sha256 \
+            "release-assets/musemend-${RELEASE_TAG}.apk" \
+            "release-assets/musemend-${RELEASE_TAG}.apk.sha256" \
             --repo "$GITHUB_REPOSITORY" \
             --target "$COMMIT_SHA" \
             --title "MuseMend Android QA ${RELEASE_VERSION}" \
