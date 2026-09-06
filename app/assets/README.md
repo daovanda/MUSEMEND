@@ -1,7 +1,7 @@
 # MuseMend assets
 
 Trạng thái: `in-progress`
-Cập nhật: 2026-09-06
+Cập nhật: 2026-09-07
 
 Thư mục này chứa các asset chính thức đã export từ Figma và được đóng gói cùng
 ứng dụng. Không đặt screenshot của frame Figma vào đây. Khi artwork chưa có bản
@@ -31,6 +31,8 @@ assets/
 Asset đã export:
 
 - `illustrations/clouds/mascot-cloud.png`: Figma `image 22`, dùng ở màn Bầu trời.
+- `illustrations/journey/sky-background.png`: Figma `image 20`, cảnh quan alpha
+  (hills/river/clouds) đặt trên gradient của màn Bầu trời.
 - `illustrations/journey/sky-collection-sprite.png`: Figma `image 13/14/15`,
   sprite trang trí; chưa dùng làm asset catalog vì không thể suy ra từng item.
 

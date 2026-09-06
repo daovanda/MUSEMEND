@@ -11,4 +11,12 @@ void main() {
 
     expect(data.lengthInBytes, greaterThan(0));
   });
+
+  test('loads the exported sky scene asset', () async {
+    final data = await rootBundle.load(
+      'assets/illustrations/journey/sky-background.png',
+    );
+
+    expect(data.lengthInBytes, greaterThan(0));
+  });
 }

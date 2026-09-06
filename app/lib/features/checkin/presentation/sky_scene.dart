@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-/// A replaceable, code-native placeholder for the Figma sky artwork.
+/// The fixed sky artwork used by the Reflect screen.
 ///
-/// Keeping the illustration in a painter lets the app ship before the official
-/// Figma exports are available, while keeping the scene independent from
-/// check-in state and Supabase.
+/// The Figma export is a transparent foreground scene (hills, river and
+/// clouds), so it is layered over the app gradient. The painter remains as a
+/// deterministic fallback for a missing asset or an offline bundle issue.
 class SkyScene extends StatelessWidget {
   const SkyScene({super.key, this.height = 510});
 
@@ -13,9 +13,62 @@ class SkyScene extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ExcludeSemantics(
-      child: CustomPaint(
-        size: Size(double.infinity, height),
-        painter: _SkyScenePainter(),
+      child: SizedBox(
+        height: height,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0xFFDFF3FA), Color(0xFFFFF9EE)],
+                ),
+              ),
+            ),
+            Positioned(
+              top: 30,
+              right: 34,
+              child: Container(
+                width: 74,
+                height: 74,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0xFFFFE7A8).withValues(alpha: .58),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFFFE7A8).withValues(alpha: .24),
+                      blurRadius: 30,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Image.asset(
+              'assets/illustrations/journey/sky-background.png',
+              fit: BoxFit.cover,
+              alignment: Alignment.bottomCenter,
+              errorBuilder:
+                  (context, error, stackTrace) =>
+                      CustomPaint(painter: _SkyScenePainter()),
+            ),
+            IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.white.withValues(alpha: .04),
+                      const Color(0xFFFFF9EE).withValues(alpha: .12),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

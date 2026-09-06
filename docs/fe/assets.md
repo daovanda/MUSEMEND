@@ -1,7 +1,7 @@
 # Frontend asset manifest
 
 - **Trạng thái:** in-progress
-- **Cập nhật:** 2026-09-06
+- **Cập nhật:** 2026-09-07
 - **Nguồn thiết kế:** [Figma — Nhật Ký Chữa Lành](https://www.figma.com/design/AhhlLUWAyvLVs7R5ZBVcQV/Nh%E1%BA%ADt-K%C3%BD-Ch%E1%BB%AFa-L%C3%A0nh)
 
 ## Mục tiêu
@@ -14,7 +14,8 @@ thế mà không sửa nghiệp vụ. Frame screenshot chỉ là tài liệu tha
 
 | Nhóm | Nguồn/node | Implementation hiện tại | Trạng thái |
 | --- | --- | --- | --- |
-| Sky background, cloud, hills | Figma `Bầu trời` (`233-893`) | `SkyScenePainter` code-native | implemented approximation |
+| Sky gradient/ánh sáng | Figma `Bầu trời` (`233-893`) | Flutter gradient + fallback painter | implemented |
+| Sky background, hills, river | Figma `image 20` | `app/assets/illustrations/journey/sky-background.png` | implemented export |
 | Cloud mascot | Figma `image 22` (`233-1049`) | `app/assets/illustrations/clouds/mascot-cloud.png` | implemented export |
 | Journey decoration sprite | Figma `image 13`, `image 14`, `image 15` | `app/assets/illustrations/journey/sky-collection-sprite.png` | exported; integration pending |
 | Province/landmark/food/item | Catalog Supabase (`asset_path`) | repository map vào domain model | implemented mapping; catalog paths pending approved per-item exports |
