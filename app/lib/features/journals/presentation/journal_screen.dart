@@ -1,0 +1,741 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:musemend/app/theme/muse_colors.dart';
+import 'package:musemend/features/journals/application/journal_providers.dart';
+import 'package:musemend/features/journals/domain/journal_entry.dart';
+import 'package:musemend/features/journals/domain/journal_media.dart';
+import 'package:musemend/features/notifications/application/notification_providers.dart';
+import 'package:musemend/features/notifications/domain/future_letter_reminder.dart';
+import 'package:musemend/features/profile/application/profile_providers.dart';
+
+class JournalScreen extends ConsumerStatefulWidget {
+  const JournalScreen({this.requestedEntryId, super.key});
+
+  final String? requestedEntryId;
+
+  @override
+  ConsumerState<JournalScreen> createState() => _JournalScreenState();
+}
+
+class _JournalScreenState extends ConsumerState<JournalScreen> {
+  String? _handledEntryId;
+
+  @override
+  void didUpdateWidget(covariant JournalScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.requestedEntryId != oldWidget.requestedEntryId) {
+      _handledEntryId = null;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final entries = ref.watch(journalControllerProvider);
+    final requestedEntry = switch (widget.requestedEntryId) {
+      final id? => ref.watch(journalEntryProvider(id)),
+      null => null,
+    };
+    requestedEntry?.whenData(_scheduleRequestedEntry);
+    return ColoredBox(
+      color:
+          Theme.of(context).brightness == Brightness.dark
+              ? Theme.of(context).colorScheme.surface
+              : MuseColors.cream,
+      child: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: ref.read(journalControllerProvider.notifier).reload,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
+            children: [
+              Text('Nhật ký', style: Theme.of(context).textTheme.headlineLarge),
+              const SizedBox(height: 6),
+              const Text('Một nơi riêng tư để giữ lại điều bạn muốn nhớ.'),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: () => _editDaily(context, ref),
+                      icon: const Icon(Icons.edit_note_rounded),
+                      label: const Text('Viết hôm nay'),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => _editLetter(context, ref),
+                      icon: const Icon(Icons.forward_to_inbox_outlined),
+                      label: const Text('Thư tương lai'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              entries.when(
+                loading:
+                    () => const Padding(
+                      padding: EdgeInsets.all(32),
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                error:
+                    (_, _) => _JournalError(
+                      onRetry:
+                          ref.read(journalControllerProvider.notifier).reload,
+                    ),
+                data:
+                    (items) =>
+                        items.isEmpty
+                            ? const _EmptyJournal()
+                            : Column(
+                              children: items
+                                  .map(
+                                    (entry) => _JournalCard(
+                                      entry: entry,
+                                      onTap:
+                                          () => _openEntry(context, ref, entry),
+                                      onAttach:
+                                          () =>
+                                              _attachImage(context, ref, entry),
+                                      onDelete:
+                                          () => _delete(context, ref, entry),
+                                    ),
+                                  )
+                                  .toList(growable: false),
+                            ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _scheduleRequestedEntry(JournalEntry? entry) {
+    final requestedId = widget.requestedEntryId;
+    if (requestedId == null || _handledEntryId == requestedId) return;
+    _handledEntryId = requestedId;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (entry == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Không tìm thấy mục nhật ký này.')),
+        );
+        return;
+      }
+      _openEntry(context, ref, entry);
+    });
+  }
+
+  Future<void> _openEntry(
+    BuildContext context,
+    WidgetRef ref,
+    JournalEntry entry,
+  ) async {
+    if (entry.kind == JournalKind.daily) {
+      await _editDaily(context, ref, entry: entry);
+      return;
+    }
+    if (entry.openedAt == null) {
+      final opened = await ref
+          .read(journalControllerProvider.notifier)
+          .open(entry.id);
+      if (!context.mounted || !opened) {
+        if (context.mounted) _showFailure(context);
+        return;
+      }
+    }
+    if (context.mounted) await _editLetter(context, ref, entry: entry);
+  }
+
+  Future<void> _editDaily(
+    BuildContext context,
+    WidgetRef ref, {
+    JournalEntry? entry,
+  }) async {
+    final draft = await showDialog<_JournalDraft>(
+      context: context,
+      builder:
+          (_) => _JournalEditorDialog(
+            title: entry?.title ?? '',
+            content: entry?.content ?? '',
+            tags: entry?.tags.map((tag) => tag.name).toList() ?? const [],
+            heading: entry == null ? 'Viết cho hôm nay' : 'Sửa nhật ký',
+          ),
+    );
+    if (draft == null) return;
+    final saved = await ref
+        .read(journalControllerProvider.notifier)
+        .saveDaily(
+          id: entry?.id,
+          title: draft.title,
+          content: draft.content,
+          tags: draft.tags,
+        );
+    if (!context.mounted) return;
+    _showResult(context, saved != null, 'Nhật ký đã được lưu.');
+  }
+
+  Future<void> _editLetter(
+    BuildContext context,
+    WidgetRef ref, {
+    JournalEntry? entry,
+  }) async {
+    final draft = await showDialog<_LetterDraft>(
+      context: context,
+      builder:
+          (_) => _LetterEditorDialog(
+            entry: entry,
+            notificationsEnabled:
+                ref
+                    .read(accountOverviewProvider)
+                    .value
+                    ?.settings
+                    .notificationEnabled ??
+                false,
+          ),
+    );
+    if (draft == null) return;
+    final saved = await ref
+        .read(journalControllerProvider.notifier)
+        .saveFutureLetter(
+          id: entry?.id,
+          title: draft.title,
+          content: draft.content,
+          deliverAt: draft.deliverAt,
+          tags: draft.tags,
+        );
+    if (!context.mounted) return;
+    var reminderScheduled = false;
+    if (saved != null && draft.notifyOnDevice) {
+      try {
+        final service = ref.read(notificationServiceProvider);
+        final allowed = await service.requestPermission();
+        if (allowed) {
+          await service.scheduleFutureLetter(
+            FutureLetterReminder(journalId: saved, deliverAt: draft.deliverAt),
+          );
+          reminderScheduled = true;
+        }
+      } catch (_) {
+        reminderScheduled = false;
+      }
+    } else if (saved != null) {
+      try {
+        await ref.read(notificationServiceProvider).cancelFutureLetter(saved);
+      } catch (_) {
+        // The server copy is still valid when a local reminder cannot be removed.
+      }
+    }
+    if (!context.mounted) return;
+    final message =
+        saved != null && draft.notifyOnDevice && !reminderScheduled
+            ? 'Đã lưu thư, nhưng chưa thể bật nhắc trên thiết bị.'
+            : 'Thư tương lai đã được lưu.';
+    _showResult(context, saved != null, message);
+  }
+
+  Future<void> _delete(
+    BuildContext context,
+    WidgetRef ref,
+    JournalEntry entry,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder:
+          (dialogContext) => AlertDialog(
+            title: const Text('Xóa mục này?'),
+            content: const Text(
+              'Mục sẽ được ẩn ngay. Tệp liên quan được dọn theo chính sách xóa mềm.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text('Giữ lại'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: const Text('Xóa'),
+              ),
+            ],
+          ),
+    );
+    if (confirmed != true) return;
+    final deleted = await ref
+        .read(journalControllerProvider.notifier)
+        .delete(entry.id);
+    if (deleted && entry.kind == JournalKind.futureLetter) {
+      await ref.read(notificationServiceProvider).cancelFutureLetter(entry.id);
+    }
+    if (!context.mounted) return;
+    _showResult(context, deleted, 'Đã xóa mục nhật ký.');
+  }
+
+  Future<void> _attachImage(
+    BuildContext context,
+    WidgetRef ref,
+    JournalEntry entry,
+  ) async {
+    final result = await ref
+        .read(journalControllerProvider.notifier)
+        .attachImage(entry.id);
+    if (!context.mounted || result == JournalImageResult.canceled) return;
+    final message = switch (result) {
+      JournalImageResult.success => 'Ảnh đã được lưu riêng tư.',
+      JournalImageResult.tooLarge => 'Ảnh vượt quá giới hạn 10 MiB.',
+      JournalImageResult.unsupported => 'Chỉ hỗ trợ JPG, PNG, WebP hoặc HEIC.',
+      JournalImageResult.failed => 'Chưa thể tải ảnh lên. Hãy thử lại.',
+      JournalImageResult.canceled => '',
+    };
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  void _showResult(BuildContext context, bool success, String successMessage) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(success ? successMessage : 'Chưa thể lưu. Hãy thử lại.'),
+      ),
+    );
+  }
+
+  void _showFailure(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Chưa thể mở thư. Hãy thử lại.')),
+    );
+  }
+}
+
+class _JournalCard extends ConsumerWidget {
+  const _JournalCard({
+    required this.entry,
+    required this.onTap,
+    required this.onAttach,
+    required this.onDelete,
+  });
+
+  final JournalEntry entry;
+  final VoidCallback onTap;
+  final VoidCallback onAttach;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isLetter = entry.kind == JournalKind.futureLetter;
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: ListTile(
+        onTap: onTap,
+        contentPadding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
+        isThreeLine: entry.tags.isNotEmpty,
+        leading:
+            entry.media.isEmpty
+                ? CircleAvatar(
+                  backgroundColor:
+                      isLetter ? MuseColors.lavender : MuseColors.mint,
+                  child: Icon(
+                    isLetter ? Icons.mail_outline : Icons.auto_stories,
+                  ),
+                )
+                : _PrivateImage(media: entry.media.first),
+        title: Text(
+          entry.title?.trim().isNotEmpty == true
+              ? entry.title!
+              : isLetter
+              ? 'Thư gửi tương lai'
+              : 'Một ngày của tôi',
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              isLetter
+                  ? 'Hẹn ${_date(entry.deliverAt!)} · ${entry.openedAt == null ? 'chưa mở' : 'đã mở'}'
+                  : '${_date(entry.entryDate!)} · ${_preview(entry.content)}',
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            if (entry.tags.isNotEmpty)
+              Wrap(
+                spacing: 6,
+                children: [
+                  for (final tag in entry.tags)
+                    Text(
+                      '#${tag.name}',
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                ],
+              ),
+          ],
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              tooltip: 'Thêm ảnh riêng tư',
+              onPressed: onAttach,
+              icon: Badge(
+                isLabelVisible: entry.media.isNotEmpty,
+                label: Text('${entry.media.length}'),
+                child: const Icon(Icons.add_photo_alternate_outlined),
+              ),
+            ),
+            IconButton(
+              tooltip: 'Xóa',
+              onPressed: onDelete,
+              icon: const Icon(Icons.delete_outline),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static String _date(DateTime value) =>
+      '${value.day.toString().padLeft(2, '0')}/${value.month.toString().padLeft(2, '0')}/${value.year}';
+
+  static String _preview(String value) {
+    final clean = value.trim().replaceAll(RegExp(r'\s+'), ' ');
+    return clean.isEmpty ? 'Chưa có nội dung' : clean;
+  }
+}
+
+class _PrivateImage extends ConsumerWidget {
+  const _PrivateImage({required this.media});
+
+  final JournalMedia media;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final signedUrl = ref.watch(journalMediaUrlProvider(media.storagePath));
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: SizedBox.square(
+        dimension: 48,
+        child: signedUrl.when(
+          loading:
+              () => const ColoredBox(
+                color: MuseColors.mint,
+                child: Icon(Icons.image_outlined),
+              ),
+          error:
+              (_, _) => const ColoredBox(
+                color: MuseColors.mint,
+                child: Icon(Icons.broken_image_outlined),
+              ),
+          data:
+              (url) => Image.network(
+                url,
+                fit: BoxFit.cover,
+                errorBuilder:
+                    (_, _, _) => const ColoredBox(
+                      color: MuseColors.mint,
+                      child: Icon(Icons.broken_image_outlined),
+                    ),
+              ),
+        ),
+      ),
+    );
+  }
+}
+
+class _JournalEditorDialog extends StatefulWidget {
+  const _JournalEditorDialog({
+    required this.title,
+    required this.content,
+    required this.tags,
+    required this.heading,
+  });
+
+  final String title;
+  final String content;
+  final List<String> tags;
+  final String heading;
+
+  @override
+  State<_JournalEditorDialog> createState() => _JournalEditorDialogState();
+}
+
+class _JournalEditorDialogState extends State<_JournalEditorDialog> {
+  late final _title = TextEditingController(text: widget.title);
+  late final _content = TextEditingController(text: widget.content);
+  late final _tags = TextEditingController(text: widget.tags.join(', '));
+
+  @override
+  void dispose() {
+    _title.dispose();
+    _content.dispose();
+    _tags.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.heading),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _title,
+              maxLength: 120,
+              decoration: const InputDecoration(labelText: 'Tiêu đề'),
+            ),
+            TextField(
+              controller: _content,
+              onChanged: (_) => setState(() {}),
+              minLines: 3,
+              maxLines: 6,
+              maxLength: 10000,
+              decoration: const InputDecoration(labelText: 'Nội dung'),
+            ),
+            TextField(
+              controller: _tags,
+              onChanged: (_) => setState(() {}),
+              maxLength: 320,
+              decoration: const InputDecoration(
+                labelText: 'Tag (phân cách bằng dấu phẩy)',
+                helperText: 'Tối đa 8 tag, mỗi tag 40 ký tự',
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Hủy'),
+        ),
+        FilledButton(
+          onPressed:
+              _content.text.trim().isEmpty || !_validTags(_tags.text)
+                  ? null
+                  : () => Navigator.pop(
+                    context,
+                    _JournalDraft(
+                      _title.text,
+                      _content.text,
+                      _tagNames(_tags.text),
+                    ),
+                  ),
+          child: const Text('Lưu'),
+        ),
+      ],
+    );
+  }
+}
+
+class _LetterEditorDialog extends StatefulWidget {
+  const _LetterEditorDialog({
+    required this.entry,
+    required this.notificationsEnabled,
+  });
+
+  final JournalEntry? entry;
+  final bool notificationsEnabled;
+
+  @override
+  State<_LetterEditorDialog> createState() => _LetterEditorDialogState();
+}
+
+class _LetterEditorDialogState extends State<_LetterEditorDialog> {
+  late final _title = TextEditingController(text: widget.entry?.title ?? '');
+  late final _content = TextEditingController(
+    text: widget.entry?.content ?? '',
+  );
+  late final _tags = TextEditingController(
+    text: widget.entry?.tags.map((tag) => tag.name).join(', ') ?? '',
+  );
+  late DateTime _delivery =
+      widget.entry?.deliverAt?.toLocal() ??
+      DateTime.now().add(const Duration(days: 1));
+  late bool _notifyOnDevice = widget.notificationsEnabled;
+
+  @override
+  void dispose() {
+    _title.dispose();
+    _content.dispose();
+    _tags.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.entry == null ? 'Thư gửi tương lai' : 'Sửa lá thư'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _title,
+              maxLength: 120,
+              decoration: const InputDecoration(labelText: 'Tiêu đề'),
+            ),
+            TextField(
+              controller: _content,
+              onChanged: (_) => setState(() {}),
+              minLines: 2,
+              maxLines: 4,
+              maxLength: 10000,
+              decoration: const InputDecoration(labelText: 'Lời nhắn'),
+            ),
+            TextField(
+              controller: _tags,
+              onChanged: (_) => setState(() {}),
+              maxLength: 320,
+              decoration: const InputDecoration(
+                labelText: 'Tag (phân cách bằng dấu phẩy)',
+                helperText: 'Tối đa 8 tag, mỗi tag 40 ký tự',
+              ),
+            ),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Ngày nhắc mở thư'),
+              subtitle: Text(_JournalCard._date(_delivery)),
+              trailing: const Icon(Icons.calendar_month_outlined),
+              onTap: _pickDate,
+            ),
+            CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              value: _notifyOnDevice,
+              onChanged:
+                  widget.notificationsEnabled
+                      ? (value) {
+                        setState(() => _notifyOnDevice = value ?? false);
+                      }
+                      : null,
+              title: const Text('Nhắc tôi trên thiết bị'),
+              subtitle: Text(
+                widget.notificationsEnabled
+                    ? 'Ứng dụng sẽ xin quyền khi bạn lưu thư.'
+                    : 'Hãy bật thông báo trong Hồ sơ trước.',
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Hủy'),
+        ),
+        FilledButton(
+          onPressed:
+              _content.text.trim().isEmpty || !_validTags(_tags.text)
+                  ? null
+                  : () => Navigator.pop(
+                    context,
+                    _LetterDraft(
+                      _title.text,
+                      _content.text,
+                      _tagNames(_tags.text),
+                      _delivery,
+                      _notifyOnDevice,
+                    ),
+                  ),
+          child: const Text('Lưu'),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _pickDate() async {
+    final now = DateTime.now();
+    final selected = await showDatePicker(
+      context: context,
+      initialDate:
+          _delivery.isAfter(now) ? _delivery : now.add(const Duration(days: 1)),
+      firstDate: DateTime(now.year, now.month, now.day + 1),
+      lastDate: DateTime(now.year + 10),
+    );
+    if (selected != null) {
+      setState(
+        () =>
+            _delivery = DateTime(
+              selected.year,
+              selected.month,
+              selected.day,
+              9,
+            ),
+      );
+    }
+  }
+}
+
+class _JournalDraft {
+  const _JournalDraft(this.title, this.content, this.tags);
+
+  final String title;
+  final String content;
+  final List<String> tags;
+}
+
+class _LetterDraft extends _JournalDraft {
+  const _LetterDraft(
+    super.title,
+    super.content,
+    super.tags,
+    this.deliverAt,
+    this.notifyOnDevice,
+  );
+
+  final DateTime deliverAt;
+  final bool notifyOnDevice;
+}
+
+List<String> _tagNames(String value) {
+  final names = <String>[];
+  final normalized = <String>{};
+  for (final raw in value.split(',')) {
+    final name = raw.trim();
+    if (name.isEmpty || !normalized.add(name.toLowerCase())) continue;
+    names.add(name);
+  }
+  return names;
+}
+
+bool _validTags(String value) {
+  final names = _tagNames(value);
+  return names.length <= 8 && names.every((name) => name.length <= 40);
+}
+
+class _EmptyJournal extends StatelessWidget {
+  const _EmptyJournal();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Card(
+      child: Padding(
+        padding: EdgeInsets.all(24),
+        child: Text(
+          'Chưa có trang nào. Bạn có thể bắt đầu bằng vài dòng thật ngắn.',
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+}
+
+class _JournalError extends StatelessWidget {
+  const _JournalError({required this.onRetry});
+
+  final Future<void> Function() onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            const Text('Chưa thể tải nhật ký lúc này.'),
+            const SizedBox(height: 12),
+            OutlinedButton(onPressed: onRetry, child: const Text('Thử lại')),
+          ],
+        ),
+      ),
+    );
+  }
+}

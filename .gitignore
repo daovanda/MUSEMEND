@@ -1,0 +1,5 @@
+tools/db-validation/node_modules/
+.env
+.env.*
+!.env.example
+supabase/.temp/
