@@ -1,7 +1,7 @@
 # Flutter application foundation
 
 **Trạng thái:** `implemented`
-**Cập nhật:** 2026-09-05
+**Cập nhật:** 2026-09-06
 
 ## Mục tiêu và phạm vi
 
@@ -26,6 +26,11 @@ Theme hỗ trợ system/light/dark; nền pastel tự chuyển sang surface toke
 `AppConfig` nhận `APP_ENV`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` qua
 `--dart-define-from-file`. URL bắt buộc HTTPS và key không được rỗng. File local
 `config/*.json` bị ignore; chỉ các file `*.example.json` được commit.
+
+Developer local tiếp tục dùng `--dart-define-from-file`. GitHub CI lấy URL và
+publishable key từ Repository variables, kiểm tra chúng tồn tại rồi truyền ba giá
+trị bằng `--dart-define` khi build APK Development và iOS Simulator. APK tester vì
+thế kết nối cùng Supabase Development đã deploy thay vì dừng ở lỗi cấu hình.
 
 ## Validation, lỗi và bảo mật
 

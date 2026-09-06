@@ -193,6 +193,10 @@ jobs:
     name: Flutter analyze, test, and Android debug build
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      APP_ENV: development
+      SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+      SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
     steps:
       - name: Check out source
         uses: actions/checkout@v6.0.2
@@ -243,10 +247,26 @@ jobs:
         working-directory: app
         run: flutter test --coverage
 
+      - name: Validate development app configuration
+        if: steps.flutter-project.outputs.present == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in SUPABASE_URL SUPABASE_PUBLISHABLE_KEY; do
+            if [[ -z "${!name:-}" ]]; then
+              echo "Missing GitHub repository variable: $name"
+              exit 1
+            fi
+          done
+
       - name: Build tester APK
         if: steps.flutter-project.outputs.present == 'true'
         working-directory: app
-        run: flutter build apk --debug
+        run: |
+          flutter build apk --debug \
+            --dart-define=APP_ENV="$APP_ENV" \
+            --dart-define=SUPABASE_URL="$SUPABASE_URL" \
+            --dart-define=SUPABASE_PUBLISHABLE_KEY="$SUPABASE_PUBLISHABLE_KEY"
 
       - name: Upload tester APK
         if: steps.flutter-project.outputs.present == 'true'
@@ -261,6 +281,10 @@ jobs:
     name: Flutter iOS simulator build
     runs-on: macos-15
     timeout-minutes: 30
+    env:
+      APP_ENV: development
+      SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+      SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
     steps:
       - name: Check out source
         uses: actions/checkout@v6.0.2
@@ -278,6 +302,21 @@ jobs:
         working-directory: app
         run: flutter pub get --enforce-lockfile
 
+      - name: Validate development app configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in SUPABASE_URL SUPABASE_PUBLISHABLE_KEY; do
+            if [[ -z "${!name:-}" ]]; then
+              echo "Missing GitHub repository variable: $name"
+              exit 1
+            fi
+          done
+
       - name: Build iOS simulator app
         working-directory: app
-        run: flutter build ios --simulator --no-codesign
+        run: |
+          flutter build ios --simulator --no-codesign \
+            --dart-define=APP_ENV="$APP_ENV" \
+            --dart-define=SUPABASE_URL="$SUPABASE_URL" \
+            --dart-define=SUPABASE_PUBLISHABLE_KEY="$SUPABASE_PUBLISHABLE_KEY"
