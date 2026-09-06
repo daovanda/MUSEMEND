@@ -18,9 +18,9 @@ Cập nhật: 2026-09-06
 | Deletion | transaction rollback | dialog bị khóa trước chuỗi xác nhận; không xóa account QA thật |
 | Offline | HTTP timeout + widget error/retry | network recovery smoke-test; device cut-off cần lặp lại |
 
-Toàn bộ Flutter format/analyze/test, APK debug build và database validator phải đạt
-trên commit phát hành nội bộ. Screenshot/build local nằm trong thư mục bị ignore,
-không chứa trong Git artifact.
+Toàn bộ Flutter format/analyze/test, APK debug build, iOS Simulator build và
+database validator phải đạt trên commit phát hành nội bộ. Screenshot/build local
+nằm trong thư mục bị ignore, không chứa trong Git artifact.
 
 ## Mạng và lỗi
 
@@ -31,8 +31,8 @@ từ chối không được làm mất Future Letter.
 
 ## Chưa được chứng minh
 
-- iOS build/signing, Photo Picker, notification permission/scheduling/deep-link và
-  VoiceOver trên thiết bị thật;
+- iOS device archive/signing, Photo Picker, notification permission/scheduling/
+  deep-link và VoiceOver trên thiết bị thật;
 - Android thiết bị thật, TalkBack, nhiều kích thước/font scale và mạng di động yếu;
 - concurrent/load test, restore/PITR, cleanup Storage/Auth thật sau retention;
 - account/session token hết hạn cưỡng bức, notification DB đúng thời điểm theo cron;

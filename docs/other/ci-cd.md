@@ -79,7 +79,7 @@ Production.
 Deno lint và type-check toàn bộ file TypeScript dưới `supabase/functions/`.
 Không gọi function thật và không cần service-role key trong CI.
 
-### Flutter
+### Flutter Android
 
 Khi `app/pubspec.yaml` chưa tồn tại, job giải thích và bỏ qua. Module Flutter dùng
 `app/.fvmrc` làm nguồn phiên bản SDK; phiên bản đã chốt cho nền MVP là Flutter
@@ -87,6 +87,14 @@ Khi `app/pubspec.yaml` chưa tồn tại, job giải thích và bỏ qua. Module
 format/analyze, chạy test, build APK debug và lưu artifact 7 ngày. APK này chỉ
 dành cho tester nội bộ. Thay đổi SDK phải cập nhật `.fvmrc`, kiểm chứng toàn bộ CI
 và ghi rõ khả năng tương thích trong tài liệu/PR.
+
+### Flutter iOS
+
+Job macOS riêng cài dependency theo lockfile và chạy
+`flutter build ios --simulator --no-codesign`. Gate này phát hiện lỗi compile,
+plugin/CocoaPods và cấu hình iOS mà Windows không thể kiểm chứng. Simulator build
+không thay thế archive thiết bị, signing, TestFlight hoặc kiểm thử permission trên
+iPhone/iPad thật.
 
 ## 4. Hợp đồng deploy Supabase
 
@@ -145,6 +153,7 @@ Trước khi bắt buộc workflow bằng branch protection:
 - Cần thay validator nhúng hoặc bổ sung Supabase local stack để kiểm tra cron,
   extensions và hành vi sát hosted Postgres hơn trước production.
 - Cần thiết kế pipeline signing/phát hành mobile sau khi chốt Android/iOS.
+- Cần bổ sung archive iOS đã ký và phân phối TestFlight sau khi có Apple credential.
 
 ## 9. Tài liệu liên quan
 

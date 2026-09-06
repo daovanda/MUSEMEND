@@ -40,9 +40,10 @@ cần theo dõi timeout thực tế trên mạng di động trước public rele
 
 ## Kiểm thử và nghiệm thu
 
-Chạy `dart format`, `flutter analyze`, `flutter test` và build APK debug. Cấu hình
-parser có unit test. Nghiệm thu khi Android/iOS cùng dùng ID đã chốt và presentation
-không import Supabase ngoài adapter/error translation cần thiết.
+Chạy `dart format`, `flutter analyze`, `flutter test`, build APK debug và build iOS
+Simulator không ký trên macOS CI. Cấu hình parser có unit test. Nghiệm thu khi
+Android/iOS cùng dùng ID đã chốt và presentation không import Supabase ngoài
+adapter/error translation cần thiết.
 
 ## Tương thích, rollback và việc còn lại
 
