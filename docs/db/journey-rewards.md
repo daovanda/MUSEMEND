@@ -80,10 +80,12 @@ Mã catalog có prefix `demo-`; đây không phải catalog địa lý/nội dun
 
 Các cột `provinces.cover_asset_path`, `provinces.map_asset_path` và
 `landmarks.asset_path`, `foods.asset_path`, `province_items.asset_path` đã được
-repository Flutter đọc vào domain model. Hiện seed để `NULL` vì chưa có export
-artwork chính thức. Không ghi đường dẫn Figma tạm hoặc URL ký hạn vào migration;
-asset động chỉ được publish cùng catalog content đã duyệt, qua bucket/policy
-server-owned và migration/seed idempotent.
+repository Flutter đọc vào domain model. Seed demo hiện vẫn để các cột catalog
+ở `NULL`: export cloud mascot dùng chung không phải asset của một dòng catalog,
+còn sprite Figma đang chứa nhiều object/crop nên chưa thể gán đúng từng item.
+Không ghi đường dẫn Figma tạm hoặc URL ký hạn vào migration; asset động chỉ được
+publish cùng catalog content đã duyệt, qua bucket/policy server-owned và
+migration/seed idempotent.
 
 ## Kiểm thử
 

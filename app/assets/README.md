@@ -28,5 +28,11 @@ assets/
   illustrations/journey/
 ```
 
+Asset đã export:
+
+- `illustrations/clouds/mascot-cloud.png`: Figma `image 22`, dùng ở màn Bầu trời.
+- `illustrations/journey/sky-collection-sprite.png`: Figma `image 13/14/15`,
+  sprite trang trí; chưa dùng làm asset catalog vì không thể suy ra từng item.
+
 Khi thêm thư mục/file, cập nhật `pubspec.yaml`, manifest trong tài liệu frontend
 và kiểm thử màn hình dùng asset đó.

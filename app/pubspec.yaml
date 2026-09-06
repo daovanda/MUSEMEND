@@ -25,3 +25,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/illustrations/clouds/mascot-cloud.png
+    - assets/illustrations/journey/sky-collection-sprite.png

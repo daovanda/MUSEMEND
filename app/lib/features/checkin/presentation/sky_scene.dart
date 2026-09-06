@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:musemend/app/theme/muse_colors.dart';
 
 /// A replaceable, code-native placeholder for the Figma sky artwork.
 ///
@@ -32,10 +31,17 @@ class CloudMascot extends StatelessWidget {
     return Semantics(
       label: mood == null ? 'Linh vật mây của MuseMend' : 'Mây đang đồng hành',
       image: true,
-      child: SizedBox(
+      child: Image.asset(
+        'assets/illustrations/clouds/mascot-cloud.png',
         width: 150,
         height: 118,
-        child: CustomPaint(painter: _CloudMascotPainter()),
+        fit: BoxFit.contain,
+        errorBuilder:
+            (context, error, stackTrace) => const SizedBox(
+              width: 150,
+              height: 118,
+              child: Icon(Icons.cloud, size: 72),
+            ),
       ),
     );
   }
@@ -206,36 +212,6 @@ class _SkyScenePainter extends CustomPainter {
       origin.translate(width * .72, width * .34),
       paint,
     );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _CloudMascotPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final cloud = Paint()..color = Colors.white.withValues(alpha: .95);
-    final shadow =
-        Paint()..color = const Color(0xFFB6DDE4).withValues(alpha: .55);
-    canvas.drawOval(Rect.fromLTWH(15, 45, 120, 53), shadow);
-    canvas.drawCircle(const Offset(45, 58), 25, cloud);
-    canvas.drawCircle(const Offset(76, 43), 36, cloud);
-    canvas.drawCircle(const Offset(111, 61), 25, cloud);
-    canvas.drawOval(Rect.fromLTWH(30, 50, 94, 47), cloud);
-    final eye = Paint()..color = MuseColors.ink;
-    canvas.drawCircle(const Offset(62, 62), 3.5, eye);
-    canvas.drawCircle(const Offset(94, 62), 3.5, eye);
-    final smile =
-        Paint()
-          ..color = MuseColors.ink
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.4;
-    canvas.drawArc(const Rect.fromLTWH(72, 56, 14, 14), 0, 3.14, false, smile);
-    final blush =
-        Paint()..color = const Color(0xFFFFB5B0).withValues(alpha: .65);
-    canvas.drawOval(Rect.fromLTWH(43, 70, 17, 7), blush);
-    canvas.drawOval(Rect.fromLTWH(98, 70, 17, 7), blush);
   }
 
   @override

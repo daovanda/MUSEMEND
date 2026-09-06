@@ -14,9 +14,10 @@ thế mà không sửa nghiệp vụ. Frame screenshot chỉ là tài liệu tha
 
 | Nhóm | Nguồn/node | Implementation hiện tại | Trạng thái |
 | --- | --- | --- | --- |
-| Sky background, cloud, hills | Figma `Bầu trời` (`233-893`) | `SkyScenePainter` code-native | implemented placeholder |
-| Cloud mascot/mood | Figma `image 22`, `image 14`, `image 15`, `image 13` | vector placeholder trong `sky_scene.dart` | in-progress |
-| Province/landmark/food/item | Catalog Supabase (`asset_path`) | repository map vào domain model | implemented mapping; catalog paths pending |
+| Sky background, cloud, hills | Figma `Bầu trời` (`233-893`) | `SkyScenePainter` code-native | implemented approximation |
+| Cloud mascot | Figma `image 22` (`233-1049`) | `app/assets/illustrations/clouds/mascot-cloud.png` | implemented export |
+| Journey decoration sprite | Figma `image 13`, `image 14`, `image 15` | `app/assets/illustrations/journey/sky-collection-sprite.png` | exported; integration pending |
+| Province/landmark/food/item | Catalog Supabase (`asset_path`) | repository map vào domain model | implemented mapping; catalog paths pending approved per-item exports |
 | Quote card | Figma `Quote` | Flutter card, quote hardcoded P0 | implemented |
 
 ## Quy trình thêm asset chính thức
@@ -32,8 +33,9 @@ thế mà không sửa nghiệp vụ. Frame screenshot chỉ là tài liệu tha
 
 Catalog path là dữ liệu server-owned; không nhận URL tuỳ ý từ người dùng và không
 đưa signed URL vào log. Asset journal riêng tư thuộc Storage bucket khác, không
-được trộn vào asset bundle. Figma hiện chưa cung cấp export trực tiếp trong môi
-trường dev nên không thêm file nhị phân giả.
+được trộn vào asset bundle. Hai object đã được export từ Figma và ghi nguồn ở
+manifest trên. Sprite trang trí không được gán vào một dòng catalog vì nó chứa
+nhiều object đã crop; catalog vẫn chờ export riêng cho từng landmark/food/item.
 
 ## Liên quan
 
