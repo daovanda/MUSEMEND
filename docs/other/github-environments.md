@@ -15,6 +15,7 @@ token, Storage hoặc dữ liệu giữa hai môi trường.
 Trong GitHub repository, mở **Settings -> Environments** và tạo chính xác:
 
 - `development`
+- `android-development`
 - `production`
 
 Trong mỗi environment, tạo:
@@ -39,6 +40,9 @@ không đặc quyền để build ứng dụng Development:
 
 Không thay publishable key bằng secret/service-role key. Hai biến repository được
 CI truyền vào Android và iOS bằng `--dart-define`; chúng không cấp quyền vượt RLS.
+
+`android-development` không cần Supabase deploy credential. Nó chỉ chứa signing
+upload key và Play service account theo [Android Internal Testing](./android-internal-testing.md).
 
 ## 3. Protection rules
 

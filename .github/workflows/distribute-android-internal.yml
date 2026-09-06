@@ -1,0 +1,103 @@
+name: Distribute Android Internal Testing
+
+on:
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
+    branches:
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: distribute-android-internal
+  cancel-in-progress: false
+
+jobs:
+  distribute:
+    name: Build and upload Android internal release
+    if: >-
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'develop') ||
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/develop')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: android-development
+    env:
+      APP_ENV: development
+      SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+      SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
+      MUSEMEND_ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+      MUSEMEND_ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_STORE_PASSWORD }}
+      MUSEMEND_ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+      MUSEMEND_ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
+      PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+    steps:
+      - name: Check out the CI-verified revision
+        uses: actions/checkout@v6.0.2
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          persist-credentials: false
+
+      - name: Validate distribution configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in \
+            SUPABASE_URL \
+            SUPABASE_PUBLISHABLE_KEY \
+            MUSEMEND_ANDROID_KEYSTORE_BASE64 \
+            MUSEMEND_ANDROID_STORE_PASSWORD \
+            MUSEMEND_ANDROID_KEY_ALIAS \
+            MUSEMEND_ANDROID_KEY_PASSWORD \
+            PLAY_SERVICE_ACCOUNT_JSON; do
+            if [[ -z "${!name:-}" ]]; then
+              echo "Missing android-development configuration: $name"
+              exit 1
+            fi
+          done
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version-file: app/.fvmrc
+          cache: true
+
+      - name: Install locked Flutter dependencies
+        working-directory: app
+        run: flutter pub get --enforce-lockfile
+
+      - name: Build signed Android App Bundle
+        working-directory: app
+        run: |
+          flutter build appbundle --release \
+            --dart-define=APP_ENV="$APP_ENV" \
+            --dart-define=SUPABASE_URL="$SUPABASE_URL" \
+            --dart-define=SUPABASE_PUBLISHABLE_KEY="$SUPABASE_PUBLISHABLE_KEY"
+
+      - name: Upload Android App Bundle to Play Internal Testing
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.musemend.app
+          releaseFiles: app/build/app/outputs/bundle/release/app-release.aab
+          track: internal
+          status: completed
+
+      - name: Write distribution summary
+        shell: bash
+        run: |
+          {
+            echo "## Android Internal Testing distributed"
+            echo ""
+            echo "- Package: \`com.musemend.app\`"
+            echo "- Track: \`internal\`"
+            echo "- Revision: \`$(git rev-parse HEAD)\`"
+            echo "- Artifact: signed AAB uploaded to Google Play Internal Testing"
+          } >> "$GITHUB_STEP_SUMMARY"
