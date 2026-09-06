@@ -2,7 +2,7 @@
 
 **Trạng thái:** `proposed` — workflow đã tham chiếu environment nhưng cấu hình
 GitHub phải do repository owner thực hiện.  
-**Cập nhật:** 2026-09-05
+**Cập nhật:** 2026-09-06
 
 ## 1. Mục tiêu và phạm vi
 
@@ -28,6 +28,17 @@ Trong mỗi environment, tạo:
 Không thêm service-role key hoặc `MUSEMEND_CLEANUP_SECRET`: workflow deploy không
 cần đọc hai giá trị này. Edge Function secret/Vault phải được provision trực tiếp
 trong từng Supabase project bằng quy trình quản trị secret riêng.
+
+Ngoài Environment variables dành cho deploy, repository cần hai Actions variables
+không đặc quyền để build ứng dụng Development:
+
+| Loại | Tên | Nội dung |
+| --- | --- | --- |
+| Repository variable | `SUPABASE_URL` | URL HTTPS của Supabase Development |
+| Repository variable | `SUPABASE_PUBLISHABLE_KEY` | Publishable key dành cho mobile client |
+
+Không thay publishable key bằng secret/service-role key. Hai biến repository được
+CI truyền vào Android và iOS bằng `--dart-define`; chúng không cấp quyền vượt RLS.
 
 ## 3. Protection rules
 

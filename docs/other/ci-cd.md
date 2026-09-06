@@ -1,7 +1,7 @@
 # CI/CD của MuseMend
 
 **Trạng thái:** `in-progress`  
-**Cập nhật:** 2026-09-05
+**Cập nhật:** 2026-09-06
 
 ## 1. Mục tiêu và phạm vi
 
@@ -88,13 +88,20 @@ format/analyze, chạy test, build APK debug và lưu artifact 7 ngày. APK này
 dành cho tester nội bộ. Thay đổi SDK phải cập nhật `.fvmrc`, kiểm chứng toàn bộ CI
 và ghi rõ khả năng tương thích trong tài liệu/PR.
 
+Trước khi build, job kiểm tra hai Repository variables `SUPABASE_URL` và
+`SUPABASE_PUBLISHABLE_KEY`, rồi truyền chúng cùng `APP_ENV=development` qua
+`--dart-define`. Vì publishable key được nhúng vào APK và không phải credential
+đặc quyền, quyền truy cập dữ liệu vẫn phải được giới hạn bằng RLS. Job dừng với
+tên biến bị thiếu nhưng không in giá trị cấu hình.
+
 ### Flutter iOS
 
 Job macOS riêng cài dependency theo lockfile và chạy
 `flutter build ios --simulator --no-codesign`. Gate này phát hiện lỗi compile,
 plugin/CocoaPods và cấu hình iOS mà Windows không thể kiểm chứng. Simulator build
 không thay thế archive thiết bị, signing, TestFlight hoặc kiểm thử permission trên
-iPhone/iPad thật.
+iPhone/iPad thật. Build simulator nhận cùng cấu hình Development bằng
+`--dart-define` để tránh tạo artifact biên dịch được nhưng không thể bootstrap.
 
 ## 4. Hợp đồng deploy Supabase
 
