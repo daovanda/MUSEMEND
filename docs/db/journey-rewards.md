@@ -1,7 +1,7 @@
 # Journey, checkpoints và rewards
 
 Trạng thái: `implemented`  
-Cập nhật: 2026-09-05
+Cập nhật: 2026-09-06
 
 ## Mục tiêu và phạm vi
 
@@ -76,8 +76,16 @@ Migration demo seed idempotent tạo:
 - 15 landmark, 15 food và 3 badge hoàn thành tỉnh;
 - 33 reward mapping: landmark + food cho từng trạm, thêm badge ở trạm 5.
 
-Mã catalog có prefix `demo-`; đây không phải catalog địa lý/nội dung production và
-asset artwork chưa được cung cấp.
+Mã catalog có prefix `demo-`; đây không phải catalog địa lý/nội dung production.
+
+Các cột `provinces.cover_asset_path`, `provinces.map_asset_path` và
+`landmarks.asset_path`, `foods.asset_path`, `province_items.asset_path` đã được
+repository Flutter đọc vào domain model. Seed demo hiện vẫn để các cột catalog
+ở `NULL`: export cloud mascot dùng chung không phải asset của một dòng catalog,
+còn sprite Figma đang chứa nhiều object/crop nên chưa thể gán đúng từng item.
+Không ghi đường dẫn Figma tạm hoặc URL ký hạn vào migration; asset động chỉ được
+publish cùng catalog content đã duyệt, qua bucket/policy server-owned và
+migration/seed idempotent.
 
 ## Kiểm thử
 
@@ -95,7 +103,8 @@ trên Dashboard.
 
 ## Giới hạn và việc còn lại
 
-- Cần catalog nội dung/asset được duyệt thay cho demo seed.
+- Cần catalog nội dung/asset được duyệt thay cho demo seed và quy trình publish
+  `asset_path` an toàn.
 - App phải gọi `start_journey()` khi user muốn chuyển sang tỉnh kế tiếp.
 - Chưa có admin/content publishing workflow hay version catalog.
 - Chưa có test tải/lock contention và invariant toàn hành trình.

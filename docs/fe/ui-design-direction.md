@@ -1,7 +1,7 @@
 # UI/UX direction for MVP
 
 - **Status:** in-progress
-- **Last updated:** 2026-09-05
+- **Last updated:** 2026-09-07
 - **Source of reference:** [Figma — Nhật Ký Chữa Lành](https://www.figma.com/design/AhhlLUWAyvLVs7R5ZBVcQV/Nh%E1%BA%ADt-K%C3%BD-Ch%E1%BB%AFa-L%C3%A0nh?node-id=5-147&p=f)
 
 ## 1. Mục tiêu và phạm vi
@@ -24,20 +24,46 @@ cam kết rằng mọi frame trong Figma đều nằm trong P0.
   thao tác thông thường.
 - Minh họa hành trình và vật phẩm dùng phong cách sticker mềm, đồng nhất với mây.
 
-## 3. Information architecture
+## 3. Inventory Figma đã quan sát
 
-Thanh điều hướng trong Figma có bốn vùng chính:
+File hiện có ba page: `Style`, `Home` và `Page 3` (Page 3 chưa có frame hiển
+thị). `Style` chứa `Color Styles`, `Mây Mascot`, `Iconos`, `Iconos large` và
+artwork `05-rabbit-cheer 1`; đây là nguồn đối chiếu token/asset dùng chung, không
+phải một màn điều hướng.
+
+Trên
+`Home` đã quan sát các nhóm onboarding (Splash, Welcome, Privacy, Name, chọn tài
+khoản và các trạng thái offline/loading), các rationale về Contacts/Microphone/
+Photos/Location/Notification, cùng nhóm Bầu trời gồm `Header - TopAppBar`,
+`Chat Bubble`, `Background`, `Weather Widget`, `Quote`, `BottomNavBar`, các
+`Container`, `Heading 3 - Chia sẻ khoảnh khắc`, `Switch` và các object ảnh
+`image 12/13/14/15/19/20/22/23`.
+
+`image 20` là lớp cảnh quan alpha; `image 22/23` là mây mascot; `image 12`,
+`image 13/14/15` và `Gemini_Generated_Image...` là sprite nhiều vật phẩm/địa
+danh. Sprite chưa đủ thông tin để gán từng dòng catalog động. Inventory này là
+những object đang có trong file, không tự biến mọi exploration thành phạm vi MVP.
+
+Khi làm từng màn, phải đối chiếu frame và layer order, opacity, gradient, radius,
+trạng thái loading/empty/error và tương tác trước khi code. Vòng hiện tại chỉ
+hoàn thiện Bầu trời; các màn khác sẽ làm tuần tự.
+
+## 4. Information architecture
+
+Thanh điều hướng trong Figma có bốn vùng nội dung và một điểm hành động trung tâm:
 
 1. **Reflect** — check-in, mood, nhiệm vụ và trạng thái hôm nay.
 2. **Journal** — danh sách, tạo và xem nhật ký/thư tương lai.
 3. **Library** — hành trình, passport, địa danh, món ăn và vật phẩm đã mở.
 4. **Profile** — hồ sơ, cài đặt, quyền riêng tư và tài khoản.
+5. **Cloud mood action** — mây ở giữa thanh dưới; nhấn giữ để chọn một trong năm
+   mood chuẩn, không tạo route mới.
 
 Tên route/domain trong code không bắt buộc giống nhãn hiển thị, nhưng navigation
 phải giữ bốn trách nhiệm này tách bạch. Journey là một phần trải nghiệm khám phá,
 không trở thành tầng điều hướng thứ năm nếu chưa có quyết định UX mới.
 
-## 4. Mood check-in
+## 5. Mood check-in
 
 Figma thể hiện mood bằng card mây có minh họa, chia ít nhất hai nhóm cảm nhận:
 
@@ -53,7 +79,7 @@ Database hiện chỉ chấp nhận năm giá trị chuẩn:
 - Không suy diễn hoặc hiển thị chẩn đoán sức khỏe tinh thần từ một lựa chọn mood.
 - Khi chưa chốt mapping sản phẩm, P0 dùng đúng năm mức chuẩn và chọn artwork phù hợp.
 
-## 5. Design system implementation
+## 6. Design system implementation
 
 Không hard-code màu, radius, spacing hoặc typography trong từng màn hình. Đặt token
 trong `lib/app/theme/`:
@@ -76,7 +102,7 @@ Tạo component dùng chung chỉ khi có từ hai use case thực tế trở l�
 Component không chứa logic gọi Supabase. Widget feature nhận state/callback từ tầng
 presentation/application.
 
-## 6. Responsive và accessibility
+## 7. Responsive và accessibility
 
 - Thiết kế trước cho điện thoại nhưng không khóa bằng kích thước frame tuyệt đối.
 - Nội dung phải hoạt động từ màn hình nhỏ đến text scale tối thiểu 200%.
@@ -87,7 +113,7 @@ presentation/application.
   screen-reader semantics.
 - Hỗ trợ Reduce Motion cho animation mây/chuyển checkpoint.
 
-## 7. Assets
+## 8. Assets
 
 Không dùng ảnh screenshot của Figma làm giao diện. Asset cần được export riêng ở
 SVG/WebP/PNG phù hợp, có tên có nghĩa, kích thước hợp lý và xác nhận quyền sử dụng.
@@ -104,7 +130,7 @@ app/assets/
   backgrounds/
 ```
 
-## 8. Bảo mật và riêng tư trong UI
+## 9. Bảo mật và riêng tư trong UI
 
 - Không hiển thị nội dung journal/mood trong notification lock screen mặc định.
 - Không đưa nội dung nhạy cảm vào route URL, analytics, crash logs hoặc debug prints.
@@ -112,7 +138,7 @@ app/assets/
 - Picker và preview media phải xử lý quyền bị từ chối, file sai loại và file quá lớn.
 - Không dùng dark pattern để xin notification/media permission hay ngăn xóa tài khoản.
 
-## 9. Kiểm thử và tiêu chí nghiệm thu
+## 10. Kiểm thử và tiêu chí nghiệm thu
 
 - Golden/widget tests cho theme, navigation và các trạng thái chính.
 - Widget test ở text scale lớn và kích thước màn hình nhỏ.
@@ -121,7 +147,7 @@ app/assets/
 - So sánh trực quan với frame Figma liên quan trong PR.
 - Không có widget presentation nào import trực tiếp `supabase_flutter`.
 
-## 10. Giới hạn và việc còn lại
+## 11. Giới hạn và việc còn lại
 
 - Cần bản export chính thức của artwork/logo/icon trước khi làm pixel-perfect.
 - Cần chốt mapping các nhãn cảm xúc phong phú sang năm enum mood trong DB.
@@ -130,7 +156,7 @@ app/assets/
 - Figma có thể chứa exploration ngoài P0; phạm vi feature theo roadmap MVP đã chốt
   được ưu tiên hơn việc triển khai tất cả frame.
 
-## 11. Tài liệu liên quan
+## 12. Tài liệu liên quan
 
 - [Quy ước dự án](../README.md)
 - [Frontend index](./README.md)

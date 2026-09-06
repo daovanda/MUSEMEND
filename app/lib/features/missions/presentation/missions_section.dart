@@ -2,11 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:musemend/app/theme/muse_colors.dart';
 import 'package:musemend/features/missions/application/mission_providers.dart';
+import 'package:musemend/features/missions/domain/mission_dashboard.dart';
 import 'package:musemend/features/missions/domain/mission_template.dart';
 import 'package:musemend/features/missions/domain/user_mission.dart';
 
 class MissionsSection extends ConsumerWidget {
-  const MissionsSection({super.key});
+  const MissionsSection({this.skyStyle = false, super.key});
+
+  /// Uses the rounded, grouped presentation from the Figma sky frame while
+  /// keeping the same server-backed mission actions and default presentation.
+  final bool skyStyle;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -44,39 +49,49 @@ class MissionsSection extends ConsumerWidget {
               (dashboard) => Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _EnergyCard(
-                    current: dashboard.energy.currentEnergy,
-                    available: dashboard.energy.availableEnergy,
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Nhiệm vụ hôm nay',
-                          style: Theme.of(context).textTheme.titleLarge,
+                  if (!skyStyle)
+                    _EnergyCard(
+                      current: dashboard.energy.currentEnergy,
+                      available: dashboard.energy.availableEnergy,
+                    ),
+                  if (!skyStyle) const SizedBox(height: 20),
+                  if (skyStyle)
+                    _SkyMissionPanel(
+                      dashboard: dashboard,
+                      onComplete: (mission) => _complete(context, ref, mission),
+                      onSkip: (mission) => _skip(context, ref, mission),
+                      onCreate: () => _showCreateCustom(context, ref),
+                    )
+                  else ...[
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Nhiệm vụ hôm nay',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                        ),
+                        Text('${dashboard.missions.length} việc'),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    if (dashboard.missions.isEmpty)
+                      const _EmptyMissions()
+                    else
+                      ...dashboard.missions.map(
+                        (mission) => _MissionCard(
+                          mission: mission,
+                          onComplete: () => _complete(context, ref, mission),
+                          onSkip: () => _skip(context, ref, mission),
                         ),
                       ),
-                      Text('${dashboard.missions.length} việc'),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  if (dashboard.missions.isEmpty)
-                    const _EmptyMissions()
-                  else
-                    ...dashboard.missions.map(
-                      (mission) => _MissionCard(
-                        mission: mission,
-                        onComplete: () => _complete(context, ref, mission),
-                        onSkip: () => _skip(context, ref, mission),
-                      ),
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      onPressed: () => _showCreateCustom(context, ref),
+                      icon: const Icon(Icons.add_rounded),
+                      label: const Text('Tự tạo nhiệm vụ mới'),
                     ),
-                  const SizedBox(height: 8),
-                  OutlinedButton.icon(
-                    onPressed: () => _showCreateCustom(context, ref),
-                    icon: const Icon(Icons.add_rounded),
-                    label: const Text('Tự tạo nhiệm vụ mới'),
-                  ),
+                  ],
                   const SizedBox(height: 24),
                   Text(
                     'Gợi ý từ Muse',
@@ -194,6 +209,168 @@ class MissionsSection extends ConsumerWidget {
   }
 }
 
+class _SkyMissionPanel extends StatelessWidget {
+  const _SkyMissionPanel({
+    required this.dashboard,
+    required this.onComplete,
+    required this.onSkip,
+    required this.onCreate,
+  });
+
+  final MissionDashboard dashboard;
+  final ValueChanged<UserMission> onComplete;
+  final ValueChanged<UserMission> onSkip;
+  final VoidCallback onCreate;
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 13),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: .62),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: Colors.white.withValues(alpha: .75)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0C000000),
+            blurRadius: 18,
+            offset: Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Chăm sóc hôm nay',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Một việc nhỏ cũng là cách cậu ở bên mình.',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                '${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')}  +',
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: MuseColors.mutedInk,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 13),
+          if (dashboard.missions.isEmpty)
+            const _EmptyMissions()
+          else
+            ...dashboard.missions.map(
+              (mission) => _SkyMissionRow(
+                mission: mission,
+                onComplete: () => onComplete(mission),
+                onSkip: () => onSkip(mission),
+              ),
+            ),
+          const SizedBox(height: 4),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: onCreate,
+              icon: const Icon(Icons.add_rounded, size: 18),
+              label: const Text('Thêm một việc dịu dàng'),
+              style: TextButton.styleFrom(
+                foregroundColor: MuseColors.ink,
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SkyMissionRow extends StatelessWidget {
+  const _SkyMissionRow({
+    required this.mission,
+    required this.onComplete,
+    required this.onSkip,
+  });
+
+  final UserMission mission;
+  final VoidCallback onComplete;
+  final VoidCallback onSkip;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: .75),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            tooltip: 'Hoàn thành',
+            onPressed: onComplete,
+            icon: const Icon(Icons.radio_button_unchecked_rounded),
+            color: MuseColors.mutedInk,
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    mission.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  if (mission.description case final description?)
+                    Text(
+                      description,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                ],
+              ),
+            ),
+          ),
+          Text(
+            '+${mission.energyReward} ⚡',
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: MuseColors.mutedInk,
+            ),
+          ),
+          IconButton(
+            tooltip: 'Bỏ qua',
+            onPressed: onSkip,
+            icon: const Icon(Icons.more_horiz_rounded),
+            color: MuseColors.mutedInk,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _EnergyCard extends StatelessWidget {
   const _EnergyCard({required this.current, required this.available});
 
@@ -264,7 +441,9 @@ class _MissionCard extends StatelessWidget {
                 children: [
                   Text(
                     mission.title,
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleMedium?.copyWith(color: MuseColors.ink),
                   ),
                   if (mission.description case final description?)
                     Text(

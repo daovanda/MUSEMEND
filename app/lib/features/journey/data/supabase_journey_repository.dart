@@ -21,7 +21,7 @@ class SupabaseJourneyRepository implements JourneyRepository {
           .single(),
       _client
           .from('provinces')
-          .select('id, name, description')
+          .select('id, name, description, cover_asset_path, map_asset_path')
           .eq('is_active', true)
           .order('order_index', ascending: true),
       _client
@@ -47,15 +47,15 @@ class SupabaseJourneyRepository implements JourneyRepository {
           .select('province_item_id, unlocked_at, is_viewed, is_equipped'),
       _client
           .from('landmarks')
-          .select('id, name, description, rarity')
+          .select('id, name, description, rarity, asset_path')
           .eq('is_active', true),
       _client
           .from('foods')
-          .select('id, name, description, rarity')
+          .select('id, name, description, rarity, asset_path')
           .eq('is_active', true),
       _client
           .from('province_items')
-          .select('id, name, description, rarity')
+          .select('id, name, description, rarity, asset_path')
           .eq('is_active', true),
     ]);
     return _mapper.fromResponses(responses);
