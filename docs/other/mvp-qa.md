@@ -22,6 +22,12 @@ Toàn bộ Flutter format/analyze/test, APK debug build, iOS Simulator build và
 database validator phải đạt trên commit phát hành nội bộ. Screenshot/build local
 nằm trong thư mục bị ignore, không chứa trong Git artifact.
 
+APK Release đầu tiên đã được CI tạo và ký tại
+[`qa-v0.1.0-1-e679e367ade5`](https://github.com/daovanda/MUSEMEND/releases/tag/qa-v0.1.0-1-e679e367ade5).
+Release artifact đã được xác minh ở pipeline; lượt nghiệm thu trên thiết bị thật
+phải ghi theo [checklist Android](./android-device-qa-acceptance.md) trước khi đổi
+trạng thái tài liệu này thành `implemented`.
+
 ## Mạng và lỗi
 
 Supabase dùng HTTP timeout 20 giây; các màn có loading/error/retry và không hiển thị
@@ -50,4 +56,5 @@ khi phần tương ứng được kiểm chứng và ký duyệt.
 5. Chờ GitHub CI xanh trên commit đã push trước khi chuyển APK cho tester.
 
 Liên quan: [Roadmap](./mvp-roadmap.md), [CI/CD](./ci-cd.md),
-[Runbook](./release-runbook.md), [Privacy/safety](./privacy-safety.md).
+[Runbook](./release-runbook.md), [Privacy/safety](./privacy-safety.md),
+[Nghiệm thu Android](./android-device-qa-acceptance.md).

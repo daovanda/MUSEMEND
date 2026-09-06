@@ -1,7 +1,7 @@
 # Cấu hình GitHub Environments
 
-**Trạng thái:** `proposed` — workflow đã tham chiếu environment nhưng cấu hình
-GitHub phải do repository owner thực hiện.  
+**Trạng thái:** `in-progress` — `development` và `android-development` đã được
+cấu hình và xác minh qua workflow; `production` chưa nghiệm thu.
 **Cập nhật:** 2026-09-06
 
 ## 1. Mục tiêu và phạm vi
@@ -91,8 +91,10 @@ không đủ.
 
 ## 7. Việc còn lại và liên kết
 
-Việc tạo environment/protection rule là thao tác ngoài Git nên tài liệu này giữ
-trạng thái `proposed` cho tới khi owner xác minh cấu hình thực tế.
+`development` và `android-development` đã được owner cấu hình; CI, deploy Dev và
+phát hành APK đã chạy thành công. Trước public release vẫn phải xác minh
+`production`, required reviewer, branch/tag restriction và khả năng từ chối một
+deployment mà không làm lộ secret.
 
 - [CI/CD](./ci-cd.md)
 - [Runbook phát hành](./release-runbook.md)
