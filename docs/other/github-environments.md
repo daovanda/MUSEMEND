@@ -42,7 +42,9 @@ Không thay publishable key bằng secret/service-role key. Hai biến repositor
 CI truyền vào Android và iOS bằng `--dart-define`; chúng không cấp quyền vượt RLS.
 
 `android-development` không cần Supabase deploy credential. Nó chỉ chứa signing
-upload key và Play service account theo [Android Internal Testing](./android-internal-testing.md).
+upload key theo [Android QA Release](./android-qa-release.md). GitHub Release dùng
+`GITHUB_TOKEN` với quyền `contents: write` trong job publish; không cần Play
+service account.
 
 ## 3. Protection rules
 

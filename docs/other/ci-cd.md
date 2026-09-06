@@ -9,10 +9,11 @@ Tài liệu này mô tả pipeline hiện có cho Flutter và Supabase. Mục ti
 hiện lỗi trước khi merge, chỉ triển khai revision đã qua CI, tách hoàn toàn Dev
 khỏi Production và không đưa credential vào repository.
 
-Phần tự động phát hành AAB lên Google Play Internal Testing đang được triển khai
-qua workflow riêng; production Play release và archive iOS lên App Store Connect
-chưa được triển khai vì còn cần signing/account/protection tương ứng. Không được
-hiểu artifact APK debug hoặc Internal Testing là bản production.
+Phần tự động phát hành APK release lên GitHub Releases đang được triển khai qua
+workflow riêng để QA không cần Google Play Console. Production Play release và
+archive iOS lên App Store Connect chưa được triển khai vì còn cần
+signing/account/protection tương ứng. Không được hiểu artifact APK debug hoặc
+GitHub Release QA là bản production.
 
 ## 2. Luồng nhánh và môi trường
 
@@ -24,7 +25,7 @@ Pull request -> CI -> review -> develop
                                |
                                v
                      Supabase Development
-                     + APK/AAB QA cho tester
+                     + APK QA cho tester
                                |
                               QA
                                |
@@ -43,8 +44,8 @@ Pull request -> CI -> review -> develop
   khi gọi thủ công.
 - `Deploy Supabase Development` tự chạy sau khi workflow `CI` của `develop`
   thành công. Lần chạy thủ công chỉ hợp lệ khi workflow được gọi từ `develop`.
-- `Distribute Android Internal Testing` tự chạy sau cùng điều kiện CI và upload
-  AAB đã ký vào track `internal`; workflow dùng Environment `android-development`.
+- `Distribute Android QA Release` tự chạy sau cùng điều kiện CI và tạo GitHub
+  prerelease chứa APK đã ký; workflow dùng Environment `android-development`.
 - `Deploy Supabase Production` chỉ có `workflow_dispatch`, bắt buộc nhập tag
   phiên bản thuộc lịch sử `main`, xác nhận QA và qua Environment `production`.
 - Không deploy production trực tiếp từ working tree, branch feature hay SHA chưa
@@ -97,10 +98,11 @@ Trước khi build, job kiểm tra hai Repository variables `SUPABASE_URL` và
 đặc quyền, quyền truy cập dữ liệu vẫn phải được giới hạn bằng RLS. Job dừng với
 tên biến bị thiếu nhưng không in giá trị cấu hình.
 
-Ngoài APK debug dùng làm fallback, workflow Android Internal Testing build AAB
-release với upload key ổn định và truyền cùng cấu hình Development. AAB chỉ được
-upload sau CI thành công; signing key và Play service account chỉ nằm trong
-GitHub Environment secrets.
+Ngoài APK debug dùng để kiểm tra nhanh, workflow Android QA Release build APK
+release với upload key ổn định, tạo checksum và truyền cùng cấu hình Development.
+APK chỉ được phát hành sau CI thành công; signing key chỉ nằm trong GitHub
+Environment secrets. Job build chỉ có `contents: read`; job tạo Release mới có
+`contents: write`.
 
 ### Flutter iOS
 
@@ -167,9 +169,10 @@ Trước khi bắt buộc workflow bằng branch protection:
 - Cần thêm test Edge Function hành vi, không chỉ lint/type-check.
 - Cần thay validator nhúng hoặc bổ sung Supabase local stack để kiểm tra cron,
   extensions và hành vi sát hosted Postgres hơn trước production.
-- Cần thiết kế pipeline signing/phát hành mobile sau khi chốt Android/iOS.
-- Cần owner cấu hình `android-development`, Play Console Internal Testing và
-  upload secrets theo [Android Internal Testing](./android-internal-testing.md).
+- Cần owner cấu hình `android-development` và upload secrets theo
+  [Android QA Release](./android-qa-release.md).
+- Có thể bổ sung Play Console Internal Testing sau này mà không đổi package ID
+  hoặc signing lineage.
 - Cần bổ sung archive iOS đã ký và phân phối TestFlight sau khi có Apple credential.
 
 ## 9. Tài liệu liên quan

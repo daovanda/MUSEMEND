@@ -1,0 +1,180 @@
+name: Distribute Android QA Release
+
+on:
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
+    branches:
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: distribute-android-qa-release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build signed Android QA APK
+    if: >-
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'develop') ||
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/develop')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: android-development
+    outputs:
+      commit_sha: ${{ steps.release.outputs.commit_sha }}
+      release_tag: ${{ steps.release.outputs.release_tag }}
+      release_version: ${{ steps.release.outputs.release_version }}
+    env:
+      APP_ENV: development
+      SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+      SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
+      MUSEMEND_ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+      MUSEMEND_ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_STORE_PASSWORD }}
+      MUSEMEND_ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+      MUSEMEND_ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
+    steps:
+      - name: Check out the CI-verified revision
+        uses: actions/checkout@v6.0.2
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          persist-credentials: false
+
+      - name: Validate distribution configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in \
+            SUPABASE_URL \
+            SUPABASE_PUBLISHABLE_KEY \
+            MUSEMEND_ANDROID_KEYSTORE_BASE64 \
+            MUSEMEND_ANDROID_STORE_PASSWORD \
+            MUSEMEND_ANDROID_KEY_ALIAS \
+            MUSEMEND_ANDROID_KEY_PASSWORD; do
+            if [[ -z "${!name:-}" ]]; then
+              echo "Missing android-development configuration: $name"
+              exit 1
+            fi
+          done
+
+      - name: Read release version
+        id: release
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          release_version="$(sed -n 's/^version:[[:space:]]*//p' pubspec.yaml | head -n 1)"
+          if [[ -z "$release_version" ]]; then
+            echo "app/pubspec.yaml must define a version before creating a QA release."
+            exit 1
+          fi
+          commit_sha="$(git rev-parse HEAD)"
+          short_sha="$(git rev-parse --short=12 HEAD)"
+          release_tag="qa-v${release_version//+/-}-${short_sha}"
+          echo "commit_sha=$commit_sha" >> "$GITHUB_OUTPUT"
+          echo "release_tag=$release_tag" >> "$GITHUB_OUTPUT"
+          echo "release_version=$release_version" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version-file: app/.fvmrc
+          cache: true
+
+      - name: Install locked Flutter dependencies
+        working-directory: app
+        run: flutter pub get --enforce-lockfile
+
+      - name: Build signed Android QA APK
+        working-directory: app
+        run: |
+          flutter build apk --release \
+            --dart-define=APP_ENV="$APP_ENV" \
+            --dart-define=SUPABASE_URL="$SUPABASE_URL" \
+            --dart-define=SUPABASE_PUBLISHABLE_KEY="$SUPABASE_PUBLISHABLE_KEY"
+
+      - name: Prepare release asset and checksum
+        working-directory: app
+        env:
+          RELEASE_TAG: ${{ steps.release.outputs.release_tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          asset_path="build/app/outputs/flutter-apk/musemend-${RELEASE_TAG}.apk"
+          cp build/app/outputs/flutter-apk/app-release.apk "$asset_path"
+          sha256sum "$asset_path" > "${asset_path}.sha256"
+
+      - name: Upload signed APK for the release job
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: musemend-android-qa-release-${{ steps.release.outputs.release_tag }}
+          path: |
+            app/build/app/outputs/flutter-apk/musemend-${{ steps.release.outputs.release_tag }}.apk
+            app/build/app/outputs/flutter-apk/musemend-${{ steps.release.outputs.release_tag }}.apk.sha256
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Publish GitHub QA Release
+    needs: build
+    if: needs.build.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Download signed APK
+        uses: actions/download-artifact@v7.0.0
+        with:
+          name: musemend-android-qa-release-${{ needs.build.outputs.release_tag }}
+          path: release-assets
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ needs.build.outputs.release_tag }}
+          RELEASE_VERSION: ${{ needs.build.outputs.release_version }}
+          COMMIT_SHA: ${{ needs.build.outputs.commit_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          notes_file="$(mktemp)"
+          trap 'rm -f "$notes_file"' EXIT
+          {
+            echo "MuseMend Android QA release ${RELEASE_VERSION}."
+            echo
+            echo "- Environment: Supabase Development"
+            echo "- Commit: ${COMMIT_SHA}"
+            echo "- Install the APK manually on an Android QA device."
+            echo "- Verify the SHA-256 checksum before installation."
+          } > "$notes_file"
+
+          gh release create "$RELEASE_TAG" \
+            release-assets/musemend-${RELEASE_TAG}.apk \
+            release-assets/musemend-${RELEASE_TAG}.apk.sha256 \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$COMMIT_SHA" \
+            --title "MuseMend Android QA ${RELEASE_VERSION}" \
+            --notes-file "$notes_file" \
+            --prerelease
+
+      - name: Write distribution summary
+        env:
+          RELEASE_TAG: ${{ needs.build.outputs.release_tag }}
+        shell: bash
+        run: |
+          {
+            echo "## Android QA GitHub Release published"
+            echo
+            echo "- Tag: ${RELEASE_TAG}"
+            echo "- Asset: signed APK"
+            echo "- Artifact retained for 7 days as a workflow handoff only"
+          } >> "$GITHUB_STEP_SUMMARY"
