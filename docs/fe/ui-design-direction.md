@@ -2,7 +2,7 @@
 
 - **Status:** in-progress
 - **Last updated:** 2026-09-07
-- **Source of reference:** [Figma — Nhật Ký Chữa Lành](https://www.figma.com/design/AhhlLUWAyvLVs7R5ZBVcQV/Nh%E1%BA%ADt-K%C3%BD-Ch%E1%BB%AFa-L%C3%A0nh?node-id=5-147&p=f)
+- **Source of reference:** [Figma — page Home](https://www.figma.com/design/AhhlLUWAyvLVs7R5ZBVcQV/Nh%E1%BA%ADt-K%C3%BD-Ch%E1%BB%AFa-L%C3%A0nh?node-id=130-25)
 
 ## 1. Mục tiêu và phạm vi
 
@@ -10,8 +10,11 @@ Tài liệu này ghi lại hướng thiết kế đã quan sát từ Figma để
 không tự tạo một ngôn ngữ thị giác khác. Figma là nguồn tham chiếu hình ảnh; hành
 vi nghiệp vụ, bảo mật và dữ liệu vẫn phải tuân theo schema/RPC cùng tài liệu kỹ thuật.
 
-Phạm vi hiện tại là design direction cho MVP, chưa phải đặc tả pixel-perfect hoặc
-cam kết rằng mọi frame trong Figma đều nằm trong P0.
+Phạm vi thiết kế hiện tại **chỉ là page `Home` trong Figma**. Các page `Style`,
+`Page 3` và mọi exploration nằm ngoài `Home` không được dùng làm nguồn chuẩn cho
+implementation trong vòng này. Việc triển khai đi lần lượt từng màn thuộc Home,
+bắt đầu từ Bầu trời; inventory đầy đủ được giữ để những màn Home còn lại không bị
+bỏ quên.
 
 ## 2. Ngôn ngữ thị giác đã quan sát
 
@@ -26,27 +29,16 @@ cam kết rằng mọi frame trong Figma đều nằm trong P0.
 
 ## 3. Inventory Figma đã quan sát
 
-File hiện có ba page: `Style`, `Home` và `Page 3` (Page 3 chưa có frame hiển
-thị). `Style` chứa `Color Styles`, `Mây Mascot`, `Iconos`, `Iconos large` và
-artwork `05-rabbit-cheer 1`; đây là nguồn đối chiếu token/asset dùng chung, không
-phải một màn điều hướng.
+Inventory chỉ lấy từ page `Home` và được ghi chi tiết tại
+[Home Figma inventory](./home-figma-inventory.md). Page này gồm các nhóm
+onboarding, rationale xin quyền, các trạng thái hệ thống và nhóm màn chính; vòng
+hiện tại triển khai frame Bầu trời trước.
 
-Trên
-`Home` đã quan sát các nhóm onboarding (Splash, Welcome, Privacy, Name, chọn tài
-khoản và các trạng thái offline/loading), các rationale về Contacts/Microphone/
-Photos/Location/Notification, cùng nhóm Bầu trời gồm `Header - TopAppBar`,
-`Chat Bubble`, `Background`, `Weather Widget`, `Quote`, `BottomNavBar`, các
-`Container`, `Heading 3 - Chia sẻ khoảnh khắc`, `Switch` và các object ảnh
-`image 12/13/14/15/19/20/22/23`.
-
-`image 20` là lớp cảnh quan alpha; `image 22/23` là mây mascot; `image 12`,
-`image 13/14/15` và `Gemini_Generated_Image...` là sprite nhiều vật phẩm/địa
-danh. Sprite chưa đủ thông tin để gán từng dòng catalog động. Inventory này là
-những object đang có trong file, không tự biến mọi exploration thành phạm vi MVP.
-
-Khi làm từng màn, phải đối chiếu frame và layer order, opacity, gradient, radius,
-trạng thái loading/empty/error và tương tác trước khi code. Vòng hiện tại chỉ
-hoàn thiện Bầu trời; các màn khác sẽ làm tuần tự.
+Trong Bầu trời, `image 20` là nền cảnh quan, `image 22` là mascot mây và năm
+object mood là artwork tĩnh dùng trong check-in. Sprite landmark/food chứa dữ liệu
+catalog động nên chỉ dùng làm tài liệu nguồn, không gắn cứng vào một trạm. Khi làm
+từng màn phải đối chiếu frame, layer order, opacity, gradient, blur, radius, trạng
+thái loading/empty/error và tương tác trước khi code.
 
 ## 4. Information architecture
 
@@ -149,8 +141,10 @@ app/assets/
 
 ## 11. Giới hạn và việc còn lại
 
-- Cần bản export chính thức của artwork/logo/icon trước khi làm pixel-perfect.
-- Cần chốt mapping các nhãn cảm xúc phong phú sang năm enum mood trong DB.
+- Artwork nền, mascot và năm mood của Bầu trời đã được export trực tiếp từ page
+  Home. Asset catalog theo tỉnh/trạm vẫn chờ export riêng và dữ liệu server.
+- Mapping năm mood Bầu trời đã chốt về enum DB; những nhãn cảm xúc khác trong các
+  frame Home tương lai phải có quyết định riêng trước khi thêm.
 - Package/bundle ID đã chốt là `com.musemend.app` cho Android và iOS.
 - Full interactive map chưa có asset/spec đủ chắc chắn; P0 dùng journey card/list.
 - Figma có thể chứa exploration ngoài P0; phạm vi feature theo roadmap MVP đã chốt
@@ -160,5 +154,6 @@ app/assets/
 
 - [Quy ước dự án](../README.md)
 - [Frontend index](./README.md)
+- [Home Figma inventory](./home-figma-inventory.md)
 - [Daily check-in và streak](../db/daily-checkins-streak.md)
 - [Journey và rewards](../db/journey-rewards.md)

@@ -47,6 +47,24 @@ từ chối không được làm mất Future Letter.
 Các mục này không chặn APK QA nội bộ, nhưng iOS/public release chưa sẵn sàng cho đến
 khi phần tương ứng được kiểm chứng và ký duyệt.
 
+## Visual QA Home/Bầu trời
+
+1. Chạy Android bằng config development không commit:
+   `flutter run -d <device> --dart-define-from-file=config/dev.json`.
+2. Đăng nhập tài khoản QA mà không lưu credential trong repo, command log hoặc
+   screenshot giao cho tester.
+3. So sánh đúng frame trên page Home: nền, fade, mascot, mood bubble, năm mood,
+   journey, mission grouping và bottom navigation.
+4. Chạm từng mood và hai nút lưu; nhấn giữ mây giữa nav; xác nhận đổi mood không
+   xóa energy/note đã lưu.
+5. Kiểm tra semantics, overflow và thao tác ở màn nhỏ/text scale lớn. Screenshot
+   cục bộ đặt dưới `app/build/visual-qa/` hoặc thư mục ignore.
+
+Emulator Medium Phone API 36 trên máy phát triển hiện báo `called unimplemented
+OpenGL ES API`. Software rendering đã cho phép chụp Home, phần nhiệm vụ và mood
+picker, nhưng emulator vẫn mất kết nối sau một số lần chạy. Đây là giới hạn môi
+trường QA; cần lặp lại trên thiết bị Android thật trước khi xác nhận pixel-perfect.
+
 ## Regression trước mỗi bản QA
 
 1. Replay migration + integration test từ database sạch.

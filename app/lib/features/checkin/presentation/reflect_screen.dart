@@ -1,3 +1,6 @@
+import 'dart:math' as math;
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,8 +8,10 @@ import 'package:musemend/app/theme/muse_colors.dart';
 import 'package:musemend/features/checkin/application/reflect_providers.dart';
 import 'package:musemend/features/checkin/application/reflect_state.dart';
 import 'package:musemend/features/checkin/domain/mood.dart';
+import 'package:musemend/features/checkin/presentation/mood_visuals.dart';
 import 'package:musemend/features/checkin/presentation/sky_scene.dart';
 import 'package:musemend/features/journey/application/journey_providers.dart';
+import 'package:musemend/features/journey/domain/journey_checkpoint.dart';
 import 'package:musemend/features/journey/domain/journey_dashboard.dart';
 import 'package:musemend/features/missions/presentation/missions_section.dart';
 
@@ -80,93 +85,152 @@ class _ReflectScreenState extends ConsumerState<ReflectScreen> {
     state.whenData(_hydrate);
 
     return DecoratedBox(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors:
-              Theme.of(context).brightness == Brightness.dark
-                  ? [
-                    Theme.of(context).colorScheme.surface,
-                    Theme.of(context).colorScheme.surfaceContainer,
-                    Theme.of(context).colorScheme.surface,
-                  ]
-                  : [MuseColors.sky, MuseColors.cream, MuseColors.mint],
+          colors: [Color(0xFFE0F2F7), Color(0xFFFBF9F5), Color(0xFFFBF9F5)],
+          stops: [0, .56, 1],
         ),
       ),
-      child: SafeArea(
-        bottom: false,
-        child: state.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error:
-              (_, _) => _ErrorView(
+      child: state.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error:
+            (_, _) => SafeArea(
+              child: _ErrorView(
                 onRetry: () => ref.invalidate(reflectControllerProvider),
               ),
-          data: (data) {
-            final selected = _selectedMood ?? data.today?.mood;
-            final journey = journeyState?.asData?.value;
-            return ListView(
-              padding: const EdgeInsets.only(bottom: 32),
-              children: [
-                _SkyHeader(streak: data.streak, energy: journey?.currentEnergy),
-                const SizedBox(
-                  height: 244,
-                  child: Stack(
-                    alignment: Alignment.topCenter,
-                    children: [
-                      Positioned.fill(child: SkyScene(height: 380)),
-                      Positioned(top: 18, child: CloudMascot()),
-                      Positioned(
-                        top: 147,
-                        child: _ChatBubble(text: 'Mây đang dịu dàng cùng cậu.'),
-                      ),
-                    ],
-                  ),
+            ),
+        data: (data) {
+          final selected = _selectedMood ?? data.today?.mood;
+          final journey = journeyState?.asData?.value;
+          final checkpoint = _currentCheckpoint(journey);
+          return ListView(
+            padding: const EdgeInsets.only(bottom: 34),
+            children: [
+              _HomeSkyHero(
+                streak: data.streak,
+                energy: journey?.currentEnergy,
+                selectedMood: selected,
+                journey: journey,
+                hasExistingCheckin: data.today != null,
+                onMoodSelected: (mood) => setState(() => _selectedMood = mood),
+                onSave: selected == null ? null : _save,
+                onSaveAndWrite: selected == null ? null : _saveAndWrite,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: MissionsSection(
+                  skyStyle: true,
+                  skyEnergyEarned: checkpoint?.earnedEnergy,
+                  skyEnergyRequired: checkpoint?.requiredEnergy,
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    children: [
-                      _MoodCheckinCard(
-                        selected: selected,
-                        hasExistingCheckin: data.today != null,
-                        onSelected:
-                            (mood) => setState(() => _selectedMood = mood),
-                        onSave: selected == null ? null : _save,
-                        onSaveAndWrite: selected == null ? null : _saveAndWrite,
-                        noteController: _noteController,
-                        energyLevel: _energyLevel,
-                        onEnergyChanged:
-                            (value) => setState(() => _energyLevel = value),
-                        onClearEnergy:
-                            () => setState(() => _energyLevel = null),
-                      ),
-                      const SizedBox(height: 20),
-                      _JourneyOverview(journey: journey),
-                      const MissionsSection(skyStyle: true),
-                      const SizedBox(height: 6),
-                      const _SkyQuoteCard(),
-                      const SizedBox(height: 24),
-                      const _ShareMoments(),
-                      const SizedBox(height: 16),
-                      const Card(
-                        child: ListTile(
-                          leading: Icon(Icons.health_and_safety_outlined),
-                          title: Text('Một khoảng dừng để tự lắng nghe'),
-                          subtitle: Text(
-                            'MuseMend hỗ trợ phản tư, không chẩn đoán và không '
-                            'thay thế chuyên gia y tế hoặc sức khỏe tâm thần.',
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 28),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 18),
+                    const _SkyQuoteCard(),
+                    const SizedBox(height: 24),
+                    const _ShareMoments(),
+                  ],
                 ),
-              ],
-            );
-          },
-        ),
+              ),
+            ],
+          );
+        },
       ),
+    );
+  }
+
+  JourneyCheckpoint? _currentCheckpoint(JourneyDashboard? journey) {
+    final id = journey?.currentCheckpointId;
+    if (id == null) return null;
+    for (final checkpoint in journey?.province?.checkpoints ?? const []) {
+      if (checkpoint.id == id) return checkpoint;
+    }
+    return null;
+  }
+}
+
+class _HomeSkyHero extends StatelessWidget {
+  const _HomeSkyHero({
+    required this.streak,
+    required this.energy,
+    required this.selectedMood,
+    required this.journey,
+    required this.hasExistingCheckin,
+    required this.onMoodSelected,
+    required this.onSave,
+    required this.onSaveAndWrite,
+  });
+
+  final int streak;
+  final int? energy;
+  final Mood? selectedMood;
+  final JourneyDashboard? journey;
+  final bool hasExistingCheckin;
+  final ValueChanged<Mood> onMoodSelected;
+  final VoidCallback? onSave;
+  final VoidCallback? onSaveAndWrite;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        const Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 560,
+          child: SkyScene(height: 560),
+        ),
+        const Positioned(
+          top: 294,
+          left: 0,
+          right: 0,
+          height: 337,
+          child: IgnorePointer(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0x00E0F2F7), Color(0xFFE0F2F7)],
+                ),
+              ),
+            ),
+          ),
+        ),
+        Column(
+          children: [
+            SafeArea(
+              bottom: false,
+              child: _SkyHeader(streak: streak, energy: energy),
+            ),
+            const SizedBox(height: 14),
+            const CloudMascot(),
+            const SizedBox(height: 11),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 29),
+              child: _MoodCheckinCard(
+                selected: selectedMood,
+                hasExistingCheckin: hasExistingCheckin,
+                onSelected: onMoodSelected,
+                onSave: onSave,
+                onSaveAndWrite: onSaveAndWrite,
+              ),
+            ),
+            const SizedBox(height: 104),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: _JourneyOverview(journey: journey),
+            ),
+            const SizedBox(height: 18),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -180,78 +244,42 @@ class _SkyHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: SizedBox(
-        height: 56,
+        height: 60,
         child: Row(
           children: [
             IconButton(
               tooltip: 'Mở menu',
               onPressed: () {},
-              icon: const Icon(Icons.menu_rounded),
+              icon: const Icon(Icons.menu_rounded, size: 20),
             ),
-            const SizedBox(width: 4),
             Text(
               'MuseMend',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-                letterSpacing: .2,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: const Color(0xFF6C9B7A),
+                fontWeight: FontWeight.w600,
+                letterSpacing: .1,
               ),
             ),
             const Spacer(),
             Semantics(
               label: '${energy ?? 0} năng lượng, streak $streak ngày',
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: .72),
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text('⚡', style: TextStyle(fontSize: 17)),
-                    const SizedBox(width: 4),
-                    Text('${energy ?? 0}'),
-                  ],
+              child: SizedBox.square(
+                dimension: 44,
+                child: IconButton(
+                  tooltip: 'Bộ sưu tập và năng lượng',
+                  onPressed: () {},
+                  icon: const Icon(
+                    Icons.card_giftcard_rounded,
+                    color: Color(0xFFF4C84A),
+                    size: 20,
+                  ),
                 ),
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _ChatBubble extends StatelessWidget {
-  const _ChatBubble({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      constraints: const BoxConstraints(minWidth: 185),
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: .72),
-        borderRadius: BorderRadius.circular(48),
-        border: Border.all(color: Colors.white.withValues(alpha: .74)),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x12000000),
-            blurRadius: 12,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Text(
-        text,
-        style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
       ),
     );
   }
@@ -264,10 +292,6 @@ class _MoodCheckinCard extends StatelessWidget {
     required this.onSelected,
     required this.onSave,
     required this.onSaveAndWrite,
-    required this.noteController,
-    required this.energyLevel,
-    required this.onEnergyChanged,
-    required this.onClearEnergy,
   });
 
   final Mood? selected;
@@ -275,167 +299,247 @@ class _MoodCheckinCard extends StatelessWidget {
   final ValueChanged<Mood> onSelected;
   final VoidCallback? onSave;
   final VoidCallback? onSaveAndWrite;
-  final TextEditingController noteController;
-  final double? energyLevel;
-  final ValueChanged<double> onEnergyChanged;
-  final VoidCallback onClearEnergy;
-
-  static const _displayLabels = {
-    Mood.awful: 'QUẠO',
-    Mood.sad: 'TRỐNG RỖNG',
-    Mood.okay: 'ỔN ÁP',
-    Mood.good: 'THƯ GIÃN',
-    Mood.great: 'CHỮA LÀNH',
-  };
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: Colors.white.withValues(alpha: .91),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 18, 16, 16),
-        child: Column(
-          children: [
-            Text(
-              'Ngày hôm nay có dịu dàng với cậu không?',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 3,
-              runSpacing: 4,
-              children: [
-                for (final mood in Mood.values)
-                  _MoodOption(
-                    mood: mood,
-                    label: _displayLabels[mood]!,
-                    selected: mood == selected,
-                    onTap: () => onSelected(mood),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            ExpansionTile(
-              tilePadding: EdgeInsets.zero,
-              childrenPadding: EdgeInsets.zero,
-              title: const Text('Ghi lại thêm một chút (không bắt buộc)'),
-              subtitle: Text(
-                energyLevel == null
-                    ? 'Năng lượng và ghi chú'
-                    : 'Năng lượng ${energyLevel!.round()}/5',
-              ),
-              children: [
-                TextField(
-                  controller: noteController,
-                  minLines: 2,
-                  maxLines: 4,
-                  maxLength: 500,
-                  decoration: const InputDecoration(
-                    labelText: 'Một dòng cho hôm nay',
-                    alignLabelWithHint: true,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(48),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
+          width: 332,
+          constraints: const BoxConstraints(minHeight: 179),
+          padding: const EdgeInsets.fromLTRB(25, 17, 25, 8),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: .60),
+            borderRadius: BorderRadius.circular(48),
+            border: Border.all(color: Colors.white.withValues(alpha: .50)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(
+                height: 18,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    'Ngày hôm nay có dịu dàng với cậu không?',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Color(0xFF565C5E),
+                      fontSize: 11,
+                      height: 1.25,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-                Row(
-                  children: [
-                    const Icon(Icons.battery_5_bar_rounded),
-                    Expanded(
-                      child: Slider(
-                        value: energyLevel ?? 3,
-                        min: 1,
-                        max: 5,
-                        divisions: 4,
-                        label: '${(energyLevel ?? 3).round()}/5',
-                        onChanged: onEnergyChanged,
-                      ),
+              ),
+              const SizedBox(height: 7),
+              SizedBox(
+                height: 93,
+                width: double.infinity,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: SizedBox(
+                    width: 268,
+                    height: 93,
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        for (final mood in _homeMoodOrder)
+                          _MoodOption(
+                            mood: mood,
+                            selected: mood == selected,
+                            onTap: () => onSelected(mood),
+                          ),
+                      ],
                     ),
-                    IconButton(
-                      tooltip: 'Bỏ chọn năng lượng',
-                      onPressed: energyLevel == null ? null : onClearEnergy,
-                      icon: const Icon(Icons.close_rounded),
-                    ),
-                  ],
+                  ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _MoodActionButton(
+                    width: 91,
+                    label: 'LƯU NHANH',
+                    semanticLabel:
+                        hasExistingCheckin
+                            ? 'Cập nhật check-in hôm nay'
+                            : 'Lưu nhanh check-in hôm nay',
                     onPressed: onSave,
-                    child: Text(hasExistingCheckin ? 'CẬP NHẬT' : 'LƯU NHANH'),
                   ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: FilledButton(
+                  const SizedBox(width: 7),
+                  _MoodActionButton(
+                    width: 137,
+                    label: 'LƯU VÀ VIẾT TÂM TƯ',
                     onPressed: onSaveAndWrite,
-                    child: const Text('VIẾT TÂM TÌNH'),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
+const _homeMoodOrder = [Mood.awful, Mood.sad, Mood.okay, Mood.good, Mood.great];
+
 class _MoodOption extends StatelessWidget {
   const _MoodOption({
     required this.mood,
-    required this.label,
     required this.selected,
     required this.onTap,
   });
 
   final Mood mood;
-  final String label;
   final bool selected;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      selected: selected,
-      label: '$label, ${mood.label}',
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 160),
-          width: 58,
-          padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 3),
-          decoration: BoxDecoration(
-            color: selected ? MuseColors.lavender : const Color(0xFFF9F7F1),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: selected ? MuseColors.coral : Colors.transparent,
-              width: 1.5,
-            ),
-          ),
-          child: Column(
-            children: [
-              Text(mood.symbol, style: const TextStyle(fontSize: 25)),
-              const SizedBox(height: 3),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                style: TextStyle(
-                  fontSize: 8,
-                  fontWeight: FontWeight.w700,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+    final visual = mood.visual;
+    final top = (93 - visual.height) / 2;
+    return Positioned(
+      left: visual.left,
+      top: top,
+      width: visual.width,
+      height: visual.height,
+      child: Transform.rotate(
+        angle: visual.rotationDegrees * math.pi / 180,
+        child: Semantics(
+          button: true,
+          selected: selected,
+          label: visual.label,
+          excludeSemantics: true,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(16),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                curve: Curves.easeOutCubic,
+                decoration: BoxDecoration(
+                  color: visual.backgroundColor,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color:
+                        selected ? const Color(0xFF6E8E92) : Colors.transparent,
+                    width: selected ? 1.3 : 0,
+                  ),
+                  boxShadow:
+                      selected
+                          ? const [
+                            BoxShadow(
+                              color: Color(0x1F366672),
+                              blurRadius: 8,
+                              offset: Offset(0, 2),
+                            ),
+                          ]
+                          : null,
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 3),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      visual.assetPath,
+                      cacheWidth: 128,
+                      width: visual.imageSize,
+                      height: visual.imageSize,
+                      fit: BoxFit.contain,
+                    ),
+                    const SizedBox(height: 1),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        visual.label,
+                        maxLines: 1,
+                        style: const TextStyle(
+                          color: Color(0xFF5B6163),
+                          fontSize: 6.8,
+                          height: 1,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MoodActionButton extends StatelessWidget {
+  const _MoodActionButton({
+    required this.width,
+    required this.label,
+    required this.onPressed,
+    this.semanticLabel,
+  });
+
+  final double width;
+  final String label;
+  final String? semanticLabel;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      enabled: onPressed != null,
+      label: semanticLabel ?? label,
+      excludeSemantics: true,
+      child: AnimatedOpacity(
+        opacity: onPressed == null ? .48 : 1,
+        duration: const Duration(milliseconds: 160),
+        child: Container(
+          width: width,
+          height: 36,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFFD4E2C7), Color(0x99E9F1E3), Color(0x33FFFFFF)],
+            ),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: Colors.white.withValues(alpha: .80)),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x0D000000),
+                blurRadius: 2,
+                offset: Offset(0, 1),
+              ),
             ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onPressed,
+              borderRadius: BorderRadius.circular(999),
+              child: Center(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Text(
+                      label,
+                      style: const TextStyle(
+                        color: Color(0xFF596868),
+                        fontSize: 7.2,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: .1,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -452,72 +556,99 @@ class _JourneyOverview extends StatelessWidget {
   Widget build(BuildContext context) {
     final province = journey?.province;
     final checkpoints = province?.checkpoints ?? const [];
-    return Card(
-      color: const Color(0xFFFFF4DC).withValues(alpha: .92),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(18, 16, 18, 15),
+    var currentNumber =
+        (checkpoints.where((checkpoint) => checkpoint.isCompleted).length + 1)
+            .clamp(1, checkpoints.isEmpty ? 1 : checkpoints.length);
+    for (final checkpoint in checkpoints) {
+      if (checkpoint.isCurrent) {
+        currentNumber = checkpoint.number;
+        break;
+      }
+    }
+    return Semantics(
+      label:
+          'Hành trình Việt Nam, trạm $currentNumber trên ${checkpoints.length}',
+      child: SizedBox(
+        height: 142,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(
+                const Text(
                   'VIỆT NAM',
                   style: TextStyle(
-                    letterSpacing: 1.3,
-                    fontSize: 12,
+                    color: Color(0xFF343B3D),
+                    fontSize: 16,
+                    height: 1,
                     fontWeight: FontWeight.w800,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    letterSpacing: .2,
                   ),
                 ),
                 const Spacer(),
-                Text('${province?.completionPercent ?? 0}%'),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              province?.name ?? 'Hành trình của bạn',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            Text(
-              province?.description ??
-                  'Mỗi bước nhỏ là một lần trở về với mình.',
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 13),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: LinearProgressIndicator(
-                minHeight: 8,
-                value: (province?.completionPercent ?? 0) / 100,
-                backgroundColor: Colors.white.withValues(alpha: .75),
-                color: MuseColors.coral,
-              ),
-            ),
-            const SizedBox(height: 13),
-            Row(
-              children: [
-                for (final checkpoint in checkpoints.take(5))
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 2),
-                      child: _CheckpointDot(
-                        number: checkpoint.number,
-                        completed: checkpoint.isCompleted,
-                        current: checkpoint.isCurrent,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    const Text(
+                      'Trạm',
+                      style: TextStyle(
+                        color: Color(0xFF697173),
+                        fontSize: 9,
+                        height: 1,
                       ),
                     ),
-                  ),
+                    Text(
+                      checkpoints.isEmpty
+                          ? '--/--'
+                          : '$currentNumber/${checkpoints.length}',
+                      style: const TextStyle(
+                        color: Color(0xFF535D5F),
+                        fontSize: 12,
+                        height: 1.15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
-            if (journey != null) ...[
-              const SizedBox(height: 12),
-              Text(
-                '${journey!.availableEnergy} năng lượng sẵn sàng · ${journey!.journeyEnergyUsed} đã dùng cho hành trình',
-                style: Theme.of(context).textTheme.bodySmall,
+            const SizedBox(height: 12),
+            if (checkpoints.isEmpty)
+              const Expanded(
+                child: Center(
+                  child: Text(
+                    'Hành trình sẽ xuất hiện khi dữ liệu trạm sẵn sàng.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 11, color: Color(0xFF697173)),
+                  ),
+                ),
+              )
+            else
+              Expanded(
+                child: Stack(
+                  alignment: Alignment.topCenter,
+                  children: [
+                    Positioned(
+                      top: 23,
+                      left: 24,
+                      right: 24,
+                      child: Container(
+                        height: 1,
+                        color: Colors.white.withValues(alpha: .76),
+                      ),
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (final checkpoint in checkpoints.take(5))
+                          Expanded(
+                            child: _CheckpointDot(checkpoint: checkpoint),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ],
           ],
         ),
       ),
@@ -526,42 +657,53 @@ class _JourneyOverview extends StatelessWidget {
 }
 
 class _CheckpointDot extends StatelessWidget {
-  const _CheckpointDot({
-    required this.number,
-    required this.completed,
-    required this.current,
-  });
+  const _CheckpointDot({required this.checkpoint});
 
-  final int number;
-  final bool completed;
-  final bool current;
+  final JourneyCheckpoint checkpoint;
 
   @override
   Widget build(BuildContext context) {
-    final color =
-        completed
-            ? MuseColors.coral
-            : current
-            ? MuseColors.lavender
-            : Colors.white;
-    return Container(
-      height: 36,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: MuseColors.coral.withValues(alpha: .35)),
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        '$number',
-        style: TextStyle(
-          fontWeight: FontWeight.w800,
-          color:
-              completed
-                  ? Colors.white
-                  : Theme.of(context).colorScheme.onSurface,
+    final active = checkpoint.isCurrent || checkpoint.isCompleted;
+    return Column(
+      children: [
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          width: 46,
+          height: 46,
+          decoration: BoxDecoration(
+            color:
+                active
+                    ? Colors.white.withValues(alpha: .86)
+                    : Colors.white.withValues(alpha: .48),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color:
+                  checkpoint.isCurrent
+                      ? const Color(0xFF6C9B7A)
+                      : Colors.white.withValues(alpha: .68),
+            ),
+          ),
+          child: Icon(
+            checkpoint.isCompleted
+                ? Icons.check_rounded
+                : Icons.landscape_outlined,
+            size: 21,
+            color: active ? const Color(0xFF5B7675) : const Color(0xFF9BA4A4),
+          ),
         ),
-      ),
+        const SizedBox(height: 4),
+        Text(
+          checkpoint.title,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: Color(0xFF626B6D),
+            fontSize: 7,
+            height: 1.1,
+          ),
+        ),
+      ],
     );
   }
 }

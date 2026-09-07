@@ -25,16 +25,21 @@ assets/
   backgrounds/
   icons/
   illustrations/clouds/
+  illustrations/clouds/moods/
   illustrations/journey/
 ```
 
 Asset đã export:
 
 - `illustrations/clouds/mascot-cloud.png`: Figma `image 22`, dùng ở màn Bầu trời.
+- `illustrations/clouds/moods/{awful,sad,okay,good,great}.png`: năm biểu cảm
+  Home/Bầu trời, ánh xạ lần lượt tới `QUẠO`, `TRỐNG RỖNG`, `ỔN ÁP`, `THƯ GIÃN`,
+  `CHỮA LÀNH`.
 - `illustrations/journey/sky-background.png`: Figma `image 20`, cảnh quan alpha
-  (hills/river/clouds) đặt trên gradient của màn Bầu trời.
+  (sky/hills/river/clouds) phủ phần đầu màn Bầu trời.
 - `illustrations/journey/sky-collection-sprite.png`: Figma `image 13/14/15`,
-  sprite trang trí; chưa dùng làm asset catalog vì không thể suy ra từng item.
+  sprite tham chiếu nhiều landmark/food; không render như dữ liệu catalog vì
+  không thể suy ra từng item và không khai báo trong `pubspec.yaml`.
 
 Khi thêm thư mục/file, cập nhật `pubspec.yaml`, manifest trong tài liệu frontend
 và kiểm thử màn hình dùng asset đó.

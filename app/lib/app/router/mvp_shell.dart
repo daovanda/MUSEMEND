@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:musemend/app/theme/muse_colors.dart';
-import 'package:musemend/features/checkin/domain/mood.dart';
 import 'package:musemend/features/checkin/application/reflect_providers.dart';
+import 'package:musemend/features/checkin/domain/mood.dart';
+import 'package:musemend/features/checkin/presentation/mood_visuals.dart';
 import 'package:musemend/features/notifications/application/notification_providers.dart';
 
 class MvpShell extends ConsumerStatefulWidget {
@@ -67,7 +68,7 @@ class _MvpShellState extends ConsumerState<MvpShell>
         onMoodSelected: (mood) async {
           final saved = await ref
               .read(reflectControllerProvider.notifier)
-              .save(mood: mood, energyLevel: null, note: null);
+              .updateMood(mood);
           if (!context.mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -91,7 +92,7 @@ class _MuseBottomNavigation extends StatelessWidget {
   });
 
   final StatefulNavigationShell shell;
-  final ValueChanged<Mood> onMoodSelected;
+  final Future<void> Function(Mood mood) onMoodSelected;
 
   static const _items = [
     (Icons.cloud_outlined, 'Bầu trời'),
@@ -107,27 +108,43 @@ class _MuseBottomNavigation extends StatelessWidget {
       color: Colors.transparent,
       child: SafeArea(
         top: false,
-        child: Container(
-          height: 93,
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: .88),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-            border: Border.all(
-              color: const Color(0xFFE3E3DC).withValues(alpha: .65),
-            ),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x0D000000),
-                blurRadius: 20,
-                offset: Offset(0, -4),
-              ),
-            ],
-          ),
-          child: Row(
+        child: SizedBox(
+          height: 76,
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.topCenter,
             children: [
-              for (var index = 0; index < 2; index++)
-                Expanded(child: _item(index, selected)),
-              Expanded(
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: .91),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(26),
+                    ),
+                    border: Border.all(
+                      color: const Color(0xFFE3E3DC).withValues(alpha: .55),
+                    ),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x0D000000),
+                        blurRadius: 20,
+                        offset: Offset(0, -4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      for (var index = 0; index < 2; index++)
+                        Expanded(child: _item(index, selected)),
+                      const Expanded(child: SizedBox()),
+                      for (var index = 2; index < _items.length; index++)
+                        Expanded(child: _item(index, selected)),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                top: -19,
                 child: _MoodCloudButton(
                   onMoodSelected: onMoodSelected,
                   onTap:
@@ -137,8 +154,6 @@ class _MuseBottomNavigation extends StatelessWidget {
                       ),
                 ),
               ),
-              for (var index = 2; index < _items.length; index++)
-                Expanded(child: _item(index, selected)),
             ],
           ),
         ),
@@ -163,7 +178,7 @@ class _MuseBottomNavigation extends StatelessWidget {
 class _MoodCloudButton extends StatefulWidget {
   const _MoodCloudButton({required this.onMoodSelected, required this.onTap});
 
-  final ValueChanged<Mood> onMoodSelected;
+  final Future<void> Function(Mood mood) onMoodSelected;
   final VoidCallback onTap;
 
   @override
@@ -172,6 +187,7 @@ class _MoodCloudButton extends StatefulWidget {
 
 class _MoodCloudButtonState extends State<_MoodCloudButton> {
   bool _pressed = false;
+  bool _saving = false;
 
   Future<void> _showMoodPicker() async {
     final mood = await showModalBottomSheet<Mood>(
@@ -212,7 +228,13 @@ class _MoodCloudButtonState extends State<_MoodCloudButton> {
             ),
           ),
     );
-    if (mood != null && mounted) widget.onMoodSelected(mood);
+    if (mood == null || !mounted) return;
+    setState(() => _saving = true);
+    try {
+      await widget.onMoodSelected(mood);
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   @override
@@ -224,40 +246,41 @@ class _MoodCloudButtonState extends State<_MoodCloudButton> {
         onTapDown: (_) => setState(() => _pressed = true),
         onTapUp: (_) => setState(() => _pressed = false),
         onTapCancel: () => setState(() => _pressed = false),
-        onTap: widget.onTap,
-        onLongPress: _showMoodPicker,
+        onTap: _saving ? null : widget.onTap,
+        onLongPress: _saving ? null : _showMoodPicker,
         child: AnimatedScale(
           scale: _pressed ? .9 : 1,
           duration: const Duration(milliseconds: 140),
           curve: Curves.easeOutCubic,
           child: Container(
-            width: 62,
-            height: 62,
+            width: 56,
+            height: 56,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFF5F929A),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: .82),
-                width: 4,
-              ),
+              color: const Color(0xFF366672),
               boxShadow: const [
                 BoxShadow(
-                  color: Color(0x22000000),
-                  blurRadius: 14,
-                  offset: Offset(0, 5),
+                  color: Color(0x24000000),
+                  blurRadius: 9,
+                  offset: Offset(0, 4),
                 ),
               ],
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(11),
-              child: Image.asset(
-                'assets/illustrations/clouds/mascot-cloud.png',
-                fit: BoxFit.contain,
-                errorBuilder:
-                    (context, error, stackTrace) =>
-                        const Icon(Icons.cloud, color: Colors.white),
-              ),
-            ),
+            alignment: Alignment.center,
+            child:
+                _saving
+                    ? const SizedBox.square(
+                      dimension: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Color(0xFFEFFBFF),
+                      ),
+                    )
+                    : const SizedBox(
+                      width: 27.5,
+                      height: 20,
+                      child: CustomPaint(painter: _CloudOutlinePainter()),
+                    ),
           ),
         ),
       ),
@@ -273,9 +296,11 @@ class _MoodPickerOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final visual = mood.visual;
     return Semantics(
       button: true,
-      label: mood.label,
+      label: visual.label,
+      excludeSemantics: true,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(18),
@@ -283,10 +308,18 @@ class _MoodPickerOption extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
           child: Column(
             children: [
-              Text(mood.symbol, style: const TextStyle(fontSize: 28)),
+              SizedBox(
+                width: 42,
+                height: 36,
+                child: Image.asset(
+                  visual.assetPath,
+                  cacheWidth: 128,
+                  fit: BoxFit.contain,
+                ),
+              ),
               const SizedBox(height: 4),
               Text(
-                mood.label,
+                visual.label,
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 style: const TextStyle(
@@ -300,6 +333,61 @@ class _MoodPickerOption extends StatelessWidget {
       ),
     );
   }
+}
+
+class _CloudOutlinePainter extends CustomPainter {
+  const _CloudOutlinePainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint =
+        Paint()
+          ..color = const Color(0xFFEFFBFF)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.7
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round;
+    final path =
+        Path()
+          ..moveTo(size.width * .20, size.height * .82)
+          ..cubicTo(
+            size.width * .05,
+            size.height * .82,
+            size.width * .02,
+            size.height * .58,
+            size.width * .17,
+            size.height * .48,
+          )
+          ..cubicTo(
+            size.width * .18,
+            size.height * .24,
+            size.width * .39,
+            size.height * .12,
+            size.width * .55,
+            size.height * .30,
+          )
+          ..cubicTo(
+            size.width * .69,
+            size.height * .19,
+            size.width * .87,
+            size.height * .32,
+            size.width * .87,
+            size.height * .50,
+          )
+          ..cubicTo(
+            size.width * 1.02,
+            size.height * .58,
+            size.width * .96,
+            size.height * .82,
+            size.width * .81,
+            size.height * .82,
+          )
+          ..close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _CloudOutlinePainter oldDelegate) => false;
 }
 
 class _NavItem extends StatelessWidget {

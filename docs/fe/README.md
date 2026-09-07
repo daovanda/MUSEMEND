@@ -10,6 +10,7 @@ accessibility, bảo mật dữ liệu trên thiết bị và kiểm thử.
 ## Features
 
 - [UI/UX direction từ Figma](./ui-design-direction.md) — in-progress
+- [Home Figma inventory](./home-figma-inventory.md) — in-progress
 - [Frontend asset manifest](./assets.md) — in-progress
 - [Application foundation](./application-foundation.md) — implemented
 - [Authentication](./authentication.md) — in-progress
