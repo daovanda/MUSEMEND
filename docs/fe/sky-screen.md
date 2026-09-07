@@ -27,7 +27,9 @@ tiến độ vẫn do RPC/database xác định; các con số hiển thị ch�
 
 - `SkyScene` hiển thị trực tiếp export `sky-background.png` trong vùng tỷ lệ
   `390×560`; painter code-native là fallback. `CloudMascot` dùng
-  `mascot-cloud.png` ở tỷ lệ `145×97`.
+  `mascot-cloud.png` ở tỷ lệ `145×97`, bồng bềnh dọc tối đa `3dp` theo chu kỳ
+  `4s` để tạo cảm giác nhẹ nhàng mà không làm xê dịch layout. Animation tự dừng
+  khi hệ điều hành bật `disableAnimations`.
 - Logo `MuseMend` ở header dùng `ShaderMask` với gradient ngang xanh teal →
   xanh lá nhạt, giữ chữ là text để sắc nét ở mọi mật độ màn hình.
 - Mood bubble rộng `332`, tối thiểu cao `179`, radius `48`, white 60%, border

@@ -29,28 +29,78 @@ class SkyScene extends StatelessWidget {
   }
 }
 
-class CloudMascot extends StatelessWidget {
+class CloudMascot extends StatefulWidget {
   const CloudMascot({super.key, this.mood});
 
   final String? mood;
 
   @override
+  State<CloudMascot> createState() => _CloudMascotState();
+}
+
+class _CloudMascotState extends State<CloudMascot>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _float;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 4000),
+    );
+    _float = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final reduceMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    if (reduceMotion) {
+      _controller.stop();
+    } else if (!_controller.isAnimating) {
+      _controller.repeat(reverse: true);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: mood == null ? 'Linh vật mây của MuseMend' : 'Mây đang đồng hành',
+      label:
+          widget.mood == null
+              ? 'Linh vật mây của MuseMend'
+              : 'Mây đang đồng hành',
       image: true,
-      child: Image.asset(
-        'assets/illustrations/clouds/mascot-cloud.png',
-        cacheWidth: 512,
-        width: 145,
-        height: 97,
-        fit: BoxFit.contain,
-        errorBuilder:
-            (context, error, stackTrace) => const SizedBox(
-              width: 145,
-              height: 97,
-              child: Icon(Icons.cloud, size: 72),
-            ),
+      child: AnimatedBuilder(
+        animation: _float,
+        builder: (context, child) {
+          return Transform.translate(
+            // Keep the motion deliberately small so it feels like breathing,
+            // not a moving layout element over the check-in card.
+            offset: Offset(0, -3 * _float.value),
+            child: child,
+          );
+        },
+        child: Image.asset(
+          'assets/illustrations/clouds/mascot-cloud.png',
+          cacheWidth: 512,
+          width: 145,
+          height: 97,
+          fit: BoxFit.contain,
+          errorBuilder:
+              (context, error, stackTrace) => const SizedBox(
+                width: 145,
+                height: 97,
+                child: Icon(Icons.cloud, size: 72),
+              ),
+        ),
       ),
     );
   }
