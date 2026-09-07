@@ -38,7 +38,7 @@ Frame gốc rộng `390`, cao `1741`, nền dọc `#E0F2F7 → #FBF9F5 → #FBF9
 | Thành phần | Node | Kích thước/vị trí theo frame | Quy tắc |
 | --- | --- | --- | --- |
 | Nền trời/cảnh quan | `image 20` (`58:184`) | `390×560`, top `0` | asset tĩnh, phủ ngang màn |
-| Mascot mây | `image 22` (`118:41`) | `145×97`, left `122`, top `98` | asset tĩnh |
+| Mascot mây | `image 23` (`174:44`) | `145×97`, left `122`, top `98` | asset tĩnh |
 | Mood bubble | `85:559` | `332×179`, left `29`, top `206`, radius `48` | white 60%, border white 50%, background blur `12` |
 | Mood selector | `85:567` | `268×93`, left `32`, top `42` trong bubble | 5 mood tĩnh, xếp chồng có rotation |
 | Journey | `74:611` | `360×142`, left `16`, top `489` | tỉnh/trạm/checkpoint là dữ liệu động |
@@ -67,8 +67,10 @@ Hai nút mood dùng radius pill, border white 80%, shadow đen 5%; gradient từ
 
 - nền Bầu trời;
 - mascot mây;
+- cloud phụ từ `image 12` (`57:21`) được export sẵn, chờ xác nhận vị trí dùng;
 - năm biểu cảm mood;
-- icon mây ở bottom navigation được vẽ code-native.
+- icon mây ở bottom navigation được vẽ code-native (đúng node `195:289`); không
+  thay bằng cloud phụ nếu chưa có xác nhận layer tương ứng.
 
 Không hardcode theo ảnh Figma:
 

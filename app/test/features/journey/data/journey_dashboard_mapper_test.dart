@@ -53,6 +53,7 @@ void main() {
           'title': 'Trạm 2',
           'description': null,
           'required_energy': 10,
+          'asset_path': 'https://jpoktrdyehalxkhdhkzu.supabase.co/storage/v1/object/public/catalog/ha-noi-tram-2.png',
         },
         {
           'id': 10,
@@ -61,6 +62,7 @@ void main() {
           'title': 'Trạm 1',
           'description': null,
           'required_energy': 10,
+          'asset_path': 'assets/illustrations/journey/checkpoint-1.png',
         },
       ],
       [
@@ -93,6 +95,10 @@ void main() {
     );
     expect(dashboard.province?.checkpoints.first.earnedEnergy, 5);
     expect(dashboard.province?.checkpoints.first.progress, 0.5);
+    expect(
+      dashboard.province?.checkpoints.first.assetPath,
+      'assets/illustrations/journey/checkpoint-1.png',
+    );
     expect(dashboard.collectibles.single.kind, CollectibleKind.landmark);
     expect(dashboard.collectibles.single.name, 'Hồ Gươm');
   });

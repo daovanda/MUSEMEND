@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:musemend/app/theme/muse_colors.dart';
+import 'package:musemend/core/presentation/catalog_artwork.dart';
 import 'package:musemend/features/checkin/application/reflect_providers.dart';
 import 'package:musemend/features/checkin/application/reflect_state.dart';
 import 'package:musemend/features/checkin/domain/mood.dart';
@@ -124,6 +125,8 @@ class _ReflectScreenState extends ConsumerState<ReflectScreen> {
                   skyStyle: true,
                   skyEnergyEarned: checkpoint?.earnedEnergy,
                   skyEnergyRequired: checkpoint?.requiredEnergy,
+                  skyArtworkPath:
+                      checkpoint?.assetPath ?? journey?.province?.coverAssetPath,
                 ),
               ),
               Padding(
@@ -683,13 +686,30 @@ class _CheckpointDot extends StatelessWidget {
                       : Colors.white.withValues(alpha: .68),
             ),
           ),
-          child: Icon(
-            checkpoint.isCompleted
-                ? Icons.check_rounded
-                : Icons.landscape_outlined,
-            size: 21,
-            color: active ? const Color(0xFF5B7675) : const Color(0xFF9BA4A4),
-          ),
+          child:
+              checkpoint.isCompleted
+                  ? Icon(
+                    Icons.check_rounded,
+                    size: 21,
+                    color:
+                        active
+                            ? const Color(0xFF5B7675)
+                            : const Color(0xFF9BA4A4),
+                  )
+                  : CatalogArtwork(
+                    assetPath: checkpoint.assetPath,
+                    width: 36,
+                    height: 36,
+                    semanticLabel: checkpoint.title,
+                    placeholder: Icon(
+                      Icons.landscape_outlined,
+                      size: 21,
+                      color:
+                          active
+                              ? const Color(0xFF5B7675)
+                              : const Color(0xFF9BA4A4),
+                    ),
+                  ),
         ),
         const SizedBox(height: 4),
         Text(

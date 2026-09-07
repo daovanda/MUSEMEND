@@ -28,7 +28,7 @@ class SupabaseJourneyRepository implements JourneyRepository {
           .from('province_checkpoints')
           .select(
             'id, province_id, checkpoint_number, title, description, '
-            'required_energy',
+            'required_energy, asset_path',
           )
           .eq('is_active', true)
           .order('order_index', ascending: true),

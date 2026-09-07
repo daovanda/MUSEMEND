@@ -33,7 +33,9 @@ tiến độ vẫn do RPC/database xác định; các con số hiển thị ch�
   `TRỐNG RỖNG`, `ỔN ÁP`, `THƯ GIÃN`, `CHỮA LÀNH` về đúng enum DB.
 - `LƯU NHANH` lưu check-in; `LƯU VÀ VIẾT TÂM TƯ` lưu rồi mở `/journal`.
 - Journey hiển thị tỉnh, trạm và tối đa năm checkpoint từ `JourneyDashboard`;
-  không dùng sprite cố định thay cho dữ liệu hiện tại.
+  `province_checkpoints.asset_path` được truyền tới `CatalogArtwork` khi đã có
+  export được duyệt, còn `NULL` dùng placeholder. Không dùng sprite cố định thay
+  cho dữ liệu hiện tại.
 - Mission nằm trên panel gradient xanh nhạt sang tím nhạt, nhóm theo `Buổi sáng`, `Bất kỳ lúc nào`,
   `Buổi chiều`, `Buổi tối` từ `dueAt` ở UTC+7. Tiến độ cạnh sticker là
   `earned_energy/required_energy` của checkpoint hiện tại.

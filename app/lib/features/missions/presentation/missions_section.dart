@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:musemend/app/theme/muse_colors.dart';
+import 'package:musemend/core/presentation/catalog_artwork.dart';
 import 'package:musemend/features/missions/application/mission_providers.dart';
 import 'package:musemend/features/missions/domain/mission_dashboard.dart';
 import 'package:musemend/features/missions/domain/mission_template.dart';
@@ -11,6 +12,7 @@ class MissionsSection extends ConsumerWidget {
     this.skyStyle = false,
     this.skyEnergyEarned,
     this.skyEnergyRequired,
+    this.skyArtworkPath,
     super.key,
   });
 
@@ -19,6 +21,7 @@ class MissionsSection extends ConsumerWidget {
   final bool skyStyle;
   final int? skyEnergyEarned;
   final int? skyEnergyRequired;
+  final String? skyArtworkPath;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -83,6 +86,7 @@ class MissionsSection extends ConsumerWidget {
                         dashboard: dashboard,
                         energyEarned: skyEnergyEarned,
                         energyRequired: skyEnergyRequired,
+                        artworkPath: skyArtworkPath,
                         onComplete:
                             (mission) => _complete(context, ref, mission),
                         onSkip: (mission) => _skip(context, ref, mission),
@@ -243,6 +247,7 @@ class _SkyMissionPanel extends StatelessWidget {
     required this.dashboard,
     required this.energyEarned,
     required this.energyRequired,
+    required this.artworkPath,
     required this.onComplete,
     required this.onSkip,
     required this.onCreate,
@@ -251,6 +256,7 @@ class _SkyMissionPanel extends StatelessWidget {
   final MissionDashboard dashboard;
   final int? energyEarned;
   final int? energyRequired;
+  final String? artworkPath;
   final ValueChanged<UserMission> onComplete;
   final ValueChanged<UserMission> onSkip;
   final VoidCallback onCreate;
@@ -303,10 +309,10 @@ class _SkyMissionPanel extends StatelessWidget {
                   ),
                 ),
               ),
-              const Positioned(
+              Positioned(
                 top: 0,
                 right: 4,
-                child: _DynamicStickerPlaceholder(),
+                child: _DynamicStickerPlaceholder(assetPath: artworkPath),
               ),
               Positioned(
                 right: 1,
@@ -366,7 +372,9 @@ const _missionPeriodLabels = <_MissionPeriod, String>{
 };
 
 class _DynamicStickerPlaceholder extends StatelessWidget {
-  const _DynamicStickerPlaceholder();
+  const _DynamicStickerPlaceholder({this.assetPath});
+
+  final String? assetPath;
 
   @override
   Widget build(BuildContext context) {
@@ -386,10 +394,15 @@ class _DynamicStickerPlaceholder extends StatelessWidget {
           ),
         ),
         alignment: Alignment.center,
-        child: const Icon(
-          Icons.landscape_rounded,
-          size: 62,
-          color: Color(0xFF72958B),
+        child: CatalogArtwork(
+          assetPath: assetPath,
+          width: 76,
+          height: 66,
+          placeholder: Icon(
+            Icons.landscape_rounded,
+            size: 62,
+            color: const Color(0xFF72958B).withValues(alpha: .85),
+          ),
         ),
       ),
     );

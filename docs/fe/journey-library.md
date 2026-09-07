@@ -14,10 +14,12 @@ Tab Library đọc dashboard hành trình của user đang đăng nhập và hi�
 - thao tác bắt đầu hành trình/đến tỉnh tiếp theo và đồng bộ tiến độ.
 
 Màn hình hỗ trợ pull-to-refresh, loading, lỗi có thể thử lại và trạng thái rỗng.
-Asset của catalog MVP chưa có nên hiện dùng icon Material thay thế. Repository đã
-map `asset_path` của landmark/food/item cùng `cover_asset_path` và
-`map_asset_path` của province để có thể thay placeholder khi content được publish;
+Asset của catalog MVP chưa có nên hiện dùng placeholder có kiểm soát. Repository
+map `asset_path` của landmark/food/item và checkpoint, cùng `cover_asset_path` và
+`map_asset_path` của province, để có thể thay artwork khi content được publish;
 `NULL` luôn được xử lý như fallback, không tải URL do người dùng cung cấp.
+`CatalogArtwork` chỉ nhận local asset hoặc HTTPS URL server-owned; storage path
+tương đối chưa được tự ghép thành URL khi chưa chốt bucket/catalog resolver.
 
 ## Kiến trúc
 
@@ -60,7 +62,8 @@ Các response lỗi không được hiển thị nguyên văn nhằm tránh lộ
 ## Chưa thuộc phần hoàn thiện này
 
 - chi tiết từng collectible, đánh dấu đã xem và trang bị item;
-- bản đồ/artwork thật và catalog nội dung production;
+- bản đồ/artwork thật và catalog nội dung production (cần export riêng, mapping
+  đúng object Figma → catalog và publish `asset_path` trước khi bật);
 - animation nhận thưởng và lịch sử sự kiện;
 - offline-first/cache cục bộ (giai đoạn sau MVP đọc/ghi trực tiếp Supabase).
 

@@ -31,7 +31,10 @@ assets/
 
 Asset đã export:
 
-- `illustrations/clouds/mascot-cloud.png`: Figma `image 22`, dùng ở màn Bầu trời.
+- `illustrations/clouds/mascot-cloud.png`: Figma `image 23`, dùng ở màn Bầu trời.
+- `illustrations/clouds/secondary-cloud.png`: Figma `image 12` (160×131),
+  cloud phụ đã export để giữ đúng object Home; chưa gắn vào luồng nghiệp vụ nào
+  cho tới khi chốt vị trí dùng trong layout.
 - `illustrations/clouds/moods/{awful,sad,okay,good,great}.png`: năm biểu cảm
   Home/Bầu trời, ánh xạ lần lượt tới `QUẠO`, `TRỐNG RỖNG`, `ỔN ÁP`, `THƯ GIÃN`,
   `CHỮA LÀNH`.
