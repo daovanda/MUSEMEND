@@ -62,4 +62,17 @@ class ReflectController extends AsyncNotifier<ReflectState> {
       return false;
     }
   }
+
+  /// Updates only the mood chosen from the shared cloud control.
+  ///
+  /// The database upsert replaces every optional check-in field, so callers
+  /// must preserve the existing energy and note instead of sending nulls.
+  Future<bool> updateMood(Mood mood) {
+    final checkin = state.value?.today;
+    return save(
+      mood: mood,
+      energyLevel: checkin?.energyLevel,
+      note: checkin?.note,
+    );
+  }
 }

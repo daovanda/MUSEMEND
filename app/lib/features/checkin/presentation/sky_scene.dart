@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 /// The fixed sky artwork used by the Reflect screen.
 ///
-/// The Figma export is a transparent foreground scene (hills, river and
-/// clouds), so it is layered over the app gradient. The painter remains as a
-/// deterministic fallback for a missing asset or an offline bundle issue.
+/// The bundled image is the original 1024×1536 export used by Figma's
+/// 390×560 image layer. The painter remains a deterministic fallback when an
+/// asset bundle is damaged; it is not part of the normal composition.
 class SkyScene extends StatelessWidget {
   const SkyScene({super.key, this.height = 510});
 
@@ -15,59 +15,14 @@ class SkyScene extends StatelessWidget {
     return ExcludeSemantics(
       child: SizedBox(
         height: height,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            const DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0xFFDFF3FA), Color(0xFFFFF9EE)],
-                ),
-              ),
-            ),
-            Positioned(
-              top: 30,
-              right: 34,
-              child: Container(
-                width: 74,
-                height: 74,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: const Color(0xFFFFE7A8).withValues(alpha: .58),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFFFE7A8).withValues(alpha: .24),
-                      blurRadius: 30,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Image.asset(
-              'assets/illustrations/journey/sky-background.png',
-              fit: BoxFit.cover,
-              alignment: Alignment.bottomCenter,
-              errorBuilder:
-                  (context, error, stackTrace) =>
-                      CustomPaint(painter: _SkyScenePainter()),
-            ),
-            IgnorePointer(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.white.withValues(alpha: .04),
-                      const Color(0xFFFFF9EE).withValues(alpha: .12),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
+        child: Image.asset(
+          'assets/illustrations/journey/sky-background.png',
+          cacheWidth: 1024,
+          fit: BoxFit.cover,
+          alignment: Alignment.center,
+          errorBuilder:
+              (context, error, stackTrace) =>
+                  CustomPaint(painter: _SkyScenePainter()),
         ),
       ),
     );
@@ -86,13 +41,14 @@ class CloudMascot extends StatelessWidget {
       image: true,
       child: Image.asset(
         'assets/illustrations/clouds/mascot-cloud.png',
-        width: 150,
-        height: 118,
+        cacheWidth: 512,
+        width: 145,
+        height: 97,
         fit: BoxFit.contain,
         errorBuilder:
             (context, error, stackTrace) => const SizedBox(
-              width: 150,
-              height: 118,
+              width: 145,
+              height: 97,
               child: Icon(Icons.cloud, size: 72),
             ),
       ),

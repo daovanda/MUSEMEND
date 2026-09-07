@@ -49,6 +49,7 @@ class JourneyDashboardMapper {
             requiredEnergy: (row['required_energy'] as num).toInt(),
             earnedEnergy: (saved?['earned_energy'] as num?)?.toInt() ?? 0,
             status: saved?['status'] as String? ?? 'locked',
+            assetPath: row['asset_path'] as String?,
           );
         })
         .toList(growable: false)..sort((a, b) => a.number.compareTo(b.number));

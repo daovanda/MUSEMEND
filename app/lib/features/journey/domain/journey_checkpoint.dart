@@ -7,6 +7,7 @@ class JourneyCheckpoint {
     required this.requiredEnergy,
     required this.earnedEnergy,
     required this.status,
+    this.assetPath,
   });
 
   final int id;
@@ -16,6 +17,10 @@ class JourneyCheckpoint {
   final int requiredEnergy;
   final int earnedEnergy;
   final String status;
+
+  /// Server-owned artwork for this checkpoint. It remains null until the
+  /// corresponding catalog object has an approved export.
+  final String? assetPath;
 
   double get progress =>
       requiredEnergy == 0

@@ -34,6 +34,9 @@ void main() {
   });
 
   test('maps checkpoint progress and unlocked collections', () {
+    const firstCheckpointAsset = 'https://example.com/checkpoint.png';
+    const currentCheckpointAsset =
+        'assets/illustrations/journey/checkpoint-1.png';
     final dashboard = mapper.fromResponses([
       {
         'current_province_id': 1,
@@ -53,6 +56,7 @@ void main() {
           'title': 'Trạm 2',
           'description': null,
           'required_energy': 10,
+          'asset_path': firstCheckpointAsset,
         },
         {
           'id': 10,
@@ -61,6 +65,7 @@ void main() {
           'title': 'Trạm 1',
           'description': null,
           'required_energy': 10,
+          'asset_path': currentCheckpointAsset,
         },
       ],
       [
@@ -93,6 +98,10 @@ void main() {
     );
     expect(dashboard.province?.checkpoints.first.earnedEnergy, 5);
     expect(dashboard.province?.checkpoints.first.progress, 0.5);
+    expect(
+      dashboard.province?.checkpoints.first.assetPath,
+      currentCheckpointAsset,
+    );
     expect(dashboard.collectibles.single.kind, CollectibleKind.landmark);
     expect(dashboard.collectibles.single.name, 'Hồ Gươm');
   });
