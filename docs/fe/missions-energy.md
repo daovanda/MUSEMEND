@@ -11,7 +11,8 @@ thuộc P0.4.
 
 ## Thiết kế và luồng
 
-`MissionRepository` là contract domain. `SupabaseMissionRepository` đọc
+`MissionRepository` là contract domain. `SupabaseMissionRepository` gọi
+`ensure_home_missions()` idempotent trước khi đọc `user_missions`, sau đó đọc
 `user_missions`, `mission_templates`, `travel_progress` và chỉ ghi qua RPC.
 `MissionsController` lấy check-in hôm nay từ application contract của Reflect để
 lọc template và cung cấp `source_checkin_id` khi template yêu cầu mood.
@@ -20,8 +21,9 @@ UI `MissionsSection` nằm sau check-in trên Reflect:
 
 - nhiệm vụ pending/in-progress được nhóm theo buổi từ `dueAt` ở UTC+7;
 - hành động hoàn thành/bỏ qua và thêm nhiệm vụ riêng;
-- trên style Home/Bầu trời không hiển thị block gợi ý để giữ đúng composition
-  Figma; gợi ý vẫn tồn tại ở màn nhiệm vụ đầy đủ;
+- Home/Bầu trời materialize hai nhiệm vụ mẫu nhẹ mỗi ngày (`Uống một cốc nước`,
+  `Đi bộ 5 phút`) qua RPC server; các gợi ý còn lại vẫn tồn tại ở màn nhiệm vụ
+  đầy đủ;
 - bottom sheet tạo nhiệm vụ riêng;
 - tiến độ checkpoint hiển thị `earned_energy/required_energy` từ journey state.
 
@@ -60,8 +62,10 @@ transaction/idempotency và phân tách user.
 
 ## Tương thích, rollback và việc còn lại
 
-Không có migration DB trong thay đổi client này. Repository cho phép thay adapter
-local-first sau này. Còn thiếu sửa custom mission, pagination/lịch sử, animation
+Migration `home_mission_defaults` bổ sung starter template và RPC materialize
+idempotent. Client tạm bỏ qua riêng lỗi PostgREST `PGRST202` (hàm chưa có trong
+schema cache) để giữ khả năng đọc trong khoảng thời gian migration đang triển khai;
+các lỗi khác vẫn đi vào trạng thái retry. Repository cho phép thay adapter local-first sau này. Còn thiếu sửa custom mission, pagination/lịch sử, animation
 reward, thông báo checkpoint vừa mở và test accessibility/golden.
 
 ## Liên quan
