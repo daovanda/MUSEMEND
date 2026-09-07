@@ -28,6 +28,8 @@ tiến độ vẫn do RPC/database xác định; các con số hiển thị ch�
 - `SkyScene` hiển thị trực tiếp export `sky-background.png` trong vùng tỷ lệ
   `390×560`; painter code-native là fallback. `CloudMascot` dùng
   `mascot-cloud.png` ở tỷ lệ `145×97`.
+- Logo `MuseMend` ở header dùng `ShaderMask` với gradient ngang xanh teal →
+  xanh lá nhạt, giữ chữ là text để sắc nét ở mọi mật độ màn hình.
 - Mood bubble rộng `332`, tối thiểu cao `179`, radius `48`, white 60%, border
   white 50% và background blur `12`. Năm artwork ánh xạ nhãn `QUẠO`,
   `TRỐNG RỖNG`, `ỔN ÁP`, `THƯ GIÃN`, `CHỮA LÀNH` về đúng enum DB.
@@ -36,7 +38,9 @@ tiến độ vẫn do RPC/database xác định; các con số hiển thị ch�
   `province_checkpoints.asset_path` được truyền tới `CatalogArtwork` khi đã có
   export được duyệt, còn `NULL` dùng placeholder. Không dùng sprite cố định thay
   cho dữ liệu hiện tại.
-- Mission nằm trên panel gradient xanh nhạt sang tím nhạt, nhóm theo `Buổi sáng`, `Bất kỳ lúc nào`,
+- Mission nằm trên panel gradient xanh nhạt sang tím nhạt; khi tài khoản mở Home
+  lần đầu trong ngày, server tạo idempotent hai nhiệm vụ starter (`Uống một cốc
+  nước`, `Đi bộ 5 phút`). Các nhiệm vụ được nhóm theo `Buổi sáng`, `Bất kỳ lúc nào`,
   `Buổi chiều`, `Buổi tối` từ `dueAt` ở UTC+7. Tiến độ cạnh sticker là
   `earned_energy/required_energy` của checkpoint hiện tại.
 - Quote P0 hardcode đúng nội dung Figma. Khi có nguồn nội dung động, nó phải đi
@@ -63,7 +67,8 @@ screenshot toàn frame.
 - Picker trung tâm có saving state, scale khi chạm và khóa thao tác lặp.
 - `ReflectController.updateMood()` giữ nguyên `energyLevel` và `note` của check-in
   đã có; đổi mood ở bottom nav không gửi `null` làm mất dữ liệu cũ.
-- UI không tự cộng thưởng, đổi checkpoint hoặc unlock catalog.
+- UI không tự cộng thưởng, đổi checkpoint hoặc unlock catalog; việc materialize
+  nhiệm vụ starter cũng chỉ gọi RPC và không tự ghi bảng.
 
 ## Accessibility và responsive
 

@@ -77,8 +77,12 @@ theo mọi mood hoặc privilege test trực tiếp cho từng cột.
 ## Migration, seed và rollback
 
 `mvp_core` thêm occurrence key và RPC create/update/skip; `mvp_journey` thêm RPC
-complete. Demo seed có 10 template (9 daily, 1 weekly), tất cả reward 5. Catalog
-thật phải dùng migration seed idempotent mới; không thay đổi snapshot mission đã
+complete. Demo seed có 10 template (9 daily, 1 weekly), tất cả reward 5. Migration
+`home_mission_defaults` bổ sung template `demo-walk` và RPC
+`ensure_home_missions()` để materialize hai nhiệm vụ starter (`demo-water` và
+`demo-walk`) mỗi ngày cho tài khoản khi Home được mở. Lệnh dùng occurrence key
+daily và có thể gọi lặp an toàn; không tạo lại nhiệm vụ đã bị bỏ qua trong cùng ngày.
+Catalog thật phải dùng migration seed idempotent mới; không thay đổi snapshot mission đã
 tạo. Rollback logic reward cần migration bù trừ/audit, không xóa transaction cũ.
 
 ## Giới hạn và việc còn lại

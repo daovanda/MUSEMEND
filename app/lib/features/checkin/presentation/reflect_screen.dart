@@ -258,12 +258,21 @@ class _SkyHeader extends StatelessWidget {
               onPressed: () {},
               icon: const Icon(Icons.menu_rounded, size: 20),
             ),
-            Text(
-              'MuseMend',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: const Color(0xFF6C9B7A),
-                fontWeight: FontWeight.w600,
-                letterSpacing: .1,
+            ShaderMask(
+              blendMode: BlendMode.srcIn,
+              shaderCallback:
+                  (bounds) => const LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [Color(0xFF4D858D), Color(0xFF9BC27C)],
+                  ).createShader(bounds),
+              child: Text(
+                'MuseMend',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: .1,
+                ),
               ),
             ),
             const Spacer(),

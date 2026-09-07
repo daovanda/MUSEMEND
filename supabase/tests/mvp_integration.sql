@@ -5,13 +5,17 @@ INSERT INTO auth.users(id,email,raw_user_meta_data,raw_app_meta_data) VALUES
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000001',true);
 DO $$
-DECLARE c public.daily_checkins; c2 public.daily_checkins; v jsonb; m public.user_missions; r jsonb; p public.travel_progress; j uuid;
+DECLARE c public.daily_checkins; c2 public.daily_checkins; v jsonb; m public.user_missions; r jsonb; p public.travel_progress; j uuid; starter_count integer;
 BEGIN
  SELECT * INTO c FROM public.upsert_daily_checkin('sad',2,'first');
  SELECT * INTO c2 FROM public.upsert_daily_checkin('good',4,'edited');
  IF c.id<>c2.id OR c2.mood<>'good' OR (SELECT count(*) FROM public.daily_checkins)<>1 THEN RAISE EXCEPTION 'check-in failed'; END IF;
  SELECT public.record_app_open() INTO v; PERFORM public.record_app_open();
  IF (v->>'streak')::int<>1 OR (SELECT count(*) FROM public.daily_visits)<>1 THEN RAISE EXCEPTION 'streak failed'; END IF;
+ SELECT count(*) INTO starter_count FROM public.ensure_home_missions();
+ IF starter_count<>2 OR (SELECT count(*) FROM public.user_missions WHERE source_type='system')<>2 THEN RAISE EXCEPTION 'home starter missions failed'; END IF;
+ SELECT count(*) INTO starter_count FROM public.ensure_home_missions();
+ IF starter_count<>2 OR (SELECT count(*) FROM public.user_missions WHERE source_type='system')<>2 THEN RAISE EXCEPTION 'home starter missions are not idempotent'; END IF;
  SELECT * INTO m FROM public.create_mission(NULL,'Custom task','private',NULL,'30000000-0000-4000-8000-000000000003');
  IF m.energy_reward<>5 THEN RAISE EXCEPTION 'custom reward failed'; END IF;
  PERFORM public.start_journey(); PERFORM public.complete_mission(m.id); SELECT public.complete_mission(m.id) INTO r;
