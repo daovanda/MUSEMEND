@@ -718,7 +718,8 @@ class _SkyQuoteCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(25, 27, 25, 23),
+      constraints: const BoxConstraints(minHeight: 112),
+      padding: const EdgeInsets.fromLTRB(30, 30, 26, 22),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Color(0xFFF4EEFE), MuseColors.cream],
@@ -732,15 +733,32 @@ class _SkyQuoteCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Text(
-        quote,
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          color: Color(0xFF5B5865),
-          fontSize: 16,
-          height: 1.5,
-          fontStyle: FontStyle.italic,
-        ),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          const Positioned(
+            left: -10,
+            top: -25,
+            child: Text(
+              '“',
+              style: TextStyle(
+                color: Color(0x336D6680),
+                fontSize: 50,
+                height: 1,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          Text(
+            quote,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Color(0xFF5B5865),
+              fontSize: 16,
+              height: 1.5,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -754,30 +772,44 @@ class _ShareMoments extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'Chia sẻ khoảnh khắc',
-          style: Theme.of(context).textTheme.titleLarge,
+        const Row(
+          children: [
+            Icon(
+              Icons.auto_awesome_outlined,
+              size: 18,
+              color: Color(0xFF366672),
+            ),
+            SizedBox(width: 7),
+            Text(
+              'Chia sẻ khoảnh khắc',
+              style: TextStyle(
+                color: Color(0xFF4F666A),
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 14),
         SizedBox(
-          height: 118,
+          height: 244,
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: const [
               _MomentCard(
-                icon: Icons.wb_sunny_outlined,
-                label: 'Một điều nhỏ\nkhiến cậu mỉm cười',
-                color: Color(0xFFFFE8B6),
+                title: 'Tuần sống lành',
+                subtitle: 'Template 7 ngày',
+                preview: _MomentPreview.lines,
               ),
               _MomentCard(
-                icon: Icons.water_drop_outlined,
-                label: 'Cho mình một\nhơi thở thật sâu',
-                color: Color(0xFFDDF2F5),
+                title: 'Tháng qua của bạn',
+                subtitle: 'Tổng hợp 6 ảnh',
+                preview: _MomentPreview.grid,
               ),
               _MomentCard(
-                icon: Icons.local_florist_outlined,
-                label: 'Gửi lời dịu dàng\ncho ngày mai',
-                color: Color(0xFFE9E1FA),
+                title: 'Một năm dịu dàng',
+                subtitle: 'Những điều đáng nhớ',
+                preview: _MomentPreview.sparkles,
               ),
             ],
           ),
@@ -789,32 +821,185 @@ class _ShareMoments extends StatelessWidget {
 
 class _MomentCard extends StatelessWidget {
   const _MomentCard({
-    required this.icon,
-    required this.label,
-    required this.color,
+    required this.title,
+    required this.subtitle,
+    required this.preview,
   });
 
-  final IconData icon;
-  final String label;
-  final Color color;
+  final String title;
+  final String subtitle;
+  final _MomentPreview preview;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 164,
-      margin: const EdgeInsets.only(right: 10),
-      padding: const EdgeInsets.all(15),
+      width: 238,
+      margin: const EdgeInsets.only(right: 16),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
       decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(24),
+        color: Colors.white.withValues(alpha: .88),
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: Colors.white.withValues(alpha: .85)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0D000000),
+            blurRadius: 9,
+            offset: Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: MuseColors.ink),
+          _MomentPreviewPane(type: preview),
+          const SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 5),
+            child: Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Color(0xFF4D4D4A),
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 5),
+            child: Text(
+              subtitle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: Color(0xFF777773), fontSize: 10),
+            ),
+          ),
           const Spacer(),
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+          SizedBox(
+            height: 34,
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Mẫu chia sẻ “$title” sẽ được hoàn thiện ở vòng tiếp theo.',
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.share_outlined, size: 15),
+              label: const Text('Chia sẻ'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF366672),
+                backgroundColor: const Color(0xFFF3F2ED),
+                side: BorderSide.none,
+                textStyle: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+enum _MomentPreview { lines, grid, sparkles }
+
+class _MomentPreviewPane extends StatelessWidget {
+  const _MomentPreviewPane({required this.type});
+
+  final _MomentPreview type;
+
+  @override
+  Widget build(BuildContext context) {
+    return ExcludeSemantics(
+      child: Container(
+        height: 116,
+        width: double.infinity,
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF1F4EC),
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: switch (type) {
+          _MomentPreview.lines => const _MomentLinesPreview(),
+          _MomentPreview.grid => const _MomentGridPreview(),
+          _MomentPreview.sparkles => const Center(
+            child: Icon(
+              Icons.auto_awesome_rounded,
+              size: 42,
+              color: Color(0xFFA9B9AC),
+            ),
+          ),
+        },
+      ),
+    );
+  }
+}
+
+class _MomentLinesPreview extends StatelessWidget {
+  const _MomentLinesPreview();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _PreviewLine(width: 134),
+        SizedBox(height: 9),
+        _PreviewLine(width: 82),
+        SizedBox(height: 9),
+        _PreviewLine(width: 148),
+        SizedBox(height: 9),
+        _PreviewLine(width: 112),
+      ],
+    );
+  }
+}
+
+class _PreviewLine extends StatelessWidget {
+  const _PreviewLine({required this.width});
+
+  final double width;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: 8,
+      decoration: BoxDecoration(
+        color: const Color(0xFFCED5C9),
+        borderRadius: BorderRadius.circular(999),
+      ),
+    );
+  }
+}
+
+class _MomentGridPreview extends StatelessWidget {
+  const _MomentGridPreview();
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.count(
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 3,
+      childAspectRatio: 1.55,
+      mainAxisSpacing: 5,
+      crossAxisSpacing: 5,
+      children: List.generate(
+        6,
+        (index) => DecoratedBox(
+          decoration: BoxDecoration(
+            color: const Color(0xFFDCEBED),
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
       ),
     );
   }

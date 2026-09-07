@@ -95,10 +95,10 @@ class _MuseBottomNavigation extends StatelessWidget {
   final Future<void> Function(Mood mood) onMoodSelected;
 
   static const _items = [
-    (Icons.cloud_outlined, 'Bầu trời'),
-    (Icons.auto_stories_outlined, 'Nhật ký'),
+    (Icons.auto_awesome_outlined, 'Bầu trời'),
+    (Icons.edit_note_rounded, 'Nhật ký'),
     (Icons.explore_outlined, 'Khám phá'),
-    (Icons.person_outline, 'Cá nhân'),
+    (Icons.person_outline_rounded, 'Cá nhân'),
   ];
 
   @override
@@ -119,7 +119,7 @@ class _MuseBottomNavigation extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: .91),
                     borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(26),
+                      top: Radius.circular(32),
                     ),
                     border: Border.all(
                       color: const Color(0xFFE3E3DC).withValues(alpha: .55),
@@ -409,36 +409,33 @@ class _NavItem extends StatelessWidget {
       button: true,
       selected: selected,
       label: label,
+      excludeSemantics: true,
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.only(top: 12),
+          padding: const EdgeInsets.only(top: 9),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              AnimatedContainer(
+              AnimatedScale(
+                scale: selected ? 1.08 : 1,
                 duration: const Duration(milliseconds: 160),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 15,
-                  vertical: 7,
-                ),
-                decoration: BoxDecoration(
-                  color:
-                      selected ? const Color(0xFFE9E1FA) : Colors.transparent,
-                  borderRadius: BorderRadius.circular(24),
-                ),
                 child: Icon(
                   icon,
-                  color: selected ? MuseColors.ink : MuseColors.mutedInk,
+                  size: 22,
+                  color:
+                      selected ? const Color(0xFF366672) : MuseColors.mutedInk,
                 ),
               ),
-              const SizedBox(height: 3),
+              const SizedBox(height: 5),
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                  color: selected ? MuseColors.ink : MuseColors.mutedInk,
+                  fontSize: 9,
+                  height: 1,
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                  color:
+                      selected ? const Color(0xFF366672) : MuseColors.mutedInk,
                 ),
               ),
             ],

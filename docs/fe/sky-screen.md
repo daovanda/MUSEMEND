@@ -39,8 +39,12 @@ tiến độ vẫn do RPC/database xác định; các con số hiển thị ch�
   `earned_energy/required_energy` của checkpoint hiện tại.
 - Quote P0 hardcode đúng nội dung Figma. Khi có nguồn nội dung động, nó phải đi
   qua application interface và không cho nội dung server tự chèn HTML/URL.
+- `Chia sẻ khoảnh khắc` dùng carousel card đúng composition Home: preview, tiêu
+  đề, mô tả và nút chia sẻ. Nội dung hiện là mẫu cứng; hành vi export/share thực
+  tế được để vòng sau và không truy cập journal riêng tư trong lát cắt này.
 - Bottom navigation có bốn route và mây ở giữa. Nút mây `56×56`, màu `#366672`,
-  nhô lên `19dp`, icon `#EFFBFF`; chạm về Bầu trời, giữ để mở năm mood.
+  nhô lên `19dp`, icon `#EFFBFF`; chạm về Bầu trời, giữ để mở năm mood. Bốn tab
+  dùng icon nét mảnh, không có selected pill lớn như bản cũ.
 
 ## Layer order và chuyển tiếp
 
