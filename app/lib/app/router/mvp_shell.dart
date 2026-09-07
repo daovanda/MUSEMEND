@@ -3,7 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:musemend/app/theme/muse_colors.dart';
 import 'package:musemend/features/checkin/application/reflect_providers.dart';
+import 'package:musemend/features/checkin/domain/mood.dart';
+import 'package:musemend/features/checkin/presentation/mood_visuals.dart';
 import 'package:musemend/features/notifications/application/notification_providers.dart';
 
 class MvpShell extends ConsumerStatefulWidget {
@@ -60,32 +63,384 @@ class _MvpShellState extends ConsumerState<MvpShell>
   Widget build(BuildContext context) {
     return Scaffold(
       body: widget.navigationShell,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: widget.navigationShell.currentIndex,
-        onDestinationSelected: (index) {
-          widget.navigationShell.goBranch(
-            index,
-            initialLocation: index == widget.navigationShell.currentIndex,
+      bottomNavigationBar: _MuseBottomNavigation(
+        shell: widget.navigationShell,
+        onMoodSelected: (mood) async {
+          final saved = await ref
+              .read(reflectControllerProvider.notifier)
+              .updateMood(mood);
+          if (!context.mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                saved
+                    ? 'Đã ghi nhận ${mood.label.toLowerCase()}.'
+                    : 'Chưa thể ghi nhận cảm xúc. Hãy thử lại.',
+              ),
+            ),
           );
         },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.favorite_outline),
-            label: 'Reflect',
+      ),
+    );
+  }
+}
+
+class _MuseBottomNavigation extends StatelessWidget {
+  const _MuseBottomNavigation({
+    required this.shell,
+    required this.onMoodSelected,
+  });
+
+  final StatefulNavigationShell shell;
+  final Future<void> Function(Mood mood) onMoodSelected;
+
+  static const _items = [
+    (Icons.auto_awesome_outlined, 'Bầu trời'),
+    (Icons.edit_note_rounded, 'Nhật ký'),
+    (Icons.explore_outlined, 'Khám phá'),
+    (Icons.person_outline_rounded, 'Cá nhân'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final selected = shell.currentIndex;
+    return Material(
+      color: Colors.transparent,
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: 76,
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.topCenter,
+            children: [
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: .91),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(32),
+                    ),
+                    border: Border.all(
+                      color: const Color(0xFFE3E3DC).withValues(alpha: .55),
+                    ),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x0D000000),
+                        blurRadius: 20,
+                        offset: Offset(0, -4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      for (var index = 0; index < 2; index++)
+                        Expanded(child: _item(index, selected)),
+                      const Expanded(child: SizedBox()),
+                      for (var index = 2; index < _items.length; index++)
+                        Expanded(child: _item(index, selected)),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                top: -19,
+                child: _MoodCloudButton(
+                  onMoodSelected: onMoodSelected,
+                  onTap:
+                      () => shell.goBranch(
+                        0,
+                        initialLocation: shell.currentIndex == 0,
+                      ),
+                ),
+              ),
+            ],
           ),
-          NavigationDestination(
-            icon: Icon(Icons.auto_stories_outlined),
-            label: 'Journal',
+        ),
+      ),
+    );
+  }
+
+  Widget _item(int index, int selected) {
+    return _NavItem(
+      icon: _items[index].$1,
+      label: _items[index].$2,
+      selected: selected == index,
+      onTap:
+          () => shell.goBranch(
+            index,
+            initialLocation: index == shell.currentIndex,
           ),
-          NavigationDestination(
-            icon: Icon(Icons.collections_bookmark_outlined),
-            label: 'Library',
+    );
+  }
+}
+
+class _MoodCloudButton extends StatefulWidget {
+  const _MoodCloudButton({required this.onMoodSelected, required this.onTap});
+
+  final Future<void> Function(Mood mood) onMoodSelected;
+  final VoidCallback onTap;
+
+  @override
+  State<_MoodCloudButton> createState() => _MoodCloudButtonState();
+}
+
+class _MoodCloudButtonState extends State<_MoodCloudButton> {
+  bool _pressed = false;
+  bool _saving = false;
+
+  Future<void> _showMoodPicker() async {
+    final mood = await showModalBottomSheet<Mood>(
+      context: context,
+      showDragHandle: true,
+      backgroundColor: const Color(0xFFFFFCF7),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+      builder:
+          (context) => SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 4, 18, 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Mây hôm nay đang cảm thấy thế nào?',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      for (final value in Mood.values)
+                        Expanded(
+                          child: _MoodPickerOption(
+                            mood: value,
+                            onTap: () => Navigator.of(context).pop(value),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            label: 'Profile',
+    );
+    if (mood == null || !mounted) return;
+    setState(() => _saving = true);
+    try {
+      await widget.onMoodSelected(mood);
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: 'Mây cảm xúc. Chạm để về Bầu trời, nhấn giữ để chọn cảm xúc.',
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _pressed = true),
+        onTapUp: (_) => setState(() => _pressed = false),
+        onTapCancel: () => setState(() => _pressed = false),
+        onTap: _saving ? null : widget.onTap,
+        onLongPress: _saving ? null : _showMoodPicker,
+        child: AnimatedScale(
+          scale: _pressed ? .9 : 1,
+          duration: const Duration(milliseconds: 140),
+          curve: Curves.easeOutCubic,
+          child: Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: const Color(0xFF366672),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x24000000),
+                  blurRadius: 9,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            alignment: Alignment.center,
+            child:
+                _saving
+                    ? const SizedBox.square(
+                      dimension: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Color(0xFFEFFBFF),
+                      ),
+                    )
+                    : const SizedBox(
+                      width: 27.5,
+                      height: 20,
+                      child: CustomPaint(painter: _CloudOutlinePainter()),
+                    ),
           ),
-        ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MoodPickerOption extends StatelessWidget {
+  const _MoodPickerOption({required this.mood, required this.onTap});
+
+  final Mood mood;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final visual = mood.visual;
+    return Semantics(
+      button: true,
+      label: visual.label,
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
+          child: Column(
+            children: [
+              SizedBox(
+                width: 42,
+                height: 36,
+                child: Image.asset(
+                  visual.assetPath,
+                  cacheWidth: 128,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                visual.label,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CloudOutlinePainter extends CustomPainter {
+  const _CloudOutlinePainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint =
+        Paint()
+          ..color = const Color(0xFFEFFBFF)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.7
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round;
+    final path =
+        Path()
+          ..moveTo(size.width * .20, size.height * .82)
+          ..cubicTo(
+            size.width * .05,
+            size.height * .82,
+            size.width * .02,
+            size.height * .58,
+            size.width * .17,
+            size.height * .48,
+          )
+          ..cubicTo(
+            size.width * .18,
+            size.height * .24,
+            size.width * .39,
+            size.height * .12,
+            size.width * .55,
+            size.height * .30,
+          )
+          ..cubicTo(
+            size.width * .69,
+            size.height * .19,
+            size.width * .87,
+            size.height * .32,
+            size.width * .87,
+            size.height * .50,
+          )
+          ..cubicTo(
+            size.width * 1.02,
+            size.height * .58,
+            size.width * .96,
+            size.height * .82,
+            size.width * .81,
+            size.height * .82,
+          )
+          ..close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _CloudOutlinePainter oldDelegate) => false;
+}
+
+class _NavItem extends StatelessWidget {
+  const _NavItem({
+    required this.icon,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 9),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedScale(
+                scale: selected ? 1.08 : 1,
+                duration: const Duration(milliseconds: 160),
+                child: Icon(
+                  icon,
+                  size: 22,
+                  color:
+                      selected ? const Color(0xFF366672) : MuseColors.mutedInk,
+                ),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 9,
+                  height: 1,
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                  color:
+                      selected ? const Color(0xFF366672) : MuseColors.mutedInk,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

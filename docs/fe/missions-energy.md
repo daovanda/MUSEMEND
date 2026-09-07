@@ -1,7 +1,7 @@
 # Missions và energy client
 
 **Trạng thái:** `in-progress`
-**Cập nhật:** 2026-09-05
+**Cập nhật:** 2026-09-07
 
 ## Mục tiêu và phạm vi
 
@@ -18,10 +18,18 @@ lọc template và cung cấp `source_checkin_id` khi template yêu cầu mood.
 
 UI `MissionsSection` nằm sau check-in trên Reflect:
 
-- nhiệm vụ pending/in-progress và hành động hoàn thành/bỏ qua;
-- tối đa năm gợi ý phù hợp để tránh quá tải;
+- nhiệm vụ pending/in-progress được nhóm theo buổi từ `dueAt` ở UTC+7;
+- hành động hoàn thành/bỏ qua và thêm nhiệm vụ riêng;
+- trên style Home/Bầu trời không hiển thị block gợi ý để giữ đúng composition
+  Figma; gợi ý vẫn tồn tại ở màn nhiệm vụ đầy đủ;
 - bottom sheet tạo nhiệm vụ riêng;
-- tổng năng lượng và phần còn sẵn sàng cho hành trình.
+- tiến độ checkpoint hiển thị `earned_energy/required_energy` từ journey state.
+
+Các nhóm UI là `Buổi sáng` (<12h), `Bất kỳ lúc nào` (`dueAt == null`),
+`Buổi chiều` (12h–16h59) và `Buổi tối` (từ 17h). Sticker bên phải header hiện là
+placeholder code-native vì landmark/food thuộc catalog động; không crop cứng sprite
+Figma vào nhiệm vụ. Toàn nhóm nằm trên panel gradient xanh nhạt sang tím nhạt,
+bo góc và viền white nhẹ đúng layer Home.
 
 ## RPC và mapping
 
@@ -61,3 +69,4 @@ reward, thông báo checkpoint vừa mở và test accessibility/golden.
 - [DB missions và energy](../db/missions-energy.md)
 - [DB journey và rewards](../db/journey-rewards.md)
 - [Daily check-in](./daily-checkin.md)
+- [Home Figma inventory](./home-figma-inventory.md)

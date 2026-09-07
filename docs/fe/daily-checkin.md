@@ -1,7 +1,7 @@
 # Daily check-in và streak client
 
 **Trạng thái:** `in-progress`
-**Cập nhật:** 2026-09-05
+**Cập nhật:** 2026-09-07
 
 ## Mục tiêu và phạm vi
 
@@ -18,12 +18,19 @@ cầu. Khi app resume, shell gọi lại RPC; DB đảm bảo idempotent trong c
 Adapter ánh xạ trường domain `note` sang cột DB `note_short`; presentation không
 phụ thuộc trực tiếp vào tên cột Postgres.
 
+Page Home dùng artwork tĩnh cho năm mức: `awful → QUẠO`, `sad → TRỐNG RỖNG`,
+`okay → ỔN ÁP`, `good → THƯ GIÃN`, `great → CHỮA LÀNH`. Mapping nằm tại
+`features/checkin/presentation/mood_visuals.dart`; nhãn và ảnh chỉ thuộc
+presentation, enum gửi xuống repository vẫn là năm giá trị chuẩn.
+
 ## Quy tắc dữ liệu và lỗi
 
 - Ngày client dùng UTC+7 để truy vấn nhất quán với DB.
 - Mood ánh xạ cố định; mood score, user, ngày và timestamp do DB quyết định.
 - Energy level không bắt buộc, nếu có là 1–5; note tối đa 500 ký tự ở UI.
 - Check-in lần sau cập nhật row cùng ngày thay vì tạo row mới.
+- Đổi mood từ nút mây giữa bottom navigation phải giữ lại `energyLevel` và `note`
+  hiện có bằng `ReflectController.updateMood()`.
 - Tải lỗi có retry; lưu lỗi không hiện chi tiết DB và không báo thành công giả.
 
 ## Bảo mật và riêng tư
@@ -34,18 +41,20 @@ Không gửi `user_id`, `mood_score` hoặc ngày do UI chọn. RLS giới hạn
 
 ## Kiểm thử và nghiệm thu
 
-Unit test bảo vệ mapping enum. Widget/integration test tiếp theo phải kiểm tra năm
-lựa chọn, loading/error/retry, sửa trong ngày, mở app lặp, ranh giới ngày Việt Nam
-và phân tách hai tài khoản. DB tests là nguồn nghiệm thu cho score và idempotency.
+Unit test bảo vệ mapping enum và việc đổi mood không xóa energy/note. Asset test
+tải đủ năm artwork. Widget/integration test tiếp theo phải kiểm tra năm lựa chọn,
+loading/error/retry, sửa trong ngày, mở app lặp, ranh giới ngày Việt Nam và phân
+tách hai tài khoản. DB tests là nguồn nghiệm thu cho score và idempotency.
 
 ## Tương thích, rollback và việc còn lại
 
 Không đổi schema trong lát cắt này. Có thể thay Supabase adapter bằng local-first
-adapter sau `CheckinRepository`. Còn thiếu artwork mây chính thức, golden/
-accessibility test và mapping nhãn mood phong phú từ Figma.
+adapter sau `CheckinRepository`. Artwork năm mood Home đã có; còn thiếu golden/
+accessibility test và quyết định mapping cho các nhãn ngoài frame Bầu trời.
 
 ## Liên quan
 
 - [DB daily check-in và streak](../db/daily-checkins-streak.md)
 - [UI direction](./ui-design-direction.md)
+- [Home Figma inventory](./home-figma-inventory.md)
 - [Roadmap MVP](../other/mvp-roadmap.md)

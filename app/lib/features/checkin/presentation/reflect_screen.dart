@@ -1,9 +1,19 @@
+import 'dart:math' as math;
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:musemend/app/theme/muse_colors.dart';
+import 'package:musemend/core/presentation/catalog_artwork.dart';
 import 'package:musemend/features/checkin/application/reflect_providers.dart';
 import 'package:musemend/features/checkin/application/reflect_state.dart';
 import 'package:musemend/features/checkin/domain/mood.dart';
+import 'package:musemend/features/checkin/presentation/mood_visuals.dart';
+import 'package:musemend/features/checkin/presentation/sky_scene.dart';
+import 'package:musemend/features/journey/application/journey_providers.dart';
+import 'package:musemend/features/journey/domain/journey_checkpoint.dart';
+import 'package:musemend/features/journey/domain/journey_dashboard.dart';
 import 'package:musemend/features/missions/presentation/missions_section.dart';
 
 class ReflectScreen extends ConsumerStatefulWidget {
@@ -39,9 +49,9 @@ class _ReflectScreenState extends ConsumerState<ReflectScreen> {
     });
   }
 
-  Future<void> _save() async {
+  Future<bool> _save() async {
     final mood = _selectedMood;
-    if (mood == null) return;
+    if (mood == null) return false;
     final succeeded = await ref
         .read(reflectControllerProvider.notifier)
         .save(
@@ -49,7 +59,7 @@ class _ReflectScreenState extends ConsumerState<ReflectScreen> {
           energyLevel: _energyLevel?.round(),
           note: _noteController.text,
         );
-    if (!mounted) return;
+    if (!mounted) return succeeded;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -59,160 +69,955 @@ class _ReflectScreenState extends ConsumerState<ReflectScreen> {
         ),
       ),
     );
+    return succeeded;
+  }
+
+  Future<void> _saveAndWrite() async {
+    if (await _save() && mounted) context.go('/journal');
   }
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(reflectControllerProvider);
+    // Keep the retry state self-contained instead of starting a second
+    // Supabase request while check-in data is unavailable.
+    final journeyState =
+        state.hasValue ? ref.watch(journeyControllerProvider) : null;
     state.whenData(_hydrate);
 
     return DecoratedBox(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors:
-              Theme.of(context).brightness == Brightness.dark
-                  ? [
-                    Theme.of(context).colorScheme.surface,
-                    Theme.of(context).colorScheme.surfaceContainer,
-                    Theme.of(context).colorScheme.surface,
-                  ]
-                  : [MuseColors.sky, MuseColors.cream, MuseColors.mint],
+          colors: [Color(0xFFE0F2F7), Color(0xFFFBF9F5), Color(0xFFFBF9F5)],
+          stops: [0, .56, 1],
         ),
       ),
-      child: SafeArea(
-        bottom: false,
-        child: state.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error:
-              (_, _) => _ErrorView(
+      child: state.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error:
+            (_, _) => SafeArea(
+              child: _ErrorView(
                 onRetry: () => ref.invalidate(reflectControllerProvider),
               ),
-          data: (data) {
-            final selected = _selectedMood ?? data.today?.mood;
-            return ListView(
-              padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
-              children: [
-                Row(
+            ),
+        data: (data) {
+          final selected = _selectedMood ?? data.today?.mood;
+          final journey = journeyState?.asData?.value;
+          final checkpoint = _currentCheckpoint(journey);
+          return ListView(
+            padding: const EdgeInsets.only(bottom: 34),
+            children: [
+              _HomeSkyHero(
+                streak: data.streak,
+                energy: journey?.currentEnergy,
+                selectedMood: selected,
+                journey: journey,
+                hasExistingCheckin: data.today != null,
+                onMoodSelected: (mood) => setState(() => _selectedMood = mood),
+                onSave: selected == null ? null : _save,
+                onSaveAndWrite: selected == null ? null : _saveAndWrite,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: MissionsSection(
+                  skyStyle: true,
+                  skyEnergyEarned: checkpoint?.earnedEnergy,
+                  skyEnergyRequired: checkpoint?.requiredEnergy,
+                  skyArtworkPath:
+                      checkpoint?.assetPath ??
+                      journey?.province?.coverAssetPath,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 28),
+                child: Column(
                   children: [
-                    Expanded(
-                      child: Text(
-                        'Hôm nay bạn thế nào?',
-                        style: Theme.of(context).textTheme.headlineSmall,
-                      ),
-                    ),
-                    Chip(
-                      avatar: const Icon(
-                        Icons.local_fire_department_rounded,
-                        size: 18,
-                      ),
-                      label: Text('${data.streak} ngày'),
-                    ),
+                    const SizedBox(height: 18),
+                    const _SkyQuoteCard(),
+                    const SizedBox(height: 24),
+                    const _ShareMoments(),
                   ],
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  data.today == null
-                      ? 'Chọn cảm xúc gần nhất với bạn lúc này.'
-                      : 'Bạn có thể sửa check-in trong ngày bất cứ lúc nào.',
-                  style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  JourneyCheckpoint? _currentCheckpoint(JourneyDashboard? journey) {
+    final id = journey?.currentCheckpointId;
+    if (id == null) return null;
+    for (final checkpoint in journey?.province?.checkpoints ?? const []) {
+      if (checkpoint.id == id) return checkpoint;
+    }
+    return null;
+  }
+}
+
+class _HomeSkyHero extends StatelessWidget {
+  const _HomeSkyHero({
+    required this.streak,
+    required this.energy,
+    required this.selectedMood,
+    required this.journey,
+    required this.hasExistingCheckin,
+    required this.onMoodSelected,
+    required this.onSave,
+    required this.onSaveAndWrite,
+  });
+
+  final int streak;
+  final int? energy;
+  final Mood? selectedMood;
+  final JourneyDashboard? journey;
+  final bool hasExistingCheckin;
+  final ValueChanged<Mood> onMoodSelected;
+  final VoidCallback? onSave;
+  final VoidCallback? onSaveAndWrite;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        const Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 560,
+          child: SkyScene(height: 560),
+        ),
+        const Positioned(
+          top: 294,
+          left: 0,
+          right: 0,
+          height: 337,
+          child: IgnorePointer(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0x00E0F2F7), Color(0xFFE0F2F7)],
                 ),
-                const SizedBox(height: 20),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(18),
-                    child: Wrap(
-                      spacing: 10,
-                      runSpacing: 10,
-                      alignment: WrapAlignment.center,
-                      children:
-                          Mood.values.map((mood) {
-                            final isSelected = mood == selected;
-                            return ChoiceChip(
-                              selected: isSelected,
-                              onSelected:
-                                  (_) => setState(() => _selectedMood = mood),
-                              avatar: Text(mood.symbol),
-                              label: Text(mood.label),
-                            );
-                          }).toList(),
+              ),
+            ),
+          ),
+        ),
+        Column(
+          children: [
+            SafeArea(
+              bottom: false,
+              child: _SkyHeader(streak: streak, energy: energy),
+            ),
+            const SizedBox(height: 14),
+            const CloudMascot(),
+            const SizedBox(height: 11),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 29),
+              child: _MoodCheckinCard(
+                selected: selectedMood,
+                hasExistingCheckin: hasExistingCheckin,
+                onSelected: onMoodSelected,
+                onSave: onSave,
+                onSaveAndWrite: onSaveAndWrite,
+              ),
+            ),
+            const SizedBox(height: 104),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: _JourneyOverview(journey: journey),
+            ),
+            const SizedBox(height: 18),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _SkyHeader extends StatelessWidget {
+  const _SkyHeader({required this.streak, this.energy});
+
+  final int streak;
+  final int? energy;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: SizedBox(
+        height: 60,
+        child: Row(
+          children: [
+            IconButton(
+              tooltip: 'Mở menu',
+              onPressed: () {},
+              icon: const Icon(Icons.menu_rounded, size: 20),
+            ),
+            Text(
+              'MuseMend',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: const Color(0xFF6C9B7A),
+                fontWeight: FontWeight.w600,
+                letterSpacing: .1,
+              ),
+            ),
+            const Spacer(),
+            Semantics(
+              label: '${energy ?? 0} năng lượng, streak $streak ngày',
+              child: SizedBox.square(
+                dimension: 44,
+                child: IconButton(
+                  tooltip: 'Bộ sưu tập và năng lượng',
+                  onPressed: () {},
+                  icon: const Icon(
+                    Icons.card_giftcard_rounded,
+                    color: Color(0xFFF4C84A),
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MoodCheckinCard extends StatelessWidget {
+  const _MoodCheckinCard({
+    required this.selected,
+    required this.hasExistingCheckin,
+    required this.onSelected,
+    required this.onSave,
+    required this.onSaveAndWrite,
+  });
+
+  final Mood? selected;
+  final bool hasExistingCheckin;
+  final ValueChanged<Mood> onSelected;
+  final VoidCallback? onSave;
+  final VoidCallback? onSaveAndWrite;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(48),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
+          width: 332,
+          constraints: const BoxConstraints(minHeight: 179),
+          padding: const EdgeInsets.fromLTRB(25, 17, 25, 8),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: .60),
+            borderRadius: BorderRadius.circular(48),
+            border: Border.all(color: Colors.white.withValues(alpha: .50)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(
+                height: 18,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    'Ngày hôm nay có dịu dàng với cậu không?',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Color(0xFF565C5E),
+                      fontSize: 11,
+                      height: 1.25,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(18),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              ),
+              const SizedBox(height: 7),
+              SizedBox(
+                height: 93,
+                width: double.infinity,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: SizedBox(
+                    width: 268,
+                    height: 93,
+                    child: Stack(
+                      clipBehavior: Clip.none,
                       children: [
-                        Text(
-                          'Mức năng lượng',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          _energyLevel == null
-                              ? 'Không bắt buộc'
-                              : '${_energyLevel!.round()}/5',
-                        ),
-                        Slider(
-                          value: _energyLevel ?? 3,
-                          min: 1,
-                          max: 5,
-                          divisions: 4,
-                          onChanged:
-                              (value) => setState(() => _energyLevel = value),
-                        ),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed:
-                                _energyLevel == null
-                                    ? null
-                                    : () => setState(() => _energyLevel = null),
-                            child: const Text('Bỏ chọn'),
+                        for (final mood in _homeMoodOrder)
+                          _MoodOption(
+                            mood: mood,
+                            selected: mood == selected,
+                            onTap: () => onSelected(mood),
                           ),
-                        ),
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _noteController,
-                  minLines: 3,
-                  maxLines: 5,
-                  maxLength: 500,
-                  decoration: const InputDecoration(
-                    labelText: 'Một dòng cho hôm nay (không bắt buộc)',
-                    alignLabelWithHint: true,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _MoodActionButton(
+                    width: 91,
+                    label: 'LƯU NHANH',
+                    semanticLabel:
+                        hasExistingCheckin
+                            ? 'Cập nhật check-in hôm nay'
+                            : 'Lưu nhanh check-in hôm nay',
+                    onPressed: onSave,
                   ),
-                ),
-                const SizedBox(height: 12),
-                FilledButton.icon(
-                  onPressed: selected == null ? null : _save,
-                  icon: const Icon(Icons.favorite_rounded),
-                  label: Text(
-                    data.today == null ? 'Lưu check-in' : 'Cập nhật check-in',
+                  const SizedBox(width: 7),
+                  _MoodActionButton(
+                    width: 137,
+                    label: 'LƯU VÀ VIẾT TÂM TƯ',
+                    onPressed: onSaveAndWrite,
                   ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+const _homeMoodOrder = [Mood.awful, Mood.sad, Mood.okay, Mood.good, Mood.great];
+
+class _MoodOption extends StatelessWidget {
+  const _MoodOption({
+    required this.mood,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final Mood mood;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final visual = mood.visual;
+    final top = (93 - visual.height) / 2;
+    return Positioned(
+      left: visual.left,
+      top: top,
+      width: visual.width,
+      height: visual.height,
+      child: Transform.rotate(
+        angle: visual.rotationDegrees * math.pi / 180,
+        child: Semantics(
+          button: true,
+          selected: selected,
+          label: visual.label,
+          excludeSemantics: true,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(16),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                curve: Curves.easeOutCubic,
+                decoration: BoxDecoration(
+                  color: visual.backgroundColor,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color:
+                        selected ? const Color(0xFF6E8E92) : Colors.transparent,
+                    width: selected ? 1.3 : 0,
+                  ),
+                  boxShadow:
+                      selected
+                          ? const [
+                            BoxShadow(
+                              color: Color(0x1F366672),
+                              blurRadius: 8,
+                              offset: Offset(0, 2),
+                            ),
+                          ]
+                          : null,
                 ),
-                const MissionsSection(),
-                const SizedBox(height: 12),
-                Card(
-                  child: ListTile(
-                    leading: const Icon(Icons.health_and_safety_outlined),
-                    title: const Text('Một khoảng dừng để tự lắng nghe'),
-                    subtitle: const Text(
-                      'MuseMend hỗ trợ phản tư, không chẩn đoán và không thay '
-                      'thế chuyên gia y tế hoặc sức khỏe tâm thần.',
+                padding: const EdgeInsets.symmetric(horizontal: 3),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      visual.assetPath,
+                      cacheWidth: 128,
+                      width: visual.imageSize,
+                      height: visual.imageSize,
+                      fit: BoxFit.contain,
+                    ),
+                    const SizedBox(height: 1),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        visual.label,
+                        maxLines: 1,
+                        style: const TextStyle(
+                          color: Color(0xFF5B6163),
+                          fontSize: 6.8,
+                          height: 1,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MoodActionButton extends StatelessWidget {
+  const _MoodActionButton({
+    required this.width,
+    required this.label,
+    required this.onPressed,
+    this.semanticLabel,
+  });
+
+  final double width;
+  final String label;
+  final String? semanticLabel;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      enabled: onPressed != null,
+      label: semanticLabel ?? label,
+      excludeSemantics: true,
+      child: AnimatedOpacity(
+        opacity: onPressed == null ? .48 : 1,
+        duration: const Duration(milliseconds: 160),
+        child: Container(
+          width: width,
+          height: 36,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFFD4E2C7), Color(0x99E9F1E3), Color(0x33FFFFFF)],
+            ),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: Colors.white.withValues(alpha: .80)),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x0D000000),
+                blurRadius: 2,
+                offset: Offset(0, 1),
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onPressed,
+              borderRadius: BorderRadius.circular(999),
+              child: Center(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Text(
+                      label,
+                      style: const TextStyle(
+                        color: Color(0xFF596868),
+                        fontSize: 7.2,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: .1,
+                      ),
                     ),
                   ),
                 ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _JourneyOverview extends StatelessWidget {
+  const _JourneyOverview({required this.journey});
+
+  final JourneyDashboard? journey;
+
+  @override
+  Widget build(BuildContext context) {
+    final province = journey?.province;
+    final checkpoints = province?.checkpoints ?? const [];
+    var currentNumber =
+        (checkpoints.where((checkpoint) => checkpoint.isCompleted).length + 1)
+            .clamp(1, checkpoints.isEmpty ? 1 : checkpoints.length);
+    for (final checkpoint in checkpoints) {
+      if (checkpoint.isCurrent) {
+        currentNumber = checkpoint.number;
+        break;
+      }
+    }
+    return Semantics(
+      label:
+          'Hành trình Việt Nam, trạm $currentNumber trên ${checkpoints.length}',
+      child: SizedBox(
+        height: 142,
+        child: Column(
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                const Text(
+                  'VIỆT NAM',
+                  style: TextStyle(
+                    color: Color(0xFF343B3D),
+                    fontSize: 16,
+                    height: 1,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: .2,
+                  ),
+                ),
+                const Spacer(),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    const Text(
+                      'Trạm',
+                      style: TextStyle(
+                        color: Color(0xFF697173),
+                        fontSize: 9,
+                        height: 1,
+                      ),
+                    ),
+                    Text(
+                      checkpoints.isEmpty
+                          ? '--/--'
+                          : '$currentNumber/${checkpoints.length}',
+                      style: const TextStyle(
+                        color: Color(0xFF535D5F),
+                        fontSize: 12,
+                        height: 1.15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
               ],
-            );
-          },
+            ),
+            const SizedBox(height: 12),
+            if (checkpoints.isEmpty)
+              const Expanded(
+                child: Center(
+                  child: Text(
+                    'Hành trình sẽ xuất hiện khi dữ liệu trạm sẵn sàng.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 11, color: Color(0xFF697173)),
+                  ),
+                ),
+              )
+            else
+              Expanded(
+                child: Stack(
+                  alignment: Alignment.topCenter,
+                  children: [
+                    Positioned(
+                      top: 23,
+                      left: 24,
+                      right: 24,
+                      child: Container(
+                        height: 1,
+                        color: Colors.white.withValues(alpha: .76),
+                      ),
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (final checkpoint in checkpoints.take(5))
+                          Expanded(
+                            child: _CheckpointDot(checkpoint: checkpoint),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CheckpointDot extends StatelessWidget {
+  const _CheckpointDot({required this.checkpoint});
+
+  final JourneyCheckpoint checkpoint;
+
+  @override
+  Widget build(BuildContext context) {
+    final active = checkpoint.isCurrent || checkpoint.isCompleted;
+    return Column(
+      children: [
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          width: 46,
+          height: 46,
+          decoration: BoxDecoration(
+            color:
+                active
+                    ? Colors.white.withValues(alpha: .86)
+                    : Colors.white.withValues(alpha: .48),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color:
+                  checkpoint.isCurrent
+                      ? const Color(0xFF6C9B7A)
+                      : Colors.white.withValues(alpha: .68),
+            ),
+          ),
+          child: _artwork(active),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          checkpoint.title,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: Color(0xFF626B6D),
+            fontSize: 7,
+            height: 1.1,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _artwork(bool active) {
+    if (checkpoint.isCompleted) {
+      return Icon(
+        Icons.check_rounded,
+        size: 21,
+        color: active ? const Color(0xFF5B7675) : const Color(0xFF9BA4A4),
+      );
+    }
+    return CatalogArtwork(
+      assetPath: checkpoint.assetPath,
+      width: 36,
+      height: 36,
+      semanticLabel: checkpoint.title,
+      placeholder: Icon(
+        Icons.landscape_outlined,
+        size: 21,
+        color: active ? const Color(0xFF5B7675) : const Color(0xFF9BA4A4),
+      ),
+    );
+  }
+}
+
+class _SkyQuoteCard extends StatelessWidget {
+  const _SkyQuoteCard();
+
+  static const quote =
+      '“Chỉ cần bạn không dừng lại thì việc bạn tiến chậm cũng không là vấn đề.”';
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      constraints: const BoxConstraints(minHeight: 112),
+      padding: const EdgeInsets.fromLTRB(30, 30, 26, 22),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFF4EEFE), MuseColors.cream],
+        ),
+        borderRadius: BorderRadius.circular(48),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0D000000),
+            blurRadius: 2,
+            offset: Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          const Positioned(
+            left: -10,
+            top: -25,
+            child: Text(
+              '“',
+              style: TextStyle(
+                color: Color(0x336D6680),
+                fontSize: 50,
+                height: 1,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          Text(
+            quote,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Color(0xFF5B5865),
+              fontSize: 16,
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ShareMoments extends StatelessWidget {
+  const _ShareMoments();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Row(
+          children: [
+            Icon(
+              Icons.auto_awesome_outlined,
+              size: 18,
+              color: Color(0xFF366672),
+            ),
+            SizedBox(width: 7),
+            Text(
+              'Chia sẻ khoảnh khắc',
+              style: TextStyle(
+                color: Color(0xFF4F666A),
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        SizedBox(
+          height: 244,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: const [
+              _MomentCard(
+                title: 'Tuần sống lành',
+                subtitle: 'Template 7 ngày',
+                preview: _MomentPreview.lines,
+              ),
+              _MomentCard(
+                title: 'Tháng qua của bạn',
+                subtitle: 'Tổng hợp 6 ảnh',
+                preview: _MomentPreview.grid,
+              ),
+              _MomentCard(
+                title: 'Một năm dịu dàng',
+                subtitle: 'Những điều đáng nhớ',
+                preview: _MomentPreview.sparkles,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _MomentCard extends StatelessWidget {
+  const _MomentCard({
+    required this.title,
+    required this.subtitle,
+    required this.preview,
+  });
+
+  final String title;
+  final String subtitle;
+  final _MomentPreview preview;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 238,
+      margin: const EdgeInsets.only(right: 16),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: .88),
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: Colors.white.withValues(alpha: .85)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0D000000),
+            blurRadius: 9,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _MomentPreviewPane(type: preview),
+          const SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 5),
+            child: Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Color(0xFF4D4D4A),
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 5),
+            child: Text(
+              subtitle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: Color(0xFF777773), fontSize: 10),
+            ),
+          ),
+          const Spacer(),
+          SizedBox(
+            height: 34,
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Mẫu chia sẻ “$title” sẽ được hoàn thiện ở vòng tiếp theo.',
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.share_outlined, size: 15),
+              label: const Text('Chia sẻ'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF366672),
+                backgroundColor: const Color(0xFFF3F2ED),
+                side: BorderSide.none,
+                textStyle: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+enum _MomentPreview { lines, grid, sparkles }
+
+class _MomentPreviewPane extends StatelessWidget {
+  const _MomentPreviewPane({required this.type});
+
+  final _MomentPreview type;
+
+  @override
+  Widget build(BuildContext context) {
+    return ExcludeSemantics(
+      child: Container(
+        height: 116,
+        width: double.infinity,
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF1F4EC),
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: switch (type) {
+          _MomentPreview.lines => const _MomentLinesPreview(),
+          _MomentPreview.grid => const _MomentGridPreview(),
+          _MomentPreview.sparkles => const Center(
+            child: Icon(
+              Icons.auto_awesome_rounded,
+              size: 42,
+              color: Color(0xFFA9B9AC),
+            ),
+          ),
+        },
+      ),
+    );
+  }
+}
+
+class _MomentLinesPreview extends StatelessWidget {
+  const _MomentLinesPreview();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _PreviewLine(width: 134),
+        SizedBox(height: 9),
+        _PreviewLine(width: 82),
+        SizedBox(height: 9),
+        _PreviewLine(width: 148),
+        SizedBox(height: 9),
+        _PreviewLine(width: 112),
+      ],
+    );
+  }
+}
+
+class _PreviewLine extends StatelessWidget {
+  const _PreviewLine({required this.width});
+
+  final double width;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: 8,
+      decoration: BoxDecoration(
+        color: const Color(0xFFCED5C9),
+        borderRadius: BorderRadius.circular(999),
+      ),
+    );
+  }
+}
+
+class _MomentGridPreview extends StatelessWidget {
+  const _MomentGridPreview();
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.count(
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 3,
+      childAspectRatio: 1.55,
+      mainAxisSpacing: 5,
+      crossAxisSpacing: 5,
+      children: List.generate(
+        6,
+        (index) => DecoratedBox(
+          decoration: BoxDecoration(
+            color: const Color(0xFFDCEBED),
+            borderRadius: BorderRadius.circular(8),
+          ),
         ),
       ),
     );

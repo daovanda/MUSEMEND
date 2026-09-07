@@ -7,6 +7,8 @@ class JourneyProvince {
     required this.description,
     required this.completionPercent,
     required this.checkpoints,
+    this.coverAssetPath,
+    this.mapAssetPath,
   });
 
   final int id;
@@ -14,4 +16,9 @@ class JourneyProvince {
   final String? description;
   final int completionPercent;
   final List<JourneyCheckpoint> checkpoints;
+
+  /// Private/local asset path for the province artwork. The path is catalog
+  /// data, never a client-controlled URL.
+  final String? coverAssetPath;
+  final String? mapAssetPath;
 }
