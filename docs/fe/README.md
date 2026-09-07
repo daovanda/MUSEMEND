@@ -10,6 +10,7 @@ accessibility, bảo mật dữ liệu trên thiết bị và kiểm thử.
 ## Features
 
 - [UI/UX direction từ Figma](./ui-design-direction.md) — in-progress
+- [MuseMend UI system](./ui-system.md) — in-progress
 - [Home Figma inventory](./home-figma-inventory.md) — in-progress
 - [Frontend asset manifest](./assets.md) — in-progress
 - [Application foundation](./application-foundation.md) — implemented
@@ -19,5 +20,6 @@ accessibility, bảo mật dữ liệu trên thiết bị và kiểm thử.
 - [Missions và energy](./missions-energy.md) — in-progress
 - [Journey và Library](./journey-library.md) — in-progress
 - [Daily Journal và Future Letter](./journals-future-letters.md) — in-progress
+- [Journal editor toàn màn hình](./journal-editor.md) — in-progress
 - [Notification cục bộ và inbox](./notifications-inbox.md) — in-progress
 - [Profile overview](./profile-overview.md) — in-progress

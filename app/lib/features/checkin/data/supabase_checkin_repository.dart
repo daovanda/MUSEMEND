@@ -22,6 +22,27 @@ class SupabaseCheckinRepository implements CheckinRepository {
   }
 
   @override
+  Future<List<DailyCheckin>> loadHistory({
+    required DateTime from,
+    required DateTime toExclusive,
+  }) async {
+    final rows = await _client
+        .from('daily_checkins')
+        .select('id, checkin_date, mood, energy_level, note_short')
+        .gte('checkin_date', _dateString(from))
+        .lt('checkin_date', _dateString(toExclusive))
+        .order('checkin_date', ascending: true);
+    return rows
+        .map(
+          (row) =>
+              DailyCheckinDto.fromMap(
+                Map<String, dynamic>.from(row),
+              ).toDomain(),
+        )
+        .toList(growable: false);
+  }
+
+  @override
   Future<AppVisit> recordAppOpen() async {
     final result = await _client.rpc('record_app_open');
     final row = _singleObject(result, 'record_app_open');
@@ -64,6 +85,11 @@ class SupabaseCheckinRepository implements CheckinRepository {
         '${now.month.toString().padLeft(2, '0')}-'
         '${now.day.toString().padLeft(2, '0')}';
   }
+
+  String _dateString(DateTime value) =>
+      '${value.year.toString().padLeft(4, '0')}-'
+      '${value.month.toString().padLeft(2, '0')}-'
+      '${value.day.toString().padLeft(2, '0')}';
 
   String? _nullableTrim(String? value) {
     final trimmed = value?.trim();

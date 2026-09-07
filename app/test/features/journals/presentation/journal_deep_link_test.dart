@@ -36,18 +36,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Sửa nhật ký'), findsOneWidget);
-    final dialog = find.byType(AlertDialog);
-    expect(
-      find.descendant(of: dialog, matching: find.text('Mục được nhắc')),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(
-        of: dialog,
-        matching: find.text('Nội dung riêng của mục đích.'),
-      ),
-      findsOneWidget,
-    );
+    expect(find.text('Mục được nhắc'), findsOneWidget);
+    expect(find.text('Nội dung riêng của mục đích.'), findsOneWidget);
+    expect(find.byType(AlertDialog), findsNothing);
   });
 
   testWidgets('does not expose an unavailable deep-link target', (
@@ -92,11 +83,20 @@ class _FakeJournalRepository implements JournalRepository {
   Future<List<JournalEntry>> loadEntries() async => [entry];
 
   @override
+  Future<List<JournalEntry>> loadDailyJournals({
+    required DateTime from,
+    required DateTime toExclusive,
+  }) async => [entry];
+
+  @override
   Future<JournalEntry?> loadEntry(String id) async =>
       id == entry.id ? entry : null;
 
   @override
   Future<void> attachImage(String journalId, PickedJournalImage image) async {}
+
+  @override
+  Future<void> updateMediaTransform(JournalMedia media) async {}
 
   @override
   Future<String> createMediaUrl(String storagePath) async => storagePath;

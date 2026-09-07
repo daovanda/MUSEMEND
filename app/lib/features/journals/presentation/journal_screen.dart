@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:musemend/app/theme/muse_colors.dart';
+import 'package:musemend/core/presentation/muse_ui.dart';
 import 'package:musemend/features/journals/application/journal_providers.dart';
 import 'package:musemend/features/journals/domain/journal_entry.dart';
 import 'package:musemend/features/journals/domain/journal_media.dart';
+import 'package:musemend/features/journals/domain/journal_calendar.dart';
+import 'package:musemend/features/journals/presentation/journal_editor_screen.dart';
+import 'package:musemend/features/checkin/presentation/mood_visuals.dart';
 import 'package:musemend/features/notifications/application/notification_providers.dart';
-import 'package:musemend/features/notifications/domain/future_letter_reminder.dart';
-import 'package:musemend/features/profile/application/profile_providers.dart';
 
 class JournalScreen extends ConsumerStatefulWidget {
   const JournalScreen({this.requestedEntryId, super.key});
@@ -31,83 +33,122 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
   @override
   Widget build(BuildContext context) {
     final entries = ref.watch(journalControllerProvider);
+    final calendar = ref.watch(journalCalendarProvider);
+    final todayEntry =
+        _findTodayEntryInCalendar(calendar.asData?.value) ??
+        _findTodayEntry(entries.asData?.value);
     final requestedEntry = switch (widget.requestedEntryId) {
       final id? => ref.watch(journalEntryProvider(id)),
       null => null,
     };
     requestedEntry?.whenData(_scheduleRequestedEntry);
-    return ColoredBox(
-      color:
-          Theme.of(context).brightness == Brightness.dark
-              ? Theme.of(context).colorScheme.surface
-              : MuseColors.cream,
+    return MusePageBackground(
+      accent: MuseColors.sky,
       child: SafeArea(
         child: RefreshIndicator(
-          onRefresh: ref.read(journalControllerProvider.notifier).reload,
+          onRefresh: _reloadAll,
           child: ListView(
             padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
             children: [
-              Text('Nhật ký', style: Theme.of(context).textTheme.headlineLarge),
-              const SizedBox(height: 6),
-              const Text('Một nơi riêng tư để giữ lại điều bạn muốn nhớ.'),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: FilledButton.icon(
-                      onPressed: () => _editDaily(context, ref),
-                      icon: const Icon(Icons.edit_note_rounded),
-                      label: const Text('Viết hôm nay'),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => _editLetter(context, ref),
-                      icon: const Icon(Icons.forward_to_inbox_outlined),
-                      label: const Text('Thư tương lai'),
-                    ),
-                  ),
-                ],
+              const MusePageHeader(
+                title: 'Nhật ký',
+                subtitle: 'Mỗi ngày một trang nhỏ để trở về với chính mình.',
+                icon: Icons.auto_stories_outlined,
               ),
-              const SizedBox(height: 20),
-              entries.when(
-                loading:
-                    () => const Padding(
-                      padding: EdgeInsets.all(32),
-                      child: Center(child: CircularProgressIndicator()),
-                    ),
-                error:
-                    (_, _) => _JournalError(
-                      onRetry:
-                          ref.read(journalControllerProvider.notifier).reload,
-                    ),
+              const SizedBox(height: 24),
+              calendar.when(
+                loading: () => const _JournalCalendarLoading(),
+                error: (_, _) => _JournalError(onRetry: _reloadAll),
                 data:
-                    (items) =>
-                        items.isEmpty
-                            ? const _EmptyJournal()
-                            : Column(
-                              children: items
-                                  .map(
-                                    (entry) => _JournalCard(
-                                      entry: entry,
-                                      onTap:
-                                          () => _openEntry(context, ref, entry),
-                                      onAttach:
-                                          () =>
-                                              _attachImage(context, ref, entry),
-                                      onDelete:
-                                          () => _delete(context, ref, entry),
-                                    ),
-                                  )
-                                  .toList(growable: false),
-                            ),
+                    (value) => _DailyCalendarSection(
+                      calendar: value,
+                      hasTodayEntry: todayEntry != null,
+                      onWriteToday:
+                          () => _editDaily(context, ref, entry: todayEntry),
+                      onOpen: (entry) => _openEntry(context, ref, entry),
+                    ),
+              ),
+              const SizedBox(height: 28),
+              MuseSectionLabel(
+                'Thư gửi tương lai',
+                trailing: IconButton(
+                  tooltip: 'Viết thư mới',
+                  onPressed: () => _editLetter(context, ref),
+                  icon: const Icon(Icons.add_rounded),
+                  color: MuseColors.teal,
+                ),
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                'Những lời nhắn bạn muốn gửi cho một ngày phía trước.',
+              ),
+              const SizedBox(height: 14),
+              entries.when(
+                loading: () => const _JournalCalendarLoading(compact: true),
+                error: (_, _) => _JournalError(onRetry: _reloadAll),
+                data: (items) {
+                  final letters = items
+                      .where((entry) => entry.kind == JournalKind.futureLetter)
+                      .toList(growable: false);
+                  if (letters.isEmpty) {
+                    return _EmptyFutureLetters(
+                      onCreate: () => _editLetter(context, ref),
+                    );
+                  }
+                  return Column(
+                    children: [
+                      for (final entry in letters)
+                        _JournalCard(
+                          entry: entry,
+                          onTap: () => _openEntry(context, ref, entry),
+                          onAttach: () => _attachImage(context, ref, entry),
+                          onDelete: () => _delete(context, ref, entry),
+                        ),
+                    ],
+                  );
+                },
               ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _reloadAll() async {
+    ref.invalidate(journalCalendarProvider);
+    await ref.read(journalControllerProvider.notifier).reload();
+  }
+
+  DateTime _today() {
+    final now = DateTime.now().toUtc().add(const Duration(hours: 7));
+    return DateTime.utc(now.year, now.month, now.day);
+  }
+
+  bool _sameDate(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
+
+  JournalEntry? _findTodayEntry(List<JournalEntry>? items) {
+    if (items == null) return null;
+    final today = _today();
+    for (final entry in items) {
+      if (entry.kind == JournalKind.daily &&
+          entry.entryDate != null &&
+          _sameDate(entry.entryDate!, today)) {
+        return entry;
+      }
+    }
+    return null;
+  }
+
+  JournalEntry? _findTodayEntryInCalendar(JournalCalendarData? data) {
+    if (data == null) return null;
+    for (final month in data.months) {
+      for (final day in month.days) {
+        if (_sameDate(day.date, data.today)) return day.journal;
+      }
+    }
+    return null;
   }
 
   void _scheduleRequestedEntry(JournalEntry? entry) {
@@ -152,27 +193,29 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
     WidgetRef ref, {
     JournalEntry? entry,
   }) async {
-    final draft = await showDialog<_JournalDraft>(
-      context: context,
-      builder:
-          (_) => _JournalEditorDialog(
-            title: entry?.title ?? '',
-            content: entry?.content ?? '',
-            tags: entry?.tags.map((tag) => tag.name).toList() ?? const [],
-            heading: entry == null ? 'Viết cho hôm nay' : 'Sửa nhật ký',
-          ),
+    var selectedEntry = entry;
+    if (entry != null) {
+      try {
+        selectedEntry =
+            await ref
+                .read(journalControllerProvider.notifier)
+                .loadEntry(entry.id) ??
+            entry;
+      } catch (_) {
+        if (context.mounted) _showFailure(context);
+        return;
+      }
+      if (!context.mounted) return;
+    }
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder:
+            (_) => JournalEditorScreen(
+              entry: selectedEntry,
+              kind: JournalKind.daily,
+            ),
+      ),
     );
-    if (draft == null) return;
-    final saved = await ref
-        .read(journalControllerProvider.notifier)
-        .saveDaily(
-          id: entry?.id,
-          title: draft.title,
-          content: draft.content,
-          tags: draft.tags,
-        );
-    if (!context.mounted) return;
-    _showResult(context, saved != null, 'Nhật ký đã được lưu.');
   }
 
   Future<void> _editLetter(
@@ -180,58 +223,15 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
     WidgetRef ref, {
     JournalEntry? entry,
   }) async {
-    final draft = await showDialog<_LetterDraft>(
-      context: context,
-      builder:
-          (_) => _LetterEditorDialog(
-            entry: entry,
-            notificationsEnabled:
-                ref
-                    .read(accountOverviewProvider)
-                    .value
-                    ?.settings
-                    .notificationEnabled ??
-                false,
-          ),
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder:
+            (_) => JournalEditorScreen(
+              entry: entry,
+              kind: JournalKind.futureLetter,
+            ),
+      ),
     );
-    if (draft == null) return;
-    final saved = await ref
-        .read(journalControllerProvider.notifier)
-        .saveFutureLetter(
-          id: entry?.id,
-          title: draft.title,
-          content: draft.content,
-          deliverAt: draft.deliverAt,
-          tags: draft.tags,
-        );
-    if (!context.mounted) return;
-    var reminderScheduled = false;
-    if (saved != null && draft.notifyOnDevice) {
-      try {
-        final service = ref.read(notificationServiceProvider);
-        final allowed = await service.requestPermission();
-        if (allowed) {
-          await service.scheduleFutureLetter(
-            FutureLetterReminder(journalId: saved, deliverAt: draft.deliverAt),
-          );
-          reminderScheduled = true;
-        }
-      } catch (_) {
-        reminderScheduled = false;
-      }
-    } else if (saved != null) {
-      try {
-        await ref.read(notificationServiceProvider).cancelFutureLetter(saved);
-      } catch (_) {
-        // The server copy is still valid when a local reminder cannot be removed.
-      }
-    }
-    if (!context.mounted) return;
-    final message =
-        saved != null && draft.notifyOnDevice && !reminderScheduled
-            ? 'Đã lưu thư, nhưng chưa thể bật nhắc trên thiết bị.'
-            : 'Thư tương lai đã được lưu.';
-    _showResult(context, saved != null, message);
   }
 
   Future<void> _delete(
@@ -306,6 +306,288 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
   }
 }
 
+class _DailyCalendarSection extends StatelessWidget {
+  const _DailyCalendarSection({
+    required this.calendar,
+    required this.hasTodayEntry,
+    required this.onWriteToday,
+    required this.onOpen,
+  });
+
+  final JournalCalendarData calendar;
+  final bool hasTodayEntry;
+  final VoidCallback onWriteToday;
+  final ValueChanged<JournalEntry> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        MuseSectionLabel(
+          'Nhật ký hàng ngày',
+          trailing: MusePill(
+            label: hasTodayEntry ? 'Sửa hôm nay' : 'Viết hôm nay',
+            icon: hasTodayEntry ? Icons.edit_outlined : Icons.add_rounded,
+            onTap: onWriteToday,
+          ),
+        ),
+        const SizedBox(height: 10),
+        for (final month in calendar.months)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 14),
+            child: _MonthCalendar(
+              month: month,
+              today: calendar.today,
+              onOpen: onOpen,
+            ),
+          ),
+        if (calendar.months.length == 1)
+          Text(
+            'Kéo xuống trong những tháng sau để xem lại các trang đã viết.',
+            style: Theme.of(context).textTheme.bodySmall,
+            textAlign: TextAlign.center,
+          ),
+      ],
+    );
+  }
+}
+
+class _MonthCalendar extends StatelessWidget {
+  const _MonthCalendar({
+    required this.month,
+    required this.today,
+    required this.onOpen,
+  });
+
+  final JournalCalendarMonth month;
+  final DateTime today;
+  final ValueChanged<JournalEntry> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final firstDay = DateTime.utc(month.year, month.month, 1);
+    final leading = firstDay.weekday - 1;
+    final cells = <Widget>[
+      for (var index = 0; index < leading; index++) const SizedBox.shrink(),
+      for (final day in month.days)
+        _CalendarDayCell(
+          day: day,
+          today: today,
+          onOpen: day.journal == null ? null : () => onOpen(day.journal!),
+        ),
+    ];
+    return MuseGlassCard(
+      tint: Colors.white,
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 16),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Text(
+                month.label,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+              ),
+              const Spacer(),
+              if (month.year == today.year && month.month == today.month)
+                const MusePill(label: 'Đang xem', selected: true),
+              if (!(month.year == today.year && month.month == today.month))
+                const Icon(
+                  Icons.history_rounded,
+                  size: 17,
+                  color: MuseColors.mutedInk,
+                ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          const Row(
+            children: [
+              _WeekdayLabel('T2'),
+              _WeekdayLabel('T3'),
+              _WeekdayLabel('T4'),
+              _WeekdayLabel('T5'),
+              _WeekdayLabel('T6'),
+              _WeekdayLabel('T7'),
+              _WeekdayLabel('CN'),
+            ],
+          ),
+          const SizedBox(height: 6),
+          GridView.count(
+            crossAxisCount: 7,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            mainAxisSpacing: 7,
+            crossAxisSpacing: 5,
+            children: cells,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WeekdayLabel extends StatelessWidget {
+  const _WeekdayLabel(this.label);
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Center(
+        child: Text(
+          label,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: MuseColors.mutedInk,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CalendarDayCell extends StatelessWidget {
+  const _CalendarDayCell({required this.day, required this.today, this.onOpen});
+
+  final JournalCalendarDay day;
+  final DateTime today;
+  final VoidCallback? onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final isFuture = day.date.isAfter(today);
+    if (isFuture) return const SizedBox.shrink();
+    final mood = day.checkin?.mood;
+    final isToday = day.date == today;
+    final hasActivity = day.hasActivity;
+    return Semantics(
+      button: onOpen != null,
+      label:
+          '${day.date.day} tháng ${day.date.month}${mood == null ? '' : ', ${mood.label}'}${day.isWritten ? ', đã viết nhật ký' : ''}',
+      child: InkWell(
+        onTap: onOpen,
+        borderRadius: BorderRadius.circular(99),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color:
+                mood != null
+                    ? mood.visual.backgroundColor.withValues(alpha: .9)
+                    : day.isWritten
+                    ? MuseColors.teal.withValues(alpha: .18)
+                    : Colors.transparent,
+            border: Border.all(
+              color:
+                  isToday
+                      ? MuseColors.teal
+                      : hasActivity
+                      ? Colors.white.withValues(alpha: .86)
+                      : MuseColors.mutedInk.withValues(
+                        alpha: isFuture ? .12 : .22,
+                      ),
+              width: isToday ? 2 : 1,
+            ),
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              if (mood != null && !isFuture)
+                Padding(
+                  padding: const EdgeInsets.only(top: 3),
+                  child: Image.asset(
+                    mood.visual.assetPath,
+                    width: 29,
+                    height: 25,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              if (mood == null && !isFuture && day.isWritten)
+                const Icon(
+                  Icons.edit_note_rounded,
+                  size: 18,
+                  color: MuseColors.teal,
+                ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 3),
+                  child: Text(
+                    '${day.date.day}',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: isToday ? FontWeight.w900 : FontWeight.w600,
+                      color: MuseColors.ink,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _JournalCalendarLoading extends StatelessWidget {
+  const _JournalCalendarLoading({this.compact = false});
+
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return MuseGlassCard(
+      padding: EdgeInsets.all(compact ? 20 : 30),
+      child: Center(
+        child:
+            compact
+                ? const SizedBox.square(
+                  dimension: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+                : const CircularProgressIndicator(),
+      ),
+    );
+  }
+}
+
+class _EmptyFutureLetters extends StatelessWidget {
+  const _EmptyFutureLetters({required this.onCreate});
+
+  final VoidCallback onCreate;
+
+  @override
+  Widget build(BuildContext context) {
+    return MuseGlassCard(
+      tint: MuseColors.lavender,
+      child: Column(
+        children: [
+          const Icon(
+            Icons.mark_email_unread_outlined,
+            size: 34,
+            color: MuseColors.teal,
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Chưa có lá thư nào. Bạn có muốn gửi một lời nhắn cho tương lai không?',
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: onCreate,
+            icon: const Icon(Icons.edit_rounded),
+            label: const Text('Viết lá thư đầu tiên'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _JournalCard extends ConsumerWidget {
   const _JournalCard({
     required this.entry,
@@ -322,70 +604,74 @@ class _JournalCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isLetter = entry.kind == JournalKind.futureLetter;
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        onTap: onTap,
-        contentPadding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
-        isThreeLine: entry.tags.isNotEmpty,
-        leading:
-            entry.media.isEmpty
-                ? CircleAvatar(
-                  backgroundColor:
-                      isLetter ? MuseColors.lavender : MuseColors.mint,
-                  child: Icon(
-                    isLetter ? Icons.mail_outline : Icons.auto_stories,
-                  ),
-                )
-                : _PrivateImage(media: entry.media.first),
-        title: Text(
-          entry.title?.trim().isNotEmpty == true
-              ? entry.title!
-              : isLetter
-              ? 'Thư gửi tương lai'
-              : 'Một ngày của tôi',
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              isLetter
-                  ? 'Hẹn ${_date(entry.deliverAt!)} · ${entry.openedAt == null ? 'chưa mở' : 'đã mở'}'
-                  : '${_date(entry.entryDate!)} · ${_preview(entry.content)}',
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            if (entry.tags.isNotEmpty)
-              Wrap(
-                spacing: 6,
-                children: [
-                  for (final tag in entry.tags)
-                    Text(
-                      '#${tag.name}',
-                      style: Theme.of(context).textTheme.labelSmall,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: MuseGlassCard(
+        padding: EdgeInsets.zero,
+        tint: isLetter ? MuseColors.lavender : MuseColors.sky,
+        child: ListTile(
+          onTap: onTap,
+          contentPadding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
+          isThreeLine: entry.tags.isNotEmpty,
+          leading:
+              entry.media.isEmpty
+                  ? CircleAvatar(
+                    backgroundColor:
+                        isLetter ? MuseColors.lavender : MuseColors.mint,
+                    child: Icon(
+                      isLetter ? Icons.mail_outline : Icons.auto_stories,
                     ),
-                ],
+                  )
+                  : _PrivateImage(media: entry.media.first),
+          title: Text(
+            entry.title?.trim().isNotEmpty == true
+                ? entry.title!
+                : isLetter
+                ? 'Thư gửi tương lai'
+                : 'Một ngày của tôi',
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                isLetter
+                    ? 'Hẹn ${_date(entry.deliverAt!)} · ${entry.openedAt == null ? 'chưa mở' : 'đã mở'}'
+                    : '${_date(entry.entryDate!)} · ${_preview(entry.content)}',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
-          ],
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              tooltip: 'Thêm ảnh riêng tư',
-              onPressed: onAttach,
-              icon: Badge(
-                isLabelVisible: entry.media.isNotEmpty,
-                label: Text('${entry.media.length}'),
-                child: const Icon(Icons.add_photo_alternate_outlined),
+              if (entry.tags.isNotEmpty)
+                Wrap(
+                  spacing: 6,
+                  children: [
+                    for (final tag in entry.tags)
+                      Text(
+                        '#${tag.name}',
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
+                  ],
+                ),
+            ],
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                tooltip: 'Thêm ảnh riêng tư',
+                onPressed: onAttach,
+                icon: Badge(
+                  isLabelVisible: entry.media.isNotEmpty,
+                  label: Text('${entry.media.length}'),
+                  child: const Icon(Icons.add_photo_alternate_outlined),
+                ),
               ),
-            ),
-            IconButton(
-              tooltip: 'Xóa',
-              onPressed: onDelete,
-              icon: const Icon(Icons.delete_outline),
-            ),
-          ],
+              IconButton(
+                tooltip: 'Xóa',
+                onPressed: onDelete,
+                icon: const Icon(Icons.delete_outline),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -439,285 +725,6 @@ class _PrivateImage extends ConsumerWidget {
   }
 }
 
-class _JournalEditorDialog extends StatefulWidget {
-  const _JournalEditorDialog({
-    required this.title,
-    required this.content,
-    required this.tags,
-    required this.heading,
-  });
-
-  final String title;
-  final String content;
-  final List<String> tags;
-  final String heading;
-
-  @override
-  State<_JournalEditorDialog> createState() => _JournalEditorDialogState();
-}
-
-class _JournalEditorDialogState extends State<_JournalEditorDialog> {
-  late final _title = TextEditingController(text: widget.title);
-  late final _content = TextEditingController(text: widget.content);
-  late final _tags = TextEditingController(text: widget.tags.join(', '));
-
-  @override
-  void dispose() {
-    _title.dispose();
-    _content.dispose();
-    _tags.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(widget.heading),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _title,
-              maxLength: 120,
-              decoration: const InputDecoration(labelText: 'Tiêu đề'),
-            ),
-            TextField(
-              controller: _content,
-              onChanged: (_) => setState(() {}),
-              minLines: 3,
-              maxLines: 6,
-              maxLength: 10000,
-              decoration: const InputDecoration(labelText: 'Nội dung'),
-            ),
-            TextField(
-              controller: _tags,
-              onChanged: (_) => setState(() {}),
-              maxLength: 320,
-              decoration: const InputDecoration(
-                labelText: 'Tag (phân cách bằng dấu phẩy)',
-                helperText: 'Tối đa 8 tag, mỗi tag 40 ký tự',
-              ),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Hủy'),
-        ),
-        FilledButton(
-          onPressed:
-              _content.text.trim().isEmpty || !_validTags(_tags.text)
-                  ? null
-                  : () => Navigator.pop(
-                    context,
-                    _JournalDraft(
-                      _title.text,
-                      _content.text,
-                      _tagNames(_tags.text),
-                    ),
-                  ),
-          child: const Text('Lưu'),
-        ),
-      ],
-    );
-  }
-}
-
-class _LetterEditorDialog extends StatefulWidget {
-  const _LetterEditorDialog({
-    required this.entry,
-    required this.notificationsEnabled,
-  });
-
-  final JournalEntry? entry;
-  final bool notificationsEnabled;
-
-  @override
-  State<_LetterEditorDialog> createState() => _LetterEditorDialogState();
-}
-
-class _LetterEditorDialogState extends State<_LetterEditorDialog> {
-  late final _title = TextEditingController(text: widget.entry?.title ?? '');
-  late final _content = TextEditingController(
-    text: widget.entry?.content ?? '',
-  );
-  late final _tags = TextEditingController(
-    text: widget.entry?.tags.map((tag) => tag.name).join(', ') ?? '',
-  );
-  late DateTime _delivery =
-      widget.entry?.deliverAt?.toLocal() ??
-      DateTime.now().add(const Duration(days: 1));
-  late bool _notifyOnDevice = widget.notificationsEnabled;
-
-  @override
-  void dispose() {
-    _title.dispose();
-    _content.dispose();
-    _tags.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(widget.entry == null ? 'Thư gửi tương lai' : 'Sửa lá thư'),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _title,
-              maxLength: 120,
-              decoration: const InputDecoration(labelText: 'Tiêu đề'),
-            ),
-            TextField(
-              controller: _content,
-              onChanged: (_) => setState(() {}),
-              minLines: 2,
-              maxLines: 4,
-              maxLength: 10000,
-              decoration: const InputDecoration(labelText: 'Lời nhắn'),
-            ),
-            TextField(
-              controller: _tags,
-              onChanged: (_) => setState(() {}),
-              maxLength: 320,
-              decoration: const InputDecoration(
-                labelText: 'Tag (phân cách bằng dấu phẩy)',
-                helperText: 'Tối đa 8 tag, mỗi tag 40 ký tự',
-              ),
-            ),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Ngày nhắc mở thư'),
-              subtitle: Text(_JournalCard._date(_delivery)),
-              trailing: const Icon(Icons.calendar_month_outlined),
-              onTap: _pickDate,
-            ),
-            CheckboxListTile(
-              contentPadding: EdgeInsets.zero,
-              value: _notifyOnDevice,
-              onChanged:
-                  widget.notificationsEnabled
-                      ? (value) {
-                        setState(() => _notifyOnDevice = value ?? false);
-                      }
-                      : null,
-              title: const Text('Nhắc tôi trên thiết bị'),
-              subtitle: Text(
-                widget.notificationsEnabled
-                    ? 'Ứng dụng sẽ xin quyền khi bạn lưu thư.'
-                    : 'Hãy bật thông báo trong Hồ sơ trước.',
-              ),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Hủy'),
-        ),
-        FilledButton(
-          onPressed:
-              _content.text.trim().isEmpty || !_validTags(_tags.text)
-                  ? null
-                  : () => Navigator.pop(
-                    context,
-                    _LetterDraft(
-                      _title.text,
-                      _content.text,
-                      _tagNames(_tags.text),
-                      _delivery,
-                      _notifyOnDevice,
-                    ),
-                  ),
-          child: const Text('Lưu'),
-        ),
-      ],
-    );
-  }
-
-  Future<void> _pickDate() async {
-    final now = DateTime.now();
-    final selected = await showDatePicker(
-      context: context,
-      initialDate:
-          _delivery.isAfter(now) ? _delivery : now.add(const Duration(days: 1)),
-      firstDate: DateTime(now.year, now.month, now.day + 1),
-      lastDate: DateTime(now.year + 10),
-    );
-    if (selected != null) {
-      setState(
-        () =>
-            _delivery = DateTime(
-              selected.year,
-              selected.month,
-              selected.day,
-              9,
-            ),
-      );
-    }
-  }
-}
-
-class _JournalDraft {
-  const _JournalDraft(this.title, this.content, this.tags);
-
-  final String title;
-  final String content;
-  final List<String> tags;
-}
-
-class _LetterDraft extends _JournalDraft {
-  const _LetterDraft(
-    super.title,
-    super.content,
-    super.tags,
-    this.deliverAt,
-    this.notifyOnDevice,
-  );
-
-  final DateTime deliverAt;
-  final bool notifyOnDevice;
-}
-
-List<String> _tagNames(String value) {
-  final names = <String>[];
-  final normalized = <String>{};
-  for (final raw in value.split(',')) {
-    final name = raw.trim();
-    if (name.isEmpty || !normalized.add(name.toLowerCase())) continue;
-    names.add(name);
-  }
-  return names;
-}
-
-bool _validTags(String value) {
-  final names = _tagNames(value);
-  return names.length <= 8 && names.every((name) => name.length <= 40);
-}
-
-class _EmptyJournal extends StatelessWidget {
-  const _EmptyJournal();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Card(
-      child: Padding(
-        padding: EdgeInsets.all(24),
-        child: Text(
-          'Chưa có trang nào. Bạn có thể bắt đầu bằng vài dòng thật ngắn.',
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
-  }
-}
-
 class _JournalError extends StatelessWidget {
   const _JournalError({required this.onRetry});
 
@@ -725,7 +732,7 @@ class _JournalError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return MuseGlassCard(
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(

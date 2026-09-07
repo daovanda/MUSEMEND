@@ -5,6 +5,11 @@ import 'package:musemend/features/checkin/domain/mood.dart';
 abstract interface class CheckinRepository {
   Future<DailyCheckin?> loadToday();
 
+  Future<List<DailyCheckin>> loadHistory({
+    required DateTime from,
+    required DateTime toExclusive,
+  });
+
   Future<AppVisit> recordAppOpen();
 
   Future<DailyCheckin> saveToday({

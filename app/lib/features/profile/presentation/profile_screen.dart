@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:musemend/app/theme/muse_colors.dart';
+import 'package:musemend/core/presentation/muse_ui.dart';
 import 'package:musemend/features/auth/application/auth_providers.dart';
 import 'package:musemend/features/notifications/application/notification_providers.dart';
 import 'package:musemend/features/notifications/domain/inbox_notification.dart';
@@ -17,27 +18,29 @@ class ProfileScreen extends ConsumerWidget {
     final operation = ref.watch(authControllerProvider);
     final overview = ref.watch(accountOverviewProvider);
     final notifications = ref.watch(notificationInboxProvider);
-    return ColoredBox(
-      color:
-          Theme.of(context).brightness == Brightness.dark
-              ? Theme.of(context).colorScheme.surface
-              : MuseColors.mint,
+    return MusePageBackground(
+      accent: MuseColors.mint,
       child: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
-            Text('Hồ sơ', style: Theme.of(context).textTheme.headlineSmall),
-            const SizedBox(height: 16),
+            const MusePageHeader(
+              title: 'Cá nhân',
+              subtitle:
+                  'Một góc nhỏ để chăm sóc tài khoản và sự riêng tư của bạn.',
+              icon: Icons.person_outline_rounded,
+            ),
+            const SizedBox(height: 24),
             overview.when(
               loading:
-                  () => const Card(
+                  () => const MuseGlassCard(
                     child: Padding(
                       padding: EdgeInsets.all(24),
                       child: Center(child: CircularProgressIndicator()),
                     ),
                   ),
               error:
-                  (_, _) => Card(
+                  (_, _) => MuseGlassCard(
                     child: ListTile(
                       leading: const Icon(Icons.cloud_off_rounded),
                       title: const Text('Chưa thể tải hồ sơ'),
@@ -49,7 +52,7 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                   ),
               data:
-                  (data) => Card(
+                  (data) => MuseGlassCard(
                     child: Column(
                       children: [
                         ListTile(
@@ -94,14 +97,14 @@ class ProfileScreen extends ConsumerWidget {
             const SizedBox(height: 8),
             notifications.when(
               loading:
-                  () => const Card(
+                  () => const MuseGlassCard(
                     child: Padding(
                       padding: EdgeInsets.all(20),
                       child: Center(child: CircularProgressIndicator()),
                     ),
                   ),
               error:
-                  (_, _) => Card(
+                  (_, _) => MuseGlassCard(
                     child: ListTile(
                       leading: const Icon(Icons.cloud_off_rounded),
                       title: const Text('Chưa thể tải thông báo'),
@@ -115,7 +118,7 @@ class ProfileScreen extends ConsumerWidget {
               data:
                   (items) =>
                       items.isEmpty
-                          ? const Card(
+                          ? const MuseGlassCard(
                             child: ListTile(
                               leading: Icon(Icons.notifications_none_rounded),
                               title: Text('Chưa có thông báo mới'),
@@ -124,7 +127,7 @@ class ProfileScreen extends ConsumerWidget {
                               ),
                             ),
                           )
-                          : Card(
+                          : MuseGlassCard(
                             child: Column(
                               children: [
                                 for (
@@ -158,7 +161,7 @@ class ProfileScreen extends ConsumerWidget {
                           ),
             ),
             const SizedBox(height: 16),
-            Card(
+            MuseGlassCard(
               child: Column(
                 children: [
                   ListTile(

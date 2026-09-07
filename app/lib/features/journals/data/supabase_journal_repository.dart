@@ -28,12 +28,7 @@ class SupabaseJournalRepository implements JournalRepository {
       _client
           .from('future_letters')
           .select('journal_id, content, deliver_at, status, opened_at'),
-      _client
-          .from('journal_media')
-          .select('id, journal_id, storage_path')
-          .eq('media_type', 'image')
-          .eq('upload_status', 'completed')
-          .order('order_index', ascending: true),
+      _loadMediaRows(),
       _client
           .from('journal_tags')
           .select('id, name')
@@ -41,6 +36,49 @@ class SupabaseJournalRepository implements JournalRepository {
       _client.from('journal_tag_assignments').select('journal_id, tag_id'),
     ]);
     return _mapper.fromResponses(responses);
+  }
+
+  @override
+  Future<List<JournalEntry>> loadDailyJournals({
+    required DateTime from,
+    required DateTime toExclusive,
+  }) async {
+    final responses = await Future.wait<dynamic>([
+      _client
+          .from('journals')
+          .select('id, journal_type, title, updated_at')
+          .eq('journal_type', 'daily'),
+      _client
+          .from('daily_journals')
+          .select('journal_id, entry_date, content')
+          .gte('entry_date', _dateString(from))
+          .lt('entry_date', _dateString(toExclusive)),
+    ]);
+    final journals = (responses[0] as List)
+        .map((row) => Map<String, dynamic>.from(row as Map))
+        .toList(growable: false);
+    final dailyById = {
+      for (final row in (responses[1] as List).map(
+        (row) => Map<String, dynamic>.from(row as Map),
+      ))
+        row['journal_id'] as String: row,
+    };
+    return journals
+        .map((journal) {
+          final id = journal['id'] as String;
+          final detail = dailyById[id];
+          if (detail == null) return null;
+          return JournalEntry(
+            id: id,
+            kind: JournalKind.daily,
+            title: journal['title'] as String?,
+            content: detail['content'] as String,
+            updatedAt: DateTime.parse(journal['updated_at'] as String),
+            entryDate: DateTime.parse(detail['entry_date'] as String),
+          );
+        })
+        .whereType<JournalEntry>()
+        .toList(growable: false);
   }
 
   @override
@@ -61,13 +99,7 @@ class SupabaseJournalRepository implements JournalRepository {
           .from('future_letters')
           .select('journal_id, content, deliver_at, status, opened_at')
           .eq('journal_id', id),
-      _client
-          .from('journal_media')
-          .select('id, journal_id, storage_path')
-          .eq('journal_id', id)
-          .eq('media_type', 'image')
-          .eq('upload_status', 'completed')
-          .order('order_index', ascending: true),
+      _loadMediaRows(journalId: id),
       _client.from('journal_tags').select('id, name').order('name'),
       _client
           .from('journal_tag_assignments')
@@ -174,6 +206,20 @@ class SupabaseJournalRepository implements JournalRepository {
   }
 
   @override
+  Future<void> updateMediaTransform(JournalMedia media) async {
+    await _client.rpc(
+      'update_journal_media_transform',
+      params: {
+        'p_media_id': media.id,
+        'p_position_x': media.offsetX,
+        'p_position_y': media.offsetY,
+        'p_display_scale': media.scale,
+        'p_rotation_radians': media.rotation,
+      },
+    );
+  }
+
+  @override
   Future<String> createMediaUrl(String storagePath) {
     return _client.storage
         .from('journal-media')
@@ -214,5 +260,66 @@ class SupabaseJournalRepository implements JournalRepository {
   String _preview(String value) {
     final trimmed = value.trim();
     return trimmed.length <= 120 ? trimmed : trimmed.substring(0, 120);
+  }
+
+  String _dateString(DateTime value) =>
+      '${value.year.toString().padLeft(4, '0')}-'
+      '${value.month.toString().padLeft(2, '0')}-'
+      '${value.day.toString().padLeft(2, '0')}';
+
+  /// Reads transform metadata when the migration is present, while keeping
+  /// journal reads usable during a staged rollout before that migration lands
+  /// on the remote project. The transform RPC remains the source of truth for
+  /// writes and will fail safely until the migration is deployed.
+  Future<List<dynamic>> _loadMediaRows({String? journalId}) async {
+    try {
+      if (journalId == null) {
+        return await _client
+            .from('journal_media')
+            .select(
+              'id, journal_id, storage_path, position_x, position_y, display_scale, rotation_radians',
+            )
+            .eq('media_type', 'image')
+            .eq('upload_status', 'completed')
+            .order('order_index', ascending: true);
+      }
+      return await _client
+          .from('journal_media')
+          .select(
+            'id, journal_id, storage_path, position_x, position_y, display_scale, rotation_radians',
+          )
+          .eq('journal_id', journalId)
+          .eq('media_type', 'image')
+          .eq('upload_status', 'completed')
+          .order('order_index', ascending: true);
+    } catch (error) {
+      if (!_isMissingTransformColumns(error)) rethrow;
+
+      if (journalId == null) {
+        return await _client
+            .from('journal_media')
+            .select('id, journal_id, storage_path')
+            .eq('media_type', 'image')
+            .eq('upload_status', 'completed')
+            .order('order_index', ascending: true);
+      }
+      return await _client
+          .from('journal_media')
+          .select('id, journal_id, storage_path')
+          .eq('journal_id', journalId)
+          .eq('media_type', 'image')
+          .eq('upload_status', 'completed')
+          .order('order_index', ascending: true);
+    }
+  }
+
+  bool _isMissingTransformColumns(Object error) {
+    if (error is! PostgrestException) return false;
+    final message = error.message.toLowerCase();
+    return error.code == '42703' ||
+        message.contains('position_x') ||
+        message.contains('position_y') ||
+        message.contains('display_scale') ||
+        message.contains('rotation_radians');
   }
 }

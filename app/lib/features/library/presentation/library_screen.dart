@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:musemend/app/theme/muse_colors.dart';
+import 'package:musemend/core/presentation/muse_ui.dart';
 import 'package:musemend/features/journey/application/journey_providers.dart';
 import 'package:musemend/features/journey/domain/journey_checkpoint.dart';
 import 'package:musemend/features/journey/domain/journey_dashboard.dart';
@@ -13,26 +14,21 @@ class LibraryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dashboard = ref.watch(journeyControllerProvider);
-    return ColoredBox(
-      color:
-          Theme.of(context).brightness == Brightness.dark
-              ? Theme.of(context).colorScheme.surface
-              : MuseColors.lavender,
+    return MusePageBackground(
+      accent: MuseColors.lavender,
       child: SafeArea(
         child: RefreshIndicator(
           onRefresh: ref.read(journeyControllerProvider.notifier).reload,
           child: ListView(
             padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
             children: [
-              Text(
-                'Hành trình',
-                style: Theme.of(context).textTheme.headlineLarge,
+              const MusePageHeader(
+                title: 'Khám phá',
+                subtitle:
+                    'Biến những điều nhỏ bạn hoàn thành thành một chuyến đi dịu dàng.',
+                icon: Icons.explore_outlined,
               ),
-              const SizedBox(height: 6),
-              const Text(
-                'Biến những điều nhỏ bạn hoàn thành thành một chuyến đi qua Việt Nam.',
-              ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
               dashboard.when(
                 loading: () => const _LoadingCard(),
                 error:
@@ -93,10 +89,11 @@ class _JourneyCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final province = dashboard.province;
-    return Card(
-      color: Colors.white.withValues(alpha: 0.82),
+    return MuseGlassCard(
+      tint: MuseColors.sky,
+      padding: const EdgeInsets.all(20),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.zero,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -297,17 +294,25 @@ class _CollectibleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        leading: CircleAvatar(child: Icon(_icon(item.kind))),
-        title: Text(item.name),
-        subtitle: Text(_kindLabel(item.kind)),
-        trailing:
-            item.isEquipped
-                ? const Icon(Icons.checkroom_rounded)
-                : item.isViewed
-                ? null
-                : const Badge(label: Text('Mới')),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: MuseGlassCard(
+        padding: EdgeInsets.zero,
+        tint: MuseColors.mint,
+        child: ListTile(
+          leading: CircleAvatar(
+            backgroundColor: Colors.white.withValues(alpha: .76),
+            child: Icon(_icon(item.kind)),
+          ),
+          title: Text(item.name),
+          subtitle: Text(_kindLabel(item.kind)),
+          trailing:
+              item.isEquipped
+                  ? const Icon(Icons.checkroom_rounded)
+                  : item.isViewed
+                  ? null
+                  : const Badge(label: Text('Mới')),
+        ),
       ),
     );
   }
@@ -330,7 +335,7 @@ class _EmptyCollection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Card(
+    return const MuseGlassCard(
       child: Padding(
         padding: EdgeInsets.all(20),
         child: Text(
@@ -347,7 +352,7 @@ class _LoadingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Card(
+    return const MuseGlassCard(
       child: Padding(
         padding: EdgeInsets.all(32),
         child: Center(child: CircularProgressIndicator()),
@@ -363,7 +368,7 @@ class _ErrorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return MuseGlassCard(
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(

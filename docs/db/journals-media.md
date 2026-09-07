@@ -31,6 +31,13 @@ biến mất khỏi client cùng lúc.
 `future_letters.content` là plaintext trong PostgreSQL và chỉ được bảo vệ bằng RLS;
 không có mã hóa end-to-end/application-layer.
 
+Daily journal có tối đa một mục cho mỗi người dùng trong một ngày lịch Việt Nam.
+Migration `20260907120000_daily_journal_one_per_day.sql` khóa theo cặp user/ngày,
+tái sử dụng mục hiện có khi tạo trùng và từ chối đổi ngày sang ngày đã có mục
+khác. Client authenticated chỉ được gọi wrapper `save_journal_with_tags()`;
+RPC nền `save_journal()` không còn được cấp quyền trực tiếp để không thể bypass
+quy tắc này.
+
 ## RPC `save_journal(p_type, p_data, p_journal_id?)`
 
 `p_data` phải là JSON object. Không truyền ID sẽ tạo journal; có ID sẽ khóa row và
@@ -101,6 +108,12 @@ Object path bắt buộc:
 ```text
 <auth.uid()>/<journal UUID>/<unique filename>
 ```
+
+Ảnh có bốn metadata trình bày trong `journal_media`: `position_x` và `position_y`
+là offset chuẩn hóa từ tâm canvas, `display_scale` là kích thước đồng nhất và
+`rotation_radians` là góc xoay. Các giá trị này không thay đổi object gốc và
+không crop/ghi đè bytes ảnh. RPC `update_journal_media_transform()` chỉ cho owner
+cập nhật metadata, kiểm tra phạm vi an toàn và trả về row đã cập nhật.
 
 Thứ tự client: lưu journal → upload object → gọi `attach_journal_media`. Policy chỉ
 cho SELECT/INSERT object của journal own active; không overwrite hoặc xóa trực tiếp.

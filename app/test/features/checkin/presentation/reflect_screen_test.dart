@@ -37,6 +37,12 @@ class _OfflineCheckinRepository implements CheckinRepository {
       Future.error(TimeoutException('offline'));
 
   @override
+  Future<List<DailyCheckin>> loadHistory({
+    required DateTime from,
+    required DateTime toExclusive,
+  }) => Future.error(TimeoutException('offline'));
+
+  @override
   Future<AppVisit> recordAppOpen() => Future.error(TimeoutException('offline'));
 
   @override

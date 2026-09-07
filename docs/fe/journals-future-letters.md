@@ -1,19 +1,32 @@
 # Daily Journal và Future Letter
 
 Trạng thái: `in-progress`
-Cập nhật: 2026-09-06
+Cập nhật: 2026-09-07
 
 ## Phạm vi triển khai
 
-Tab Journal hỗ trợ MVP:
+Tab Journal hỗ trợ MVP. Việc tạo/sửa không còn dùng `AlertDialog`; app mở editor
+toàn màn hình để giữ đúng trải nghiệm viết tự do.
 
-- tải tối đa 50 daily journal và future letter gần nhất;
+Các khả năng hiện có:
+
+- tải lịch nhật ký hàng ngày từ tháng hiện tại và tối đa 11 tháng trước có hoạt
+  động; tháng hiện tại luôn hiển thị, các tháng quá khứ rỗng được ẩn để kéo xuống
+  xem nhanh lịch sử;
+- mỗi ngày có đúng một ô tròn; ô có check-in được tô bằng mood đã chọn, ô đã
+  viết nhưng chưa có mood dùng trạng thái ghi chú; ngày tương lai được để trống và
+  không thể chạm;
+- mỗi ngày chỉ tạo được một daily journal. Ngày hiện tại có nút viết/sửa; ngày
+  quá khứ chỉ mở để sửa nếu bản ghi đã tồn tại, không có nút tạo thêm;
 - tạo/sửa nhật ký ngày với tiêu đề và nội dung;
 - tạo/sửa thư tương lai, chọn ngày nhắc và đọc/mở trước hạn;
+- trong editor thư tương lai, ngày thư đến được đặt ở phần cuối lá thư; ngày viết
+  không hiển thị ở đầu để giữ đúng nhịp của một lá thư;
 - nhập tối đa 8 tag phân cách bằng dấu phẩy và hiển thị tag trên journal card;
 - tùy chọn lên lịch nhắc cục bộ khi lưu thư tương lai;
-- chọn ảnh JPG/PNG/WebP/HEIC tối đa 10 MiB, upload private và xem preview bằng
-  signed URL 5 phút;
+- chọn ảnh JPG/PNG/WebP/HEIC tối đa 10 MiB, upload private, xem preview bằng
+  signed URL 5 phút và chỉnh vị trí/kích thước/góc xoay tự do trên canvas mà
+  không crop ảnh;
 - pull-to-refresh, trạng thái loading/empty/retry;
 - mở trực tiếp đúng journal theo ID từ local notification hoặc inbox, kể cả khi
   bản ghi nằm ngoài 50 mục mới nhất;
@@ -32,6 +45,8 @@ UI này.
 - repository có query owner-scoped theo ID dành cho deep-link; RLS trả rỗng với ID
   không thuộc session hiện tại;
 - Riverpod controller tải lại danh sách sau mỗi mutation;
+- `journalCalendarProvider` ghép lịch sử `daily_checkins` và `daily_journals` theo
+  ngày để UI không phụ thuộc vào giới hạn 50 mục của danh sách chung;
 - presentation không chứa Supabase client.
 
 ## RPC, validation và bảo mật
@@ -39,6 +54,8 @@ UI này.
 Mọi create/update gọi `save_journal_with_tags()` để parent, subtype và tag
 assignments được lưu trong cùng transaction. Mở thư gọi `open_future_letter()`; xóa gọi
 `soft_delete_journal()`. Client không INSERT/UPDATE trực tiếp các bảng journal.
+Wrapper khóa theo user/ngày Việt Nam và tái sử dụng daily journal hiện có; RPC
+`save_journal()` nền bị thu hồi quyền authenticated.
 
 Ảnh được chọn qua platform picker, giảm chiều rộng tối đa 2048 px và upload vào
 `journal-media/<auth.uid()>/<journal UUID>/<file UUID>.<ext>`. Adapter gọi
