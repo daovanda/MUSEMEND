@@ -126,7 +126,8 @@ class _ReflectScreenState extends ConsumerState<ReflectScreen> {
                   skyEnergyEarned: checkpoint?.earnedEnergy,
                   skyEnergyRequired: checkpoint?.requiredEnergy,
                   skyArtworkPath:
-                      checkpoint?.assetPath ?? journey?.province?.coverAssetPath,
+                      checkpoint?.assetPath ??
+                      journey?.province?.coverAssetPath,
                 ),
               ),
               Padding(

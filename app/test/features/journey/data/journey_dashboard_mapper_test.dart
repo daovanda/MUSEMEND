@@ -35,7 +35,8 @@ void main() {
 
   test('maps checkpoint progress and unlocked collections', () {
     const firstCheckpointAsset = 'https://example.com/checkpoint.png';
-    const currentCheckpointAsset = 'assets/illustrations/journey/checkpoint-1.png';
+    const currentCheckpointAsset =
+        'assets/illustrations/journey/checkpoint-1.png';
     final dashboard = mapper.fromResponses([
       {
         'current_province_id': 1,
