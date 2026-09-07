@@ -34,8 +34,7 @@ void main() {
   });
 
   test('maps checkpoint progress and unlocked collections', () {
-    const firstCheckpointAsset =
-        'https://jpoktrdyehalxkhdhkzu.supabase.co/storage/v1/object/public/catalog/ha-noi-tram-2.png';
+    const firstCheckpointAsset = 'https://example.com/checkpoint.png';
     const currentCheckpointAsset = 'assets/illustrations/journey/checkpoint-1.png';
     final dashboard = mapper.fromResponses([
       {

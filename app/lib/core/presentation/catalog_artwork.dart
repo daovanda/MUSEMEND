@@ -29,19 +29,18 @@ class CatalogArtwork extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final path = assetPath?.trim();
-    final image = switch (path) {
-      final value when value == null || value.isEmpty => null,
-      final value when value.startsWith('assets/') => Image.asset(
-        value,
+    if (path == null || path.isEmpty) return _fallback();
+    if (path.startsWith('assets/')) {
+      return Image.asset(
+        path,
         width: width,
         height: height,
         fit: fit,
         semanticLabel: semanticLabel,
         errorBuilder: (_, _, _) => _fallback(),
-      ),
-      final value => _remoteImage(value),
-    };
-    return image ?? _fallback();
+      );
+    }
+    return _remoteImage(path);
   }
 
   Widget _remoteImage(String path) {

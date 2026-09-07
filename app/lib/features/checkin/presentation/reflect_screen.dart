@@ -667,28 +667,6 @@ class _CheckpointDot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final active = checkpoint.isCurrent || checkpoint.isCompleted;
-    final Widget artwork =
-        checkpoint.isCompleted
-            ? Icon(
-              Icons.check_rounded,
-              size: 21,
-              color:
-                  active ? const Color(0xFF5B7675) : const Color(0xFF9BA4A4),
-            )
-            : CatalogArtwork(
-              assetPath: checkpoint.assetPath,
-              width: 36,
-              height: 36,
-              semanticLabel: checkpoint.title,
-              placeholder: Icon(
-                Icons.landscape_outlined,
-                size: 21,
-                color:
-                    active
-                        ? const Color(0xFF5B7675)
-                        : const Color(0xFF9BA4A4),
-              ),
-            );
     return Column(
       children: [
         AnimatedContainer(
@@ -708,7 +686,7 @@ class _CheckpointDot extends StatelessWidget {
                       : Colors.white.withValues(alpha: .68),
             ),
           ),
-          child: artwork,
+          child: _artwork(active),
         ),
         const SizedBox(height: 4),
         Text(
@@ -723,6 +701,27 @@ class _CheckpointDot extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _artwork(bool active) {
+    if (checkpoint.isCompleted) {
+      return Icon(
+        Icons.check_rounded,
+        size: 21,
+        color: active ? const Color(0xFF5B7675) : const Color(0xFF9BA4A4),
+      );
+    }
+    return CatalogArtwork(
+      assetPath: checkpoint.assetPath,
+      width: 36,
+      height: 36,
+      semanticLabel: checkpoint.title,
+      placeholder: Icon(
+        Icons.landscape_outlined,
+        size: 21,
+        color: active ? const Color(0xFF5B7675) : const Color(0xFF9BA4A4),
+      ),
     );
   }
 }
