@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:musemend/app/theme/muse_colors.dart';
 import 'package:musemend/core/presentation/catalog_artwork.dart';
+import 'package:musemend/core/presentation/muse_ui.dart';
 import 'package:musemend/features/missions/application/mission_providers.dart';
 import 'package:musemend/features/missions/domain/mission_dashboard.dart';
 import 'package:musemend/features/missions/domain/mission_template.dart';
@@ -223,6 +224,9 @@ class MissionsSection extends ConsumerWidget {
     final draft = await showModalBottomSheet<_MissionDraft>(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: const Color(0x66366672),
+      showDragHandle: true,
       builder: (context) => const _CreateMissionSheet(),
     );
     if (draft == null || !context.mounted) return;
@@ -754,62 +758,72 @@ class _CreateMissionSheetState extends State<_CreateMissionSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        20,
-        20,
-        20,
-        MediaQuery.viewInsetsOf(context).bottom + 24,
-      ),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Nhiệm vụ của bạn',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            const Text('Mỗi nhiệm vụ tự tạo được thưởng cố định 5 năng lượng.'),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _titleController,
-              autofocus: true,
-              maxLength: 200,
-              decoration: const InputDecoration(labelText: 'Tên nhiệm vụ'),
-              validator: (value) {
-                final length = value?.trim().length ?? 0;
-                return length < 1 || length > 200
-                    ? 'Tên nhiệm vụ cần từ 1 đến 200 ký tự.'
-                    : null;
-              },
-            ),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _descriptionController,
-              maxLength: 500,
-              maxLines: 3,
-              decoration: const InputDecoration(
-                labelText: 'Ghi chú (không bắt buộc)',
+    return SafeArea(
+      child: MuseGlassCard(
+        tint: MuseColors.sky,
+        padding: EdgeInsets.fromLTRB(
+          20,
+          12,
+          20,
+          MediaQuery.viewInsetsOf(context).bottom + 24,
+        ),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Nhiệm vụ của bạn',
+                style: Theme.of(context).textTheme.titleLarge,
               ),
-            ),
-            const SizedBox(height: 12),
-            FilledButton(
-              onPressed: () {
-                if (!_formKey.currentState!.validate()) return;
-                final description = _descriptionController.text.trim();
-                Navigator.of(context).pop(
-                  _MissionDraft(
-                    title: _titleController.text.trim(),
-                    description: description.isEmpty ? null : description,
-                  ),
-                );
-              },
-              child: const Text('Thêm nhiệm vụ'),
-            ),
-          ],
+              const SizedBox(height: 6),
+              const Text(
+                'Mỗi nhiệm vụ tự tạo được thưởng cố định 5 năng lượng.',
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _titleController,
+                autofocus: true,
+                maxLength: 200,
+                decoration: const InputDecoration(
+                  labelText: 'Tên nhiệm vụ',
+                  prefixIcon: Icon(Icons.spa_outlined),
+                ),
+                validator: (value) {
+                  final length = value?.trim().length ?? 0;
+                  return length < 1 || length > 200
+                      ? 'Tên nhiệm vụ cần từ 1 đến 200 ký tự.'
+                      : null;
+                },
+              ),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _descriptionController,
+                maxLength: 500,
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  labelText: 'Ghi chú (không bắt buộc)',
+                  prefixIcon: Icon(Icons.notes_rounded),
+                ),
+              ),
+              const SizedBox(height: 12),
+              FilledButton.icon(
+                onPressed: () {
+                  if (!_formKey.currentState!.validate()) return;
+                  final description = _descriptionController.text.trim();
+                  Navigator.of(context).pop(
+                    _MissionDraft(
+                      title: _titleController.text.trim(),
+                      description: description.isEmpty ? null : description,
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.add_rounded),
+                label: const Text('Thêm nhiệm vụ'),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -25,6 +25,10 @@ class JournalEntryMapper {
             JournalMedia(
               id: row['id'] as String,
               storagePath: row['storage_path'] as String,
+              offsetX: _double(row['position_x'], fallback: 0),
+              offsetY: _double(row['position_y'], fallback: 0),
+              scale: _double(row['display_scale'], fallback: 1),
+              rotation: _double(row['rotation_radians'], fallback: 0),
             ),
           );
     }
@@ -94,4 +98,11 @@ class JournalEntryMapper {
 
   DateTime? _date(Object? value) =>
       value == null ? null : DateTime.parse(value as String);
+
+  double _double(Object? value, {required double fallback}) {
+    if (value is num) return value.toDouble();
+    return value == null
+        ? fallback
+        : double.tryParse(value.toString()) ?? fallback;
+  }
 }

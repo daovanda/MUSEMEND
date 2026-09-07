@@ -3,6 +3,10 @@ import 'package:musemend/features/journals/domain/journal_media.dart';
 
 abstract interface class JournalRepository {
   Future<List<JournalEntry>> loadEntries();
+  Future<List<JournalEntry>> loadDailyJournals({
+    required DateTime from,
+    required DateTime toExclusive,
+  });
   Future<JournalEntry?> loadEntry(String id);
 
   Future<String> saveDaily({
@@ -22,6 +26,7 @@ abstract interface class JournalRepository {
 
   Future<void> openFutureLetter(String id);
   Future<void> attachImage(String journalId, PickedJournalImage image);
+  Future<void> updateMediaTransform(JournalMedia media);
   Future<String> createMediaUrl(String storagePath);
   Future<void> delete(String id);
 }

@@ -43,6 +43,12 @@ class _RecordingCheckinRepository implements CheckinRepository {
   Future<DailyCheckin?> loadToday() async => checkin;
 
   @override
+  Future<List<DailyCheckin>> loadHistory({
+    required DateTime from,
+    required DateTime toExclusive,
+  }) async => [];
+
+  @override
   Future<AppVisit> recordAppOpen() async {
     return AppVisit(visitDate: DateTime.utc(2026, 9, 7), streak: 3);
   }

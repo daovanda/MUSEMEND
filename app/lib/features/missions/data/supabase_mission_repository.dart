@@ -17,6 +17,10 @@ class SupabaseMissionRepository implements MissionRepository {
 
   @override
   Future<MissionDashboard> loadDashboard({required Mood? todayMood}) async {
+    // Starter missions are materialized by an idempotent server command. This
+    // keeps the Home screen useful for a new account while preserving server
+    // ownership of rewards, snapshots and daily occurrence keys.
+    await _ensureHomeMissions();
     final results = await Future.wait<dynamic>([
       _client
           .from('user_missions')
@@ -144,5 +148,16 @@ class SupabaseMissionRepository implements MissionRepository {
   String? _nullableTrim(String? value) {
     final trimmed = value?.trim();
     return trimmed == null || trimmed.isEmpty ? null : trimmed;
+  }
+
+  Future<void> _ensureHomeMissions() async {
+    try {
+      await _client.rpc('ensure_home_missions');
+    } on PostgrestException catch (error) {
+      // Keep an older development schema readable while the migration is being
+      // deployed. All other errors remain visible to the retry state.
+      if (error.code == 'PGRST202') return;
+      rethrow;
+    }
   }
 }

@@ -1,7 +1,7 @@
 # Migrations, seed và kiểm thử database
 
 Trạng thái: `implemented` cho migration MVP; coverage còn giới hạn  
-Cập nhật: 2026-09-05
+Cập nhật: 2026-09-07
 
 ## Nguồn sự thật và baseline
 
@@ -32,6 +32,8 @@ Audit Supabase remote ngày 2026-09-06 xác nhận đủ 12 migration:
 | `20260905043212` | `restrict_checkin_rpc` | Khóa lại execute ACL check-in |
 | `20260905053723` | `schedule_cleanup_worker` | `pg_net` cron + Vault secret |
 | `20260906001034` | `mvp_journal_tags_rpc` | Atomic journal + tags và ownership guard |
+| `20260907120000` | `daily_journal_one_per_day` | Một daily journal mỗi user/ngày Việt Nam và revoke RPC nền |
+| `20260907150000` | `journal_media_transforms` | Metadata vị trí, scale, xoay ảnh và RPC owner-scoped |
 
 ## Quy ước migration
 
@@ -68,6 +70,9 @@ trên PostgreSQL/Supabase thật.
 - daily/yearly/future-letter save và quan hệ cùng owner;
 - due notification và soft-delete visibility.
 - journal tags chuẩn hóa/khử trùng, lưu atomic và chặn gắn tag chéo user;
+- daily journal một-mục-mỗi-ngày, tái sử dụng khi gọi tạo trùng và chặn đổi sang
+  ngày đã có mục khác;
+- cập nhật metadata vị trí/scale/góc xoay media và chặn user khác sửa transform;
 - cột profile/settings được phép, cột trạng thái bị chặn và account deletion khóa profile.
 
 Chưa có test cho:

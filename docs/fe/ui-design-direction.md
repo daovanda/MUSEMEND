@@ -10,11 +10,11 @@ Tài liệu này ghi lại hướng thiết kế đã quan sát từ Figma để
 không tự tạo một ngôn ngữ thị giác khác. Figma là nguồn tham chiếu hình ảnh; hành
 vi nghiệp vụ, bảo mật và dữ liệu vẫn phải tuân theo schema/RPC cùng tài liệu kỹ thuật.
 
-Phạm vi thiết kế hiện tại **chỉ là page `Home` trong Figma**. Các page `Style`,
-`Page 3` và mọi exploration nằm ngoài `Home` không được dùng làm nguồn chuẩn cho
-implementation trong vòng này. Việc triển khai đi lần lượt từng màn thuộc Home,
-bắt đầu từ Bầu trời; inventory đầy đủ được giữ để những màn Home còn lại không bị
-bỏ quên.
+Phạm vi tham chiếu Figma hiện tại **chỉ là màn Bầu trời của page `Home`**. Sau
+quyết định sản phẩm mới, các màn Auth, Nhật ký, Khám phá và Cá nhân không còn lấy
+frame Figma cũ làm nguồn chuẩn; chúng dùng ngôn ngữ thị giác Bầu trời và primitive
+trong [UI system](./ui-system.md). Các page `Style`, `Page 3` và exploration
+khác được coi là đã loại bỏ khỏi UI sản phẩm.
 
 ## 2. Ngôn ngữ thị giác đã quan sát
 
@@ -29,7 +29,7 @@ bỏ quên.
 
 ## 3. Inventory Figma đã quan sát
 
-Inventory chỉ lấy từ page `Home` và được ghi chi tiết tại
+Inventory tham chiếu còn giữ từ page `Home` và được ghi chi tiết tại
 [Home Figma inventory](./home-figma-inventory.md). Page này gồm các nhóm
 onboarding, rationale xin quyền, các trạng thái hệ thống và nhóm màn chính; vòng
 hiện tại triển khai frame Bầu trời trước.
@@ -149,6 +149,8 @@ app/assets/
 - Full interactive map chưa có asset/spec đủ chắc chắn; P0 dùng journey card/list.
 - Figma có thể chứa exploration ngoài P0; phạm vi feature theo roadmap MVP đã chốt
   được ưu tiên hơn việc triển khai tất cả frame.
+- Nếu đội sản phẩm thay đổi visual language sau này, tạo ADR/UI token thay vì
+  khôi phục trực tiếp object từ các page Figma đã loại bỏ.
 
 ## 12. Tài liệu liên quan
 

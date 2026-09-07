@@ -3,7 +3,7 @@ import 'package:musemend/app/theme/muse_colors.dart';
 
 ThemeData buildMuseTheme([Brightness brightness = Brightness.light]) {
   final scheme = ColorScheme.fromSeed(
-    seedColor: MuseColors.coral,
+    seedColor: MuseColors.teal,
     brightness: brightness,
     surface: brightness == Brightness.light ? MuseColors.cream : null,
   );
@@ -39,9 +39,23 @@ ThemeData buildMuseTheme([Brightness brightness = Brightness.light]) {
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
+        backgroundColor: MuseColors.teal,
+        foregroundColor: Colors.white,
         minimumSize: const Size.fromHeight(52),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: MuseColors.teal,
+        side: BorderSide(color: MuseColors.teal.withValues(alpha: .38)),
+        minimumSize: const Size.fromHeight(52),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      ),
+    ),
+    snackBarTheme: SnackBarThemeData(
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
     ),
   );
 }

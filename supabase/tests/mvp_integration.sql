@@ -5,13 +5,17 @@ INSERT INTO auth.users(id,email,raw_user_meta_data,raw_app_meta_data) VALUES
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000001',true);
 DO $$
-DECLARE c public.daily_checkins; c2 public.daily_checkins; v jsonb; m public.user_missions; r jsonb; p public.travel_progress; j uuid;
+DECLARE c public.daily_checkins; c2 public.daily_checkins; v jsonb; m public.user_missions; r jsonb; p public.travel_progress; j uuid; j2 uuid; media_id uuid; media_path text; starter_count integer;
 BEGIN
  SELECT * INTO c FROM public.upsert_daily_checkin('sad',2,'first');
  SELECT * INTO c2 FROM public.upsert_daily_checkin('good',4,'edited');
  IF c.id<>c2.id OR c2.mood<>'good' OR (SELECT count(*) FROM public.daily_checkins)<>1 THEN RAISE EXCEPTION 'check-in failed'; END IF;
  SELECT public.record_app_open() INTO v; PERFORM public.record_app_open();
  IF (v->>'streak')::int<>1 OR (SELECT count(*) FROM public.daily_visits)<>1 THEN RAISE EXCEPTION 'streak failed'; END IF;
+ SELECT count(*) INTO starter_count FROM public.ensure_home_missions();
+ IF starter_count<>2 OR (SELECT count(*) FROM public.user_missions WHERE source_type='system')<>2 THEN RAISE EXCEPTION 'home starter missions failed'; END IF;
+ SELECT count(*) INTO starter_count FROM public.ensure_home_missions();
+ IF starter_count<>2 OR (SELECT count(*) FROM public.user_missions WHERE source_type='system')<>2 THEN RAISE EXCEPTION 'home starter missions are not idempotent'; END IF;
  SELECT * INTO m FROM public.create_mission(NULL,'Custom task','private',NULL,'30000000-0000-4000-8000-000000000003');
  IF m.energy_reward<>5 THEN RAISE EXCEPTION 'custom reward failed'; END IF;
  PERFORM public.start_journey(); PERFORM public.complete_mission(m.id); SELECT public.complete_mission(m.id) INTO r;
@@ -24,17 +28,29 @@ BEGIN
  j:=public.save_journal_with_tags('daily',jsonb_build_object('content','entry A','checkin_id',c.id,'mood','good'),ARRAY['Gia đình',' Bình yên ','gia ĐÌNH'],NULL);
  IF NOT EXISTS(SELECT 1 FROM public.daily_journals WHERE journal_id=j AND content='entry A') THEN RAISE EXCEPTION 'journal failed'; END IF;
  IF (SELECT count(*) FROM public.journal_tag_assignments WHERE journal_id=j)<>2 THEN RAISE EXCEPTION 'journal tags failed'; END IF;
+ j2:=public.save_journal_with_tags('daily',jsonb_build_object('content','entry A updated'),ARRAY[]::text[],NULL);
+ IF j2<>j OR (SELECT count(*) FROM public.daily_journals WHERE entry_date=(now() AT TIME ZONE 'Asia/Ho_Chi_Minh')::date)<>1 THEN RAISE EXCEPTION 'daily journal uniqueness failed'; END IF;
+ media_path:=auth.uid()::text||'/'||j::text||'/entry.png';
+ INSERT INTO storage.objects(id,bucket_id,name,owner_id) VALUES('50000000-0000-4000-8000-000000000001','journal-media',media_path,auth.uid()::text);
+ media_id:=public.attach_journal_media(j,media_path,'image',NULL);
+ PERFORM public.update_journal_media_transform(media_id,0.2,-0.1,1.75,1.2);
+ IF NOT EXISTS(SELECT 1 FROM public.journal_media WHERE id=media_id AND position_x=0.2 AND position_y=-0.1 AND display_scale=1.75 AND rotation_radians=1.2) THEN RAISE EXCEPTION 'media transform failed'; END IF;
  PERFORM set_config('app.test.journal_a',j::text,true); PERFORM set_config('app.test.checkin_a',c.id::text,true);
+ PERFORM set_config('app.test.media_a',media_id::text,true);
 END $$;
 SELECT set_config('request.jwt.claim.sub','20000000-0000-4000-8000-000000000002',true);
 DO $$
-DECLARE j uuid:=current_setting('app.test.journal_a')::uuid; ca uuid:=current_setting('app.test.checkin_a')::uuid; blocked boolean:=false;
+DECLARE j uuid:=current_setting('app.test.journal_a')::uuid; ca uuid:=current_setting('app.test.checkin_a')::uuid; media_id uuid:=current_setting('app.test.media_a')::uuid; blocked boolean:=false;
 BEGIN
  PERFORM public.upsert_daily_checkin('okay',3,NULL);
  IF EXISTS(SELECT 1 FROM public.journals WHERE id=j) THEN RAISE EXCEPTION 'RLS leak'; END IF;
- BEGIN PERFORM public.save_journal('daily',jsonb_build_object('content','bad','checkin_id',ca),NULL);
+ BEGIN PERFORM public.save_journal_with_tags('daily',jsonb_build_object('content','bad','checkin_id',ca),ARRAY[]::text[],NULL);
  EXCEPTION WHEN check_violation OR raise_exception THEN blocked:=true; END;
  IF NOT blocked THEN RAISE EXCEPTION 'cross-user relation accepted'; END IF;
+ blocked:=false;
+ BEGIN PERFORM public.update_journal_media_transform(media_id,0,0,1,0);
+ EXCEPTION WHEN insufficient_privilege OR raise_exception THEN blocked:=true; END;
+ IF NOT blocked THEN RAISE EXCEPTION 'cross-user media transform accepted'; END IF;
  blocked:=false;
  BEGIN PERFORM public.set_journal_tags(j,ARRAY['stolen']);
  EXCEPTION WHEN insufficient_privilege OR raise_exception THEN blocked:=true; END;
@@ -44,9 +60,9 @@ SELECT set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000001'
 DO $$
 DECLARE j uuid;
 BEGIN
- j:=public.save_journal('yearly','{"year":2026,"goals":[{"title":"Goal"}],"highlights":[{"title":"Moment"}],"lessons":[{"content":"Lesson"}]}'::jsonb,NULL);
+ j:=public.save_journal_with_tags('yearly','{"year":2026,"goals":[{"title":"Goal"}],"highlights":[{"title":"Moment"}],"lessons":[{"content":"Lesson"}]}'::jsonb,ARRAY[]::text[],NULL);
  IF (SELECT count(*) FROM public.yearly_goals WHERE yearly_journal_id=j)<>1 OR (SELECT count(*) FROM public.yearly_highlights WHERE yearly_journal_id=j)<>1 OR (SELECT count(*) FROM public.yearly_lessons WHERE yearly_journal_id=j)<>1 THEN RAISE EXCEPTION 'yearly save failed'; END IF;
- j:=public.save_journal('future_letter',jsonb_build_object('content','Readable now','deliver_at',now()+interval '1 hour'),NULL);
+ j:=public.save_journal_with_tags('future_letter',jsonb_build_object('content','Readable now','deliver_at',now()+interval '1 hour'),ARRAY[]::text[],NULL);
  IF (SELECT content FROM public.future_letters WHERE journal_id=j)<>'Readable now' THEN RAISE EXCEPTION 'future read failed'; END IF;
  PERFORM public.open_future_letter(j);
  IF (SELECT status FROM public.future_letters WHERE journal_id=j)<>'opened' THEN RAISE EXCEPTION 'future open failed'; END IF;
