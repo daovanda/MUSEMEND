@@ -1,7 +1,7 @@
 # Journey, checkpoints và rewards
 
 Trạng thái: `implemented`  
-Cập nhật: 2026-09-06
+Cập nhật: 2026-09-08
 
 ## Mục tiêu và phạm vi
 
@@ -18,6 +18,9 @@ Catalog server-owned:
 - `checkpoint_rewards` trỏ đúng một loại reward: landmark, food, province item
   hoặc energy. Constraint yêu cầu đúng cột đích và số lượng/năng lượng dương.
 - `province_checkpoints.required_energy > 0` là số điểm cần phân bổ cho từng trạm.
+- `province_checkpoints.asset_path` trỏ tới artwork server-owned. Catalog mở rộng
+  dùng `provinces.country_code` và `destination_type`; tên bảng cũ được giữ để
+  tương thích với RPC và client MVP.
 
 Dữ liệu user-owned:
 
@@ -103,12 +106,13 @@ trên Dashboard.
 
 ## Giới hạn và việc còn lại
 
-- Cần catalog nội dung/asset được duyệt thay cho demo seed và quy trình publish
-  `asset_path` an toàn.
+- Artwork riêng cho food/item vẫn dùng placeholder; cần một đợt content review
+  và export riêng trước production.
 - App phải gọi `start_journey()` khi user muốn chuyển sang tỉnh kế tiếp.
 - Chưa có admin/content publishing workflow hay version catalog.
 - Chưa có test tải/lock contention và invariant toàn hành trình.
 
 Liên quan: [missions-energy.md](./missions-energy.md),
-[migrations-testing.md](./migrations-testing.md).
+[migrations-testing.md](./migrations-testing.md),
+[curated-catalog.md](./curated-catalog.md).
 

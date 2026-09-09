@@ -1,7 +1,7 @@
 # Migrations, seed và kiểm thử database
 
 Trạng thái: `implemented` cho migration MVP; coverage còn giới hạn  
-Cập nhật: 2026-09-07
+Cập nhật: 2026-09-08
 
 ## Nguồn sự thật và baseline
 
@@ -16,7 +16,8 @@ lược expand → migrate → contract khi có client cũ.
 
 ## Lịch sử đã áp dụng
 
-Audit Supabase remote ngày 2026-09-06 xác nhận đủ 12 migration:
+Các migration tới `20260907150000` đã có trên nhánh phát triển; dòng
+`20260908110000` đang chờ CI/deploy cùng content pack:
 
 | Version | Migration | Trách nhiệm |
 |---|---|---|
@@ -32,8 +33,10 @@ Audit Supabase remote ngày 2026-09-06 xác nhận đủ 12 migration:
 | `20260905043212` | `restrict_checkin_rpc` | Khóa lại execute ACL check-in |
 | `20260905053723` | `schedule_cleanup_worker` | `pg_net` cron + Vault secret |
 | `20260906001034` | `mvp_journal_tags_rpc` | Atomic journal + tags và ownership guard |
+| `20260907100000` | `home_mission_defaults` | Hai nhiệm vụ Home mặc định, tạo idempotent |
 | `20260907120000` | `daily_journal_one_per_day` | Một daily journal mỗi user/ngày Việt Nam và revoke RPC nền |
 | `20260907150000` | `journal_media_transforms` | Metadata vị trí, scale, xoay ảnh và RPC owner-scoped |
+| `20260908110000` | `curated_world_catalog` | 10 điểm đến/trạm/reward và 10 mission template curated |
 
 ## Quy ước migration
 
@@ -73,6 +76,7 @@ trên PostgreSQL/Supabase thật.
 - daily journal một-mục-mỗi-ngày, tái sử dụng khi gọi tạo trùng và chặn đổi sang
   ngày đã có mục khác;
 - cập nhật metadata vị trí/scale/góc xoay media và chặn user khác sửa transform;
+- số lượng, country metadata, artwork path và reward của curated catalog;
 - cột profile/settings được phép, cột trạng thái bị chặn và account deletion khóa profile.
 
 Chưa có test cho:
@@ -81,7 +85,7 @@ Chưa có test cho:
 - concurrent calls, deadlock/load, mọi constraint và invalid payload;
 - Storage MIME/size/object policies qua API thật;
 - cleanup lease/retry, cron/HTTP, hard delete Storage/Auth và account deletion worker E2E;
-- catalog đầy đủ, migration từ dữ liệu production lớn và rollback/restore;
+- migration catalog từ dữ liệu production lớn và rollback/restore;
 - Flutter contract hoặc local/push notification.
 
 ## Tiêu chí nghiệm thu migration mới

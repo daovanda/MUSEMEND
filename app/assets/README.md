@@ -1,9 +1,9 @@
 # MuseMend assets
 
 Trạng thái: `in-progress`
-Cập nhật: 2026-09-07
+Cập nhật: 2026-09-08
 
-Thư mục này chứa các asset chính thức đã export từ Figma và được đóng gói cùng
+Thư mục này chứa các asset chính thức đã export hoặc tạo riêng cho MuseMend và được đóng gói cùng
 ứng dụng. Không đặt screenshot của frame Figma vào đây. Khi artwork chưa có bản
 export được xác nhận, UI dùng placeholder code-native để vẫn có thể phát triển và
 kiểm thử.
@@ -14,9 +14,9 @@ kiểm thử.
 - Ưu tiên SVG cho icon/illustration phẳng, WebP/PNG cho ảnh raster.
 - Mỗi asset phải có nguồn Figma/node và quyền sử dụng ghi trong
   [`docs/fe/assets.md`](../../docs/fe/assets.md).
-- Asset động của catalog (landmark, food, item, province) không commit vào app;
-  chúng được map từ `asset_path` do repository đọc từ Supabase và phải được
-  kiểm soát bởi policy catalog.
+- Catalog có thể dùng asset bundled đã duyệt hoặc URL HTTPS từ publishing flow
+  server-owned. Chúng được map từ `asset_path` do repository đọc từ Supabase;
+  client không được tự ghi hay tự ghép URL.
 
 ## Cấu trúc dự kiến
 
@@ -43,6 +43,8 @@ Asset đã export:
 - `illustrations/journey/sky-collection-sprite.png`: Figma `image 13/14/15`,
   sprite tham chiếu nhiều landmark/food; không render như dữ liệu catalog vì
   không thể suy ra từng item và không khai báo trong `pubspec.yaml`.
+- `illustrations/journey/checkpoints/*.png`: 10 tranh trạm do AI tạo riêng cho
+  MuseMend, gồm 5 điểm đến Việt Nam và 5 điểm đến quốc tế.
 
 Khi thêm thư mục/file, cập nhật `pubspec.yaml`, manifest trong tài liệu frontend
 và kiểm thử màn hình dùng asset đó.
