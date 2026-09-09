@@ -1,6 +1,7 @@
 # MuseMend
 
-Ứng dụng nhật ký chữa lành trên Flutter cho Android/iOS, kết hợp check-in cảm xúc,
+Ứng dụng nhật ký chữa lành trên Flutter cho Android/iOS, kèm target Flutter Web
+phục vụ QA giao diện local, kết hợp check-in cảm xúc,
 nhiệm vụ tích lũy năng lượng và hành trình khám phá Việt Nam. Backend MVP sử dụng
 Supabase Auth, PostgreSQL/RLS/RPC, Storage, Edge Functions và Cron.
 
@@ -38,7 +39,7 @@ Mọi developer và coding agent phải đọc:
 ## Cấu trúc
 
 ```text
-app/                 Flutter Android/iOS (`com.musemend.app`)
+app/                 Flutter Android/iOS (`com.musemend.app`) + Web QA local
 docs/                tài liệu kiến trúc, feature, DB và vận hành
 supabase/
   migrations/        nguồn sự thật của schema
@@ -59,6 +60,15 @@ cd app
 flutter pub get
 flutter run --dart-define-from-file=config/dev.json
 ```
+
+Để kiểm tra nhanh giao diện mà không chạy Android Emulator, dùng Flutter Web:
+
+```powershell
+flutter run -d chrome --dart-define-from-file=config/dev.json
+```
+
+Target Web chỉ dùng cho QA local; các permission native, notification, image
+picker và gesture cảm ứng vẫn phải kiểm tra trên Android/iOS.
 
 Mobile app chỉ được dùng publishable key. Không đặt service-role key, database
 password hoặc cleanup secret trong `app/config/` hay mã Dart.

@@ -13,6 +13,7 @@ schema trước đợt hardening MVP và không đại diện cho trạng thái 
 - [Daily check-in và streak](./daily-checkins-streak.md)
 - [Missions và energy](./missions-energy.md)
 - [Journey, checkpoints và rewards](./journey-rewards.md)
+- [Curated travel và mission catalog](./curated-catalog.md)
 - [Journals, tags và media](./journals-media.md)
 - [Notifications, cleanup và account deletion](./notifications-cleanup.md)
 - [Migrations, seed và kiểm thử](./migrations-testing.md)

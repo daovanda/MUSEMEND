@@ -1,4 +1,15 @@
 BEGIN;
+DO $$
+BEGIN
+ IF (SELECT count(*) FROM public.provinces WHERE code LIKE 'curated-%') <> 10 THEN RAISE EXCEPTION 'curated destinations missing'; END IF;
+ IF (SELECT count(*) FROM public.province_checkpoints c JOIN public.provinces p ON p.id=c.province_id WHERE p.code LIKE 'curated-%' AND c.asset_path IS NOT NULL) <> 10 THEN RAISE EXCEPTION 'curated checkpoint artwork missing'; END IF;
+ IF (SELECT count(*) FROM public.landmarks WHERE code LIKE 'curated-%') <> 10 THEN RAISE EXCEPTION 'curated landmarks missing'; END IF;
+ IF (SELECT count(*) FROM public.foods WHERE code LIKE 'curated-%') <> 10 THEN RAISE EXCEPTION 'curated foods missing'; END IF;
+ IF (SELECT count(*) FROM public.province_items WHERE code LIKE 'curated-%') <> 10 THEN RAISE EXCEPTION 'curated items missing'; END IF;
+ IF (SELECT count(*) FROM public.mission_templates WHERE code LIKE 'curated-%') <> 10 THEN RAISE EXCEPTION 'curated missions missing'; END IF;
+ IF (SELECT count(*) FROM public.checkpoint_rewards r JOIN public.province_checkpoints c ON c.id=r.checkpoint_id JOIN public.provinces p ON p.id=c.province_id WHERE p.code LIKE 'curated-%') <> 30 THEN RAISE EXCEPTION 'curated rewards missing'; END IF;
+ IF EXISTS(SELECT 1 FROM public.provinces WHERE code LIKE 'curated-%' AND country_code IS NULL) THEN RAISE EXCEPTION 'curated destination country missing'; END IF;
+END $$;
 INSERT INTO auth.users(id,email,raw_user_meta_data,raw_app_meta_data) VALUES
  ('10000000-0000-4000-8000-000000000001','a@example.invalid','{"display_name":"A"}','{"provider":"email"}'),
  ('20000000-0000-4000-8000-000000000002','b@example.invalid','{"display_name":"B"}','{"provider":"email"}');

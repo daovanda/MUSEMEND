@@ -1,7 +1,7 @@
 # Frontend asset manifest
 
 - **Trạng thái:** in-progress
-- **Cập nhật:** 2026-09-07
+- **Cập nhật:** 2026-09-08
 - **Nguồn thiết kế:** [Figma — page Home](https://www.figma.com/design/AhhlLUWAyvLVs7R5ZBVcQV/Nh%E1%BA%ADt-K%C3%BD-Ch%E1%BB%AFa-L%C3%A0nh?node-id=130-25)
 
 ## Mục tiêu
@@ -25,7 +25,7 @@ thế mà không sửa nghiệp vụ. Frame screenshot chỉ là tài liệu tha
 | Mood CHỮA LÀNH | `85:595`, source `1024×1024` | `app/assets/illustrations/clouds/moods/great.png` | integrated |
 | Journey decoration sprite | Home mission/weather source, `2400×1309` | `app/assets/illustrations/journey/sky-collection-sprite.png` | reference only; excluded from app bundle |
 | Province/landmark/food/item | Catalog Supabase (`asset_path`) | repository map vào domain model | implemented mapping; catalog paths pending approved per-item exports |
-| Checkpoint/trạm hiện tại | `province_checkpoints.asset_path` | `JourneyCheckpoint.assetPath` → `CatalogArtwork` trên Home | plumbing implemented; `NULL` dùng placeholder tới khi mapping được duyệt |
+| 10 checkpoint curated | MuseMend generated artwork | `app/assets/illustrations/journey/checkpoints/*.png` | integrated; 5 Việt Nam + 5 quốc tế |
 | Quote card | Figma `Quote` | Flutter card, quote hardcoded P0 | implemented |
 
 ## Quy trình thêm asset chính thức
@@ -47,8 +47,10 @@ publish catalog artwork.
 Catalog path là dữ liệu server-owned; không nhận URL tuỳ ý từ người dùng và không
 đưa signed URL vào log. Asset journal riêng tư thuộc Storage bucket khác, không
 được trộn vào asset bundle. Nền, mascot và năm mood đã được export trực tiếp từ
-page Home. Sprite trang trí không được gán vào một dòng catalog vì nó chứa nhiều
-object đã crop; catalog vẫn chờ export riêng cho từng landmark/food/item.
+page Home. Mười ảnh checkpoint được AI tạo riêng cho MuseMend, không sao chép asset
+thương hiệu và được đóng gói cùng app để MVP hoạt động ổn định. Sprite trang trí
+không được gán vào một dòng catalog vì nó chứa nhiều object đã crop. Food/item vẫn
+dùng placeholder cho tới khi có artwork riêng được duyệt.
 
 ## Liên quan
 
