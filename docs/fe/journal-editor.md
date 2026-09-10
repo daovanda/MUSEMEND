@@ -1,7 +1,7 @@
 # Journal editor
 
 - **Trạng thái:** `in-progress`
-- **Cập nhật:** 2026-09-07
+- **Cập nhật:** 2026-09-10
 
 ## Mục tiêu và phạm vi
 
@@ -14,6 +14,15 @@ trong trang viết.
 
 Editor dùng chung nền gradient của trang, không đặt tiêu đề hoặc nội dung vào
 card/input box riêng. Thứ tự thị giác giống một lá thư:
+
+Nền trang viết dùng `MusePageBackground`, vì vậy có cùng lớp xanh trời–kem–tím
+và các cụm mây trắng code-native trôi nhẹ như các tab chính. Mây chỉ là lớp trang trí phía sau,
+không di chuyển vùng nhập, ảnh đính kèm hoặc ảnh hưởng gesture; Reduce Motion sẽ
+dừng toàn bộ chuyển động nền.
+
+Khi cuộn trang viết, frame mây dịch chậm bằng 14% quãng cuộn để tạo chiều sâu.
+Frame được lặp liền cạnh theo cả hai trục nên cuộn dài hoặc tự trôi ngang không
+làm lộ khoảng trống hay điểm nối.
 
 1. ngày, tháng, năm ở phía trên (chỉ áp dụng cho nhật ký hàng ngày);
 2. tiêu đề với serif lớn, đậm;

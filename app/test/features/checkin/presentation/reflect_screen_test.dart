@@ -21,13 +21,21 @@ void main() {
             _OfflineCheckinRepository(),
           ),
         ],
-        child: const MaterialApp(home: Scaffold(body: ReflectScreen())),
+        child: MaterialApp(
+          builder:
+              (context, child) => MediaQuery(
+                data: MediaQuery.of(context).copyWith(disableAnimations: true),
+                child: child!,
+              ),
+          home: const Scaffold(body: ReflectScreen()),
+        ),
       ),
     );
     await tester.pumpAndSettle();
 
     expect(find.text('Chưa thể tải dữ liệu của bạn.'), findsOneWidget);
     expect(find.text('Thử lại'), findsOneWidget);
+    expect(find.byKey(const ValueKey('muse-page-cloud-drift')), findsOneWidget);
   });
 }
 

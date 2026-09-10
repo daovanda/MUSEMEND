@@ -21,16 +21,15 @@ class ProfileScreen extends ConsumerWidget {
     return MusePageBackground(
       accent: MuseColors.mint,
       child: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(20),
+        child: MuseResponsiveList(
+          top: 20,
           children: [
-            const MusePageHeader(
-              title: 'Cá nhân',
-              subtitle:
-                  'Một góc nhỏ để chăm sóc tài khoản và sự riêng tư của bạn.',
-              icon: Icons.person_outline_rounded,
+            const MuseTopBar(trailing: MusePageBadge(label: 'Cá nhân')),
+            const SizedBox(height: 4),
+            const MusePageTagline(
+              'Một góc nhỏ để chăm sóc tài khoản và sự riêng tư của bạn.',
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 28),
             overview.when(
               loading:
                   () => const MuseGlassCard(

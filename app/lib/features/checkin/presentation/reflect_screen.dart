@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:musemend/app/theme/muse_colors.dart';
 import 'package:musemend/core/presentation/catalog_artwork.dart';
+import 'package:musemend/core/presentation/muse_ui.dart';
 import 'package:musemend/features/checkin/application/reflect_providers.dart';
 import 'package:musemend/features/checkin/application/reflect_state.dart';
 import 'package:musemend/features/checkin/domain/mood.dart';
@@ -85,15 +86,8 @@ class _ReflectScreenState extends ConsumerState<ReflectScreen> {
         state.hasValue ? ref.watch(journeyControllerProvider) : null;
     state.whenData(_hydrate);
 
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFFE0F2F7), Color(0xFFFBF9F5), Color(0xFFFBF9F5)],
-          stops: [0, .56, 1],
-        ),
-      ),
+    return MusePageBackground(
+      accent: MuseColors.sky,
       child: state.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error:
@@ -119,8 +113,9 @@ class _ReflectScreenState extends ConsumerState<ReflectScreen> {
                 onSave: selected == null ? null : _save,
                 onSaveAndWrite: selected == null ? null : _saveAndWrite,
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+              MuseContentFrame(
+                compactGutter: 14,
+                regularGutter: 16,
                 child: MissionsSection(
                   skyStyle: true,
                   skyEnergyEarned: checkpoint?.earnedEnergy,
@@ -130,8 +125,9 @@ class _ReflectScreenState extends ConsumerState<ReflectScreen> {
                       journey?.province?.coverAssetPath,
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 28),
+              MuseContentFrame(
+                compactGutter: 16,
+                regularGutter: 28,
                 child: Column(
                   children: [
                     const SizedBox(height: 18),
@@ -183,25 +179,21 @@ class _HomeSkyHero extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        const Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 560,
-          child: SkyScene(height: 560),
-        ),
-        const Positioned(
-          top: 294,
-          left: 0,
-          right: 0,
-          height: 337,
+        const Positioned.fill(child: SkyScene()),
+        const Positioned.fill(
           child: IgnorePointer(
             child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Color(0x00E0F2F7), Color(0xFFE0F2F7)],
+                  colors: [
+                    Color(0x00FBF9F5),
+                    Color(0x22FBF9F5),
+                    Color(0xCCFBF9F5),
+                    MuseColors.cream,
+                  ],
+                  stops: [.58, .74, .93, 1],
                 ),
               ),
             ),
@@ -211,7 +203,13 @@ class _HomeSkyHero extends StatelessWidget {
           children: [
             SafeArea(
               bottom: false,
-              child: _SkyHeader(streak: streak, energy: energy),
+              child: MuseContentFrame(
+                compactGutter: 16,
+                regularGutter: 16,
+                child: MuseTopBar(
+                  trailing: _SkyStatus(streak: streak, energy: energy),
+                ),
+              ),
             ),
             const SizedBox(height: 14),
             const CloudMascot(),
@@ -227,8 +225,9 @@ class _HomeSkyHero extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 104),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+            MuseContentFrame(
+              compactGutter: 16,
+              regularGutter: 16,
               child: _JourneyOverview(journey: journey),
             ),
             const SizedBox(height: 18),
@@ -239,57 +238,43 @@ class _HomeSkyHero extends StatelessWidget {
   }
 }
 
-class _SkyHeader extends StatelessWidget {
-  const _SkyHeader({required this.streak, this.energy});
+class _SkyStatus extends StatelessWidget {
+  const _SkyStatus({required this.streak, this.energy});
 
   final int streak;
   final int? energy;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: SizedBox(
-        height: 60,
+    return Semantics(
+      label: '${energy ?? 0} năng lượng, streak $streak ngày',
+      child: Container(
+        height: 36,
+        padding: const EdgeInsets.symmetric(horizontal: 11),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: .44),
+          borderRadius: BorderRadius.circular(99),
+          border: Border.all(color: Colors.white.withValues(alpha: .62)),
+        ),
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(
-              tooltip: 'Mở menu',
-              onPressed: () {},
-              icon: const Icon(Icons.menu_rounded, size: 20),
+            const Icon(Icons.bolt_rounded, color: Color(0xFFF4C84A), size: 18),
+            const SizedBox(width: 3),
+            Text(
+              '${energy ?? 0}',
+              style: const TextStyle(fontWeight: FontWeight.w800),
             ),
-            ShaderMask(
-              blendMode: BlendMode.srcIn,
-              shaderCallback:
-                  (bounds) => const LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [Color(0xFF4D858D), Color(0xFF9BC27C)],
-                  ).createShader(bounds),
-              child: Text(
-                'MuseMend',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: .1,
-                ),
-              ),
+            const SizedBox(width: 8),
+            const Icon(
+              Icons.local_fire_department_rounded,
+              color: Color(0xFFE98A67),
+              size: 17,
             ),
-            const Spacer(),
-            Semantics(
-              label: '${energy ?? 0} năng lượng, streak $streak ngày',
-              child: SizedBox.square(
-                dimension: 44,
-                child: IconButton(
-                  tooltip: 'Bộ sưu tập và năng lượng',
-                  onPressed: () {},
-                  icon: const Icon(
-                    Icons.card_giftcard_rounded,
-                    color: Color(0xFFF4C84A),
-                    size: 20,
-                  ),
-                ),
-              ),
+            const SizedBox(width: 3),
+            Text(
+              '$streak',
+              style: const TextStyle(fontWeight: FontWeight.w800),
             ),
           ],
         ),
@@ -373,20 +358,24 @@ class _MoodCheckinCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _MoodActionButton(
-                    width: 91,
-                    label: 'LƯU NHANH',
-                    semanticLabel:
-                        hasExistingCheckin
-                            ? 'Cập nhật check-in hôm nay'
-                            : 'Lưu nhanh check-in hôm nay',
-                    onPressed: onSave,
+                  Expanded(
+                    flex: 2,
+                    child: _MoodActionButton(
+                      label: 'LƯU NHANH',
+                      semanticLabel:
+                          hasExistingCheckin
+                              ? 'Cập nhật check-in hôm nay'
+                              : 'Lưu nhanh check-in hôm nay',
+                      onPressed: onSave,
+                    ),
                   ),
                   const SizedBox(width: 7),
-                  _MoodActionButton(
-                    width: 137,
-                    label: 'LƯU VÀ VIẾT TÂM TƯ',
-                    onPressed: onSaveAndWrite,
+                  Expanded(
+                    flex: 3,
+                    child: _MoodActionButton(
+                      label: 'LƯU VÀ VIẾT TÂM TƯ',
+                      onPressed: onSaveAndWrite,
+                    ),
                   ),
                 ],
               ),
@@ -492,13 +481,11 @@ class _MoodOption extends StatelessWidget {
 
 class _MoodActionButton extends StatelessWidget {
   const _MoodActionButton({
-    required this.width,
     required this.label,
     required this.onPressed,
     this.semanticLabel,
   });
 
-  final double width;
   final String label;
   final String? semanticLabel;
   final VoidCallback? onPressed;
@@ -514,7 +501,7 @@ class _MoodActionButton extends StatelessWidget {
         opacity: onPressed == null ? .48 : 1,
         duration: const Duration(milliseconds: 160),
         child: Container(
-          width: width,
+          width: double.infinity,
           height: 36,
           decoration: BoxDecoration(
             gradient: const LinearGradient(

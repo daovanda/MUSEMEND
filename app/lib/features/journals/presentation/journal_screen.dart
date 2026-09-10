@@ -47,15 +47,16 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
       child: SafeArea(
         child: RefreshIndicator(
           onRefresh: _reloadAll,
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
+          child: MuseResponsiveList(
+            top: 20,
+            physics: const AlwaysScrollableScrollPhysics(),
             children: [
-              const MusePageHeader(
-                title: 'Nhật ký',
-                subtitle: 'Mỗi ngày một trang nhỏ để trở về với chính mình.',
-                icon: Icons.auto_stories_outlined,
+              const MuseTopBar(trailing: MusePageBadge(label: 'Nhật ký')),
+              const SizedBox(height: 4),
+              const MusePageTagline(
+                'Mỗi ngày một trang nhỏ để trở về chính mình.',
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
               calendar.when(
                 loading: () => const _JournalCalendarLoading(),
                 error: (_, _) => _JournalError(onRetry: _reloadAll),

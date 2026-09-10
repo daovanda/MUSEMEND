@@ -1,7 +1,7 @@
 # Journey và Library
 
 Trạng thái: `in-progress`
-Cập nhật: 2026-09-09
+Cập nhật: 2026-09-10
 
 ## Phạm vi hiện đã triển khai
 
@@ -14,6 +14,8 @@ Tab Library đọc dashboard hành trình của user đang đăng nhập và hi�
 - thao tác bắt đầu hành trình/đến tỉnh tiếp theo và đồng bộ tiến độ.
 
 Màn hình hỗ trợ pull-to-refresh, loading, lỗi có thể thử lại và trạng thái rỗng.
+Nền Khám phá giữ accent lavender trên lớp xanh trời–kem chung và các cụm mây
+code-native trôi chậm, đồng nhất với Bầu trời mà không đưa ảnh catalog vào nền.
 Content pack curated có 10 ảnh checkpoint bundled, gồm 5 điểm đến Việt Nam và 5
 điểm đến quốc tế. Food/item chưa có artwork riêng nên vẫn dùng placeholder có
 kiểm soát. Repository

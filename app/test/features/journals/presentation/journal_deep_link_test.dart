@@ -28,8 +28,13 @@ void main() {
             _FakeJournalRepository(target),
           ),
         ],
-        child: const MaterialApp(
-          home: Scaffold(body: JournalScreen(requestedEntryId: targetId)),
+        child: MaterialApp(
+          builder:
+              (context, child) => MediaQuery(
+                data: MediaQuery.of(context).copyWith(disableAnimations: true),
+                child: child!,
+              ),
+          home: const Scaffold(body: JournalScreen(requestedEntryId: targetId)),
         ),
       ),
     );
@@ -62,8 +67,15 @@ void main() {
             _FakeJournalRepository(visibleEntry),
           ),
         ],
-        child: const MaterialApp(
-          home: Scaffold(body: JournalScreen(requestedEntryId: unavailableId)),
+        child: MaterialApp(
+          builder:
+              (context, child) => MediaQuery(
+                data: MediaQuery.of(context).copyWith(disableAnimations: true),
+                child: child!,
+              ),
+          home: const Scaffold(
+            body: JournalScreen(requestedEntryId: unavailableId),
+          ),
         ),
       ),
     );

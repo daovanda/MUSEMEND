@@ -19,16 +19,16 @@ class LibraryScreen extends ConsumerWidget {
       child: SafeArea(
         child: RefreshIndicator(
           onRefresh: ref.read(journeyControllerProvider.notifier).reload,
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
+          child: MuseResponsiveList(
+            top: 20,
+            physics: const AlwaysScrollableScrollPhysics(),
             children: [
-              const MusePageHeader(
-                title: 'Khám phá',
-                subtitle:
-                    'Biến những điều nhỏ bạn hoàn thành thành một chuyến đi dịu dàng.',
-                icon: Icons.explore_outlined,
+              const MuseTopBar(trailing: MusePageBadge(label: 'Khám phá')),
+              const SizedBox(height: 4),
+              const MusePageTagline(
+                'Biến những điều nhỏ bạn hoàn thành thành một chuyến đi dịu dàng.',
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
               dashboard.when(
                 loading: () => const _LoadingCard(),
                 error:

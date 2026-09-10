@@ -1,7 +1,7 @@
 # Daily Journal và Future Letter
 
 Trạng thái: `in-progress`
-Cập nhật: 2026-09-07
+Cập nhật: 2026-09-10
 
 ## Phạm vi triển khai
 
@@ -31,6 +31,9 @@ Các khả năng hiện có:
 - mở trực tiếp đúng journal theo ID từ local notification hoặc inbox, kể cả khi
   bản ghi nằm ngoài 50 mục mới nhất;
 - xác nhận rồi xóa mềm journal.
+
+Danh sách nhật ký và editor dùng chung nền xanh trời–kem cùng các cụm mây mềm
+trôi chậm; hiệu ứng chỉ thuộc presentation và tự dừng theo Reduce Motion.
 
 Yearly journal, tag, audio/video/PDF attachment và tìm kiếm chưa nằm trong lát cắt
 UI này.

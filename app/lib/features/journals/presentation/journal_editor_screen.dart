@@ -114,10 +114,10 @@ class _JournalEditorScreenState extends ConsumerState<JournalEditorScreen> {
                 onSave: _saving ? null : _save,
               ),
               Expanded(
-                child: ListView(
+                child: MuseResponsiveList(
                   keyboardDismissBehavior:
                       ScrollViewKeyboardDismissBehavior.onDrag,
-                  padding: const EdgeInsets.fromLTRB(26, 14, 26, 40),
+                  top: 14,
                   children: [
                     if (!_isLetter)
                       Align(

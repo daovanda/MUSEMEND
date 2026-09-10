@@ -6,14 +6,15 @@ import 'package:flutter/material.dart';
 /// 390×560 image layer. The painter remains a deterministic fallback when an
 /// asset bundle is damaged; it is not part of the normal composition.
 class SkyScene extends StatelessWidget {
-  const SkyScene({super.key, this.height = 510});
+  const SkyScene({super.key, this.height});
 
-  final double height;
+  final double? height;
 
   @override
   Widget build(BuildContext context) {
     return ExcludeSemantics(
       child: SizedBox(
+        width: double.infinity,
         height: height,
         child: Image.asset(
           'assets/illustrations/journey/sky-background.png',

@@ -1,7 +1,7 @@
 # Màn Bầu trời (Reflect)
 
 - **Trạng thái:** in-progress
-- **Cập nhật:** 2026-09-07
+- **Cập nhật:** 2026-09-10
 - **Nguồn tham chiếu:** page Home, Figma frame `Bầu trời` (`233:893`) và biến thể mood mở (`57:24`)
 
 ## Phạm vi
@@ -25,8 +25,9 @@ tiến độ vẫn do RPC/database xác định; các con số hiển thị ch�
 
 ## Thành phần UI
 
-- `SkyScene` hiển thị trực tiếp export `sky-background.png` trong vùng tỷ lệ
-  `390×560`; painter code-native là fallback. `CloudMascot` dùng
+- `SkyScene` hiển thị trực tiếp export `sky-background.png` và nhận constraint
+  từ toàn bộ hero thay vì dừng ở chiều cao cố định `560`; painter code-native là
+  fallback. `CloudMascot` dùng
   `mascot-cloud.png` ở tỷ lệ `145×97`, bồng bềnh dọc tối đa `3dp` theo chu kỳ
   `4s` để tạo cảm giác nhẹ nhàng mà không làm xê dịch layout. Animation tự dừng
   khi hệ điều hành bật `disableAnimations`.
@@ -56,10 +57,26 @@ tiến độ vẫn do RPC/database xác định; các con số hiển thị ch�
 
 ## Layer order và chuyển tiếp
 
-Vùng hero render theo thứ tự: nền `image 20`, fade về màu nền từ khoảng
-`top 294`, header, mascot, mood bubble, khoảng thở và journey. Mission tiếp tục
-trên nền sáng. Opacity, blur và gradient được dựng trong Flutter, không bake bằng
-screenshot toàn frame.
+Toàn trang dùng `MusePageBackground` ở lớp dưới cùng để nhiệm vụ, quote, chia sẻ
+và mọi khoảng không có artwork nhận cùng frame mây trắng lặp/parallax với Nhật ký,
+Khám phá và Cá nhân. Vùng hero được render phía trên lớp này theo thứ tự: ảnh nền
+phủ toàn bộ chiều cao thực của hero, fade
+tương đối từ 58% chiều cao về `MuseColors.cream`, header, mascot, mood bubble,
+khoảng thở và journey. Ảnh và fade dùng `Positioned.fill`, nên không thể xuất
+hiện dải trống do mốc pixel của hai lớp lệch nhau khi viewport thay đổi. Mission
+tiếp tục ngay trên nền kem/mây, không thêm khoảng trống 28dp ở biến thể `skyStyle`.
+Ảnh phong cảnh luôn phủ lên frame mây, nên mây code-native không làm đổi màu hay
+che chi tiết artwork Bầu trời. Khi cuộn khỏi hero, mây dịch 14% quãng cuộn và
+frame 2×2 nối liền không để lộ khoảng trống.
+Opacity, blur và gradient được dựng trong Flutter, không bake bằng screenshot
+toàn frame.
+
+Toàn màn Bầu trời dùng `MusePageBackground` ở lớp thấp nhất. Hero vẫn vẽ
+`SkyScene` và fade phía trên lớp này nên ảnh phong cảnh giữ nguyên màu và che kín
+mây code-native. Sau khi hero kết thúc, các vùng không có ảnh nền như nhiệm vụ,
+quote và chia sẻ để lộ cùng frame mây trắng lặp 2×2 như Nhật ký, Khám phá và Cá
+nhân. ListView gửi scroll notification cho nền để mây parallax 14%; Reduce Motion
+dừng cả tự trôi và parallax.
 
 ## Trạng thái, lỗi và an toàn dữ liệu
 

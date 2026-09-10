@@ -30,7 +30,7 @@ class MissionsSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: 28),
+        if (!skyStyle) const SizedBox(height: 28),
         state.when(
           loading:
               () => const Card(
