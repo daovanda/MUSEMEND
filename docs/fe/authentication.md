@@ -1,7 +1,7 @@
 # Authentication client
 
 **Trạng thái:** `in-progress`
-**Cập nhật:** 2026-09-06
+**Cập nhật:** 2026-09-10
 
 ## Mục tiêu và phạm vi
 
@@ -14,6 +14,19 @@ và đăng xuất. Profile/settings bootstrap phía DB vẫn là nguồn sự th
 gọi Supabase Auth. `AuthController` điều phối thao tác và trạng thái async;
 `SignInScreen` validate form. `authSessionProvider` điều khiển redirect
 `/splash` → `/sign-in` hoặc `/reflect`.
+
+Màn auth dùng cùng ngôn ngữ thị giác với Bầu trời: artwork phong cảnh và mascot
+cục bộ, nền chuyển từ xanh trời sang kem/tím pastel, logo gradient và form kính
+sáng. Ở điện thoại, thương hiệu nằm trên form; từ 820dp, màn hình tách thành vùng
+chào đón và form để tận dụng chiều ngang. Form cố định palette sáng có tương phản
+đủ trên cả theme hệ thống tối, tránh trường hợp nền tối kết hợp với surface kính
+sáng làm chữ và input bị xám/mờ. Chuyển đăng nhập/đăng ký dùng animation 220ms và
+tự bỏ focus bàn phím nhưng không thay đổi repository hay flow xác thực.
+
+Phong cảnh và hai vùng sương pastel trôi ngược chiều nhau với biên độ 4–15dp,
+chu kỳ 18 giây và đường cong `easeInOutSine`. Ảnh nền được phóng nhẹ 1.035 lần để
+chuyển động không lộ mép. Đây chỉ là motion trang trí; controller tự dừng khi
+`MediaQuery.disableAnimations` bật và nội dung form hoàn toàn không chuyển vị trí.
 
 Đăng ký gửi duy nhất metadata `display_name`; trigger DB tạo profile/settings và
 travel progress. UI không gửi `user_id`, role hoặc quyền.
@@ -34,6 +47,10 @@ publishable key. RLS vẫn là lớp phân quyền dữ liệu, không dựa và
 
 Widget test kiểm tra chuyển sign-up, validation và khả năng cuộn/sử dụng trên màn
 hình 320×568 ở text scale 200%; nút submit vẫn giữ vùng chạm tối thiểu 48 px.
+Widget test cũng kiểm tra màn auth ở dark theme vẫn giữ nền kem và chữ form màu
+`MuseColors.ink`, đồng thời artwork nền/mascot lấy từ asset bundle nội bộ.
+Test Reduce Motion xác nhận transform nền không đổi theo thời gian khi animation
+bị vô hiệu hóa.
 Android QA đã xác nhận đăng nhập, session restore và sign-out. Database integration
 kiểm tra bootstrap cùng cách ly hai tài khoản. Còn phải nghiệm thu account/session
 token hết hạn cưỡng bức và luồng sign-up có email confirmation trên cấu hình thật.

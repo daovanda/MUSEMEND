@@ -117,12 +117,8 @@ class _MuseBottomNavigation extends StatelessWidget {
               Positioned.fill(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: .91),
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(32),
-                    ),
-                    border: Border.all(
-                      color: const Color(0xFFE3E3DC).withValues(alpha: .55),
                     ),
                     boxShadow: const [
                       BoxShadow(
@@ -132,14 +128,31 @@ class _MuseBottomNavigation extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: Row(
-                    children: [
-                      for (var index = 0; index < 2; index++)
-                        Expanded(child: _item(index, selected)),
-                      const Expanded(child: SizedBox()),
-                      for (var index = 2; index < _items.length; index++)
-                        Expanded(child: _item(index, selected)),
-                    ],
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(32),
+                    ),
+                    child: Material(
+                      color: Colors.white.withValues(alpha: .91),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: const Color(
+                              0xFFE3E3DC,
+                            ).withValues(alpha: .55),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            for (var index = 0; index < 2; index++)
+                              Expanded(child: _item(index, selected)),
+                            const Expanded(child: SizedBox()),
+                            for (var index = 2; index < _items.length; index++)
+                              Expanded(child: _item(index, selected)),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -410,35 +423,58 @@ class _NavItem extends StatelessWidget {
       selected: selected,
       label: label,
       excludeSemantics: true,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.only(top: 9),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              AnimatedScale(
-                scale: selected ? 1.08 : 1,
-                duration: const Duration(milliseconds: 160),
-                child: Icon(
-                  icon,
-                  size: 22,
-                  color:
-                      selected ? const Color(0xFF366672) : MuseColors.mutedInk,
-                ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(24),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(24),
+            overlayColor: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.pressed)) {
+                return const Color(0xFF366672).withValues(alpha: .12);
+              }
+              if (states.contains(WidgetState.hovered) ||
+                  states.contains(WidgetState.focused)) {
+                return const Color(0xFF366672).withValues(alpha: .07);
+              }
+              return Colors.transparent;
+            }),
+            child: Padding(
+              padding: const EdgeInsets.only(top: 3),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  AnimatedScale(
+                    scale: selected ? 1.08 : 1,
+                    duration: const Duration(milliseconds: 160),
+                    child: Icon(
+                      icon,
+                      size: 22,
+                      color:
+                          selected
+                              ? const Color(0xFF366672)
+                              : MuseColors.mutedInk,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 9,
+                      height: 1,
+                      fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                      color:
+                          selected
+                              ? const Color(0xFF366672)
+                              : MuseColors.mutedInk,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 5),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 9,
-                  height: 1,
-                  fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                  color:
-                      selected ? const Color(0xFF366672) : MuseColors.mutedInk,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

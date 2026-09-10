@@ -1,13 +1,15 @@
 # Profile overview client
 
 **Trạng thái:** `in-progress`
-**Cập nhật:** 2026-09-05
+**Cập nhật:** 2026-09-10
 
 ## Mục tiêu và phạm vi
 
 Xác nhận bootstrap sau Auth bằng cách đọc profile/settings của session hiện tại,
 hiển thị và chỉnh sửa tên user, tên Mây, theme, âm thanh và notification. Profile
 cũng chứa inbox, thông tin privacy/giới hạn, sign-out và request account deletion.
+Màn Cá nhân dùng nền xanh trời–kem với accent mint và mây chuyển động dùng chung;
+opacity tự thích nghi dark mode và chuyển động dừng theo Reduce Motion.
 
 ## Thiết kế và contract
 
