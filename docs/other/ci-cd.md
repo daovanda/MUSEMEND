@@ -1,7 +1,7 @@
 # CI/CD của MuseMend
 
 **Trạng thái:** `in-progress`  
-**Cập nhật:** 2026-09-06
+**Cập nhật:** 2026-09-10
 
 ## 1. Mục tiêu và phạm vi
 
@@ -122,6 +122,13 @@ tự:
 2. `supabase db push` để áp dụng migration còn thiếu.
 3. Deploy toàn bộ Edge Functions bằng server-side bundling.
 4. In migration state vào log để đối chiếu.
+
+CLI được pin ở stable `2.117.0` để tương thích Management API và scoped Personal
+Access Token (`sbp_fc...`) dùng trong GitHub Environment. Khi nâng CLI phải cập
+nhật đồng thời workflow Development và Production, chạy actionlint, sau đó xác
+minh `supabase link` trên Development trước khi cho phép Production dùng phiên
+bản mới. Không hạ về `2.101.0`: phiên bản này đã trả lỗi authorization khi dùng
+scoped token hợp lệ của project trong lần deploy Development ngày 2026-09-10.
 
 Database migration chạy trước Edge Function để code mới không truy cập schema
 chưa tồn tại. Thay đổi phá vỡ phải dùng expand -> migrate -> contract; không dựa
