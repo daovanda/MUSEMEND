@@ -1,7 +1,7 @@
 # Missions và energy
 
-Trạng thái: `implemented`  
-Cập nhật: 2026-09-05
+Trạng thái: `in-progress`
+Cập nhật: 2026-09-11
 
 ## Mục tiêu và phạm vi
 
@@ -13,8 +13,11 @@ phân bổ cho hành trình được theo dõi riêng bằng `journey_energy_use
 
 - `mission_templates`: catalog do server quản lý, gồm loại nhiệm vụ, mood mục tiêu,
   phần thưởng mặc định và trạng thái active.
-- `user_missions`: snapshot title/description/reward tại lúc tạo; liên kết template
-  và check-in là tùy chọn; `occurrence_key` chống tạo trùng.
+- `user_missions`: snapshot title/description/reward tại lúc tạo; `start_at` và
+  `due_at` là khoảng hiệu lực; `occurrence_key` chống tạo trùng.
+- `recurrence_series_id` chỉ áp dụng cho daily mission. Mọi occurrence trong cùng
+  chuỗi giữ nguyên snapshot và giờ bắt đầu/kết thúc; occurrence lịch sử không bị
+  xóa để còn audit.
 - `energy_transactions`: sổ giao dịch bất biến phía client; unique một nguồn cho
   `(user_id, source_type, source_id)` khi có `source_id`.
 - `travel_progress.current_energy`: tổng điểm hiện có; không giảm khi qua trạm.
@@ -23,6 +26,32 @@ phân bổ cho hành trình được theo dõi riêng bằng `journey_energy_use
   checkpoint, luôn không âm.
 
 ## RPC contract
+
+### `create_scheduled_mission(...)`
+
+Đây là command chính cho client mới. Client gửi loại, template hoặc nội dung tự
+tạo, cùng lịch cần thiết; không được gửi reward.
+
+- `daily`: bắt buộc `start_at`/`due_at`, cùng ngày Việt Nam hiện tại và end sau
+  start. Server tạo `recurrence_series_id`; ngày sau `refresh_scheduled_missions`
+  sinh occurrence giống gần nhất. Buổi được suy ra từ giờ bắt đầu: sáng 05:00–
+  11:59, chiều 12:00–16:59, tối 17:00–21:59, còn lại là bất kỳ lúc nào.
+- `weekly`: server bỏ qua mốc client và đặt hết hạn 00:00 thứ Hai kế tiếp.
+- `monthly`: hết hạn 00:00 ngày đầu tháng kế tiếp.
+- `yearly`: hết hạn 00:00 ngày 01/01 năm kế tiếp.
+- `custom`: bắt buộc đầy đủ ngày/giờ bắt đầu và kết thúc; end phải ở tương lai và
+  sau start.
+- Nhiệm vụ tự tạo thuộc bất kỳ loại nào vẫn thưởng cố định 5. Template phải active,
+  đúng loại và đúng mood/check-in của user nếu template yêu cầu.
+- `p_request_id` là UUID idempotency. Daily dùng UUID này làm định danh chuỗi;
+  template daily đã được chọn không tạo thêm chuỗi thứ hai.
+
+### `refresh_scheduled_missions()`
+
+Được gọi trước khi tải dashboard. Trong một transaction ngắn, hàm đổi pending/
+in-progress đã quá `due_at` thành `expired`, rồi materialize tối đa một daily
+occurrence cho ngày Việt Nam hiện tại ở mỗi chuỗi. Gọi lặp không tạo trùng.
+Weekly/monthly/yearly/custom không tự tái tạo sau khi hết hạn.
 
 ### `create_mission(p_template_id?, p_title?, p_description?, p_checkin_id?, p_request_id?)`
 
@@ -35,6 +64,9 @@ phân bổ cho hành trình được theo dõi riêng bằng `journey_energy_use
 - Daily/weekly/monthly/yearly dùng occurrence key theo kỳ và tính `due_at` theo
   `Asia/Ho_Chi_Minh`; loại khác dùng key `once`.
 - Trả về row `user_missions` đã tạo hoặc row trùng occurrence hiện có.
+
+RPC cũ được giữ tạm để tương thích với client/replay cũ; Flutter mới không dùng
+RPC này để tạo nhiệm vụ.
 
 ### `update_custom_mission(p_mission_id, p_title, p_description?)`
 
@@ -69,10 +101,10 @@ command idempotent, không tự cộng số hiển thị trước khi nhận d�
 
 ## Kiểm thử
 
-Integration test xác nhận custom reward bằng 5, hai mission tạo tổng 10 energy,
-gọi complete lần hai không cộng đôi và mission completion tự tiến hành checkpoint.
-Chưa có stress test concurrent, test kỳ weekly/monthly/yearly, quá hạn, template
-theo mọi mood hoặc privilege test trực tiếp cho từng cột.
+Integration test xác nhận reward 5, completion idempotent, daily scheduling và
+validation, refresh idempotent, missed → expired, boundary tuần/tháng/năm,
+custom range và journey reward. Chưa có stress test concurrent, boundary năm
+nhuận hoặc template theo mọi mood.
 
 ## Migration, seed và rollback
 
@@ -80,15 +112,20 @@ theo mọi mood hoặc privilege test trực tiếp cho từng cột.
 complete. Demo seed có 10 template (9 daily, 1 weekly), tất cả reward 5. Migration
 `home_mission_defaults` bổ sung template `demo-walk` và RPC
 `ensure_home_missions()` để materialize hai nhiệm vụ starter (`demo-water` và
-`demo-walk`) mỗi ngày cho tài khoản khi Home được mở. Lệnh dùng occurrence key
-daily và có thể gọi lặp an toàn; không tạo lại nhiệm vụ đã bị bỏ qua trong cùng ngày.
+`demo-walk`). Migration `mission_scheduling_and_recurrence` thêm lịch rõ ràng,
+daily series, RPC create/refresh và chuyển các daily template occurrence cũ sang
+series theo `(user_id, template_id)`. Hai starter mới dùng lịch cả ngày 00:00–
+23:59:59 và nằm trong nhóm “Bất kỳ lúc nào”; tài khoản cũ giữ giờ của occurrence
+gần nhất.
+Migration cũng thêm một gợi ý yearly và một gợi ý custom để catalog có đủ năm
+loại mà UI cho phép chọn; daily/weekly/monthly tiếp tục dùng catalog hiện có.
 Catalog thật phải dùng migration seed idempotent mới; không thay đổi snapshot mission đã
 tạo. Rollback logic reward cần migration bù trừ/audit, không xóa transaction cũ.
 
 ## Giới hạn và việc còn lại
 
-- Mission quá hạn bị từ chối hoàn thành nhưng chưa có job tự đổi status thành
-  `expired`.
+- Mission quá hạn được đổi thành `expired` khi dashboard gọi refresh; không phụ
+  thuộc cron, nên có thể vẫn mang status cũ trong DB cho tới lần mở app kế tiếp.
 - Không có giới hạn custom mission theo ngày theo quyết định MVP; cần chống spam ở
   tầng UX/rate limit nếu lạm dụng trở thành vấn đề.
 - Chưa có admin workflow quản trị template ngoài migration/service role.

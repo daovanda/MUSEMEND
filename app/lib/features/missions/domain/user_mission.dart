@@ -1,4 +1,5 @@
 import 'package:musemend/features/missions/domain/mission_status.dart';
+import 'package:musemend/features/missions/domain/mission_type.dart';
 
 class UserMission {
   const UserMission({
@@ -9,6 +10,8 @@ class UserMission {
     required this.energyReward,
     required this.status,
     required this.sourceType,
+    required this.missionType,
+    required this.startAt,
     required this.dueAt,
   });
 
@@ -19,6 +22,8 @@ class UserMission {
   final int energyReward;
   final MissionStatus status;
   final String sourceType;
+  final MissionType missionType;
+  final DateTime startAt;
   final DateTime? dueAt;
 
   bool get isCustom => sourceType == 'user_created';

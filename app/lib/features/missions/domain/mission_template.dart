@@ -1,3 +1,5 @@
+import 'package:musemend/features/missions/domain/mission_type.dart';
+
 class MissionTemplate {
   const MissionTemplate({
     required this.id,
@@ -6,6 +8,7 @@ class MissionTemplate {
     required this.targetMood,
     required this.energyReward,
     required this.estimatedMinutes,
+    required this.missionType,
   });
 
   final int id;
@@ -14,6 +17,7 @@ class MissionTemplate {
   final String targetMood;
   final int energyReward;
   final int? estimatedMinutes;
+  final MissionType missionType;
 
   bool get requiresMood => targetMood != 'all';
 }

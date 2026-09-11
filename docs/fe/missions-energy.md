@@ -1,42 +1,59 @@
 # Missions và energy client
 
 **Trạng thái:** `in-progress`
-**Cập nhật:** 2026-09-07
+**Cập nhật:** 2026-09-11
 
 ## Mục tiêu và phạm vi
 
-Lát cắt P0.3 hiển thị nhiệm vụ đang làm, gợi ý theo mood, cho tạo nhiệm vụ riêng,
-hoàn thành/bỏ qua và hiển thị năng lượng tích lũy. Journey chi tiết và collection
-thuộc P0.4.
+Lát cắt P0.3 hiển thị nhiệm vụ đang làm, gợi ý theo mood và loại, cho tạo nhiệm vụ
+ngày/tuần/tháng/năm/custom, hoàn thành/bỏ qua và hiển thị năng lượng tích lũy.
 
 ## Thiết kế và luồng
 
 `MissionRepository` là contract domain. `SupabaseMissionRepository` gọi
-`ensure_home_missions()` idempotent trước khi đọc `user_missions`, sau đó đọc
+`refresh_scheduled_missions()` rồi `ensure_home_missions()` trước khi đọc
+`user_missions`, sau đó đọc
 `user_missions`, `mission_templates`, `travel_progress` và chỉ ghi qua RPC.
 `MissionsController` lấy check-in hôm nay từ application contract của Reflect để
 lọc template và cung cấp `source_checkin_id` khi template yêu cầu mood.
 
 UI `MissionsSection` nằm sau check-in trên Reflect:
 
-- nhiệm vụ pending/in-progress được nhóm theo buổi từ `dueAt` ở UTC+7;
+- daily pending/in-progress còn hạn được nhóm theo buổi từ `startAt` ở UTC+7;
+  bản ghi đã quá `dueAt` vẫn giữ trong DB để audit nhưng không còn hiển thị trên
+  Home;
 - hành động hoàn thành/bỏ qua và thêm nhiệm vụ riêng;
 - Home/Bầu trời materialize hai nhiệm vụ mẫu nhẹ mỗi ngày (`Uống một cốc nước`,
-  `Đi bộ 5 phút`) qua RPC server; các gợi ý còn lại vẫn tồn tại ở màn nhiệm vụ
-  đầy đủ;
-- bottom sheet tạo nhiệm vụ riêng;
+  `Đi bộ 5 phút`) qua RPC server và hiển thị tối đa năm gợi ý còn lại ngay bên
+  dưới để người dùng chọn thêm; chưa có route nhiệm vụ riêng trong MVP;
+- bottom sheet bắt buộc chọn loại khi tạo thủ công. Daily chọn giờ/phút bắt đầu và
+  kết thúc trong hôm nay; custom chọn đủ ngày/giờ; tuần/tháng/năm hiển thị mốc
+  kết thúc cố định do server tính;
+- khi chọn template daily/custom, sheet lịch tương ứng mở trước khi gửi command;
+  template tuần/tháng/năm dùng boundary server;
+- ngoài bốn nhóm daily còn có nhóm nhiệm vụ tuần, tháng, năm và tùy chỉnh;
 - tiến độ checkpoint hiển thị `earned_energy/required_energy` từ journey state.
 
-Các nhóm UI là `Buổi sáng` (<12h), `Bất kỳ lúc nào` (`dueAt == null`),
-`Buổi chiều` (12h–16h59) và `Buổi tối` (từ 17h). Sticker bên phải header hiện là
+Repository lọc các dòng có `due_at` trong tương lai hoặc `NULL` trước khi dựng
+dashboard. Nó cũng chỉ hiển thị một snapshot system cho mỗi `template_id` để
+không lặp các starter mission legacy nếu dữ liệu phát triển cũ đã tạo trùng
+trước khi `occurrence_key` được áp dụng. Các template đã có occurrence trong
+ngày hiện tại (kể cả đã hoàn thành hoặc bỏ qua) không còn hiện nút thêm lần nữa;
+nhiệm vụ tự tạo không bị gộp theo tên.
+
+Các nhóm daily là `Buổi sáng` (05:00–11:59), `Buổi chiều` (12:00–16:59),
+`Buổi tối` (17:00–21:59) và `Bất kỳ lúc nào` (22:00–04:59), suy ra từ startAt.
+Sticker bên phải header hiện là
 placeholder code-native vì landmark/food thuộc catalog động; không crop cứng sprite
 Figma vào nhiệm vụ. Toàn nhóm nằm trên panel gradient xanh nhạt sang tím nhạt,
 bo góc và viền white nhẹ đúng layer Home.
 
 ## RPC và mapping
 
-- `create_mission`: template hoặc custom; custom dùng UUID v4 làm request id để
-  retry không tạo trùng và không gửi mức thưởng từ client.
+- `create_scheduled_mission`: template hoặc user-created với loại/lịch; UUID v4
+  chống retry trùng và làm daily series id; client không gửi mức thưởng.
+- `refresh_scheduled_missions`: expire nhiệm vụ quá hạn và tạo daily occurrence
+  hôm nay từ chuỗi trước đó.
 - `complete_mission`: nhận `mission_id`, trả reward/already-completed từ server.
 - `skip_mission`: không sửa trực tiếp status.
 
@@ -44,7 +61,7 @@ DTO ánh xạ snapshot DB sang domain. UI không import Supabase và không tự
 
 ## Validation, lỗi và bảo mật
 
-Tên custom sau trim dài 1–200, ghi chú tối đa 500 ở UI. Custom không được gắn
+Tên tự tạo sau trim dài 1–200, ghi chú tối đa 500 ở UI. User-created không được gắn
 check-in và luôn nhận reward 5 do DB quyết định. Mood template chỉ hiện khi khớp
 check-in hôm nay; template `all` luôn có thể hiện. Lỗi backend được hiển thị chung,
 không lộ SQL/schema. Loading khóa thao tác lặp trên section.
@@ -62,9 +79,9 @@ transaction/idempotency và phân tách user.
 
 ## Tương thích, rollback và việc còn lại
 
-Migration `home_mission_defaults` bổ sung starter template và RPC materialize
-idempotent. Client tạm bỏ qua riêng lỗi PostgREST `PGRST202` (hàm chưa có trong
-schema cache) để giữ khả năng đọc trong khoảng thời gian migration đang triển khai;
+Migration `mission_scheduling_and_recurrence` bổ sung lịch và daily series. Client
+tạm bỏ qua riêng lỗi PostgREST `PGRST202` cho RPC materialize/refresh trong khoảng
+thời gian migration đang triển khai;
 các lỗi khác vẫn đi vào trạng thái retry. Repository cho phép thay adapter local-first sau này. Còn thiếu sửa custom mission, pagination/lịch sử, animation
 reward, thông báo checkpoint vừa mở và test accessibility/golden.
 
