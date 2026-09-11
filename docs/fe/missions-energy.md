@@ -31,6 +31,10 @@ UI `MissionsSection` nằm sau check-in trên Reflect:
   kết thúc cố định do server tính;
 - khi chọn template daily/custom, sheet lịch tương ứng mở trước khi gửi command;
   template tuần/tháng/năm dùng boundary server;
+- bottom sheet tạo nhiệm vụ dùng khung kính có chiều cao tối đa theo viewport và
+  cuộn độc lập khi bàn phím mở; phần `Loại nhiệm vụ` có nhãn tách riêng khỏi
+  dropdown, còn ngày/giờ dùng nút hai dòng có ellipsis để không đè chữ trên màn
+  hình hẹp;
 - ngoài bốn nhóm daily còn có nhóm nhiệm vụ tuần, tháng, năm và tùy chỉnh;
 - tiến độ checkpoint hiển thị `earned_energy/required_energy` từ journey state.
 

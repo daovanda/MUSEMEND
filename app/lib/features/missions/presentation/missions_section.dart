@@ -964,89 +964,112 @@ class _CreateMissionSheetState extends State<_CreateMissionSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final viewInsets = MediaQuery.viewInsetsOf(context);
+    final viewport = MediaQuery.sizeOf(context);
     return SafeArea(
-      child: SingleChildScrollView(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.viewInsetsOf(context).bottom,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: viewport.height * .9,
+          maxWidth: 560,
         ),
-        child: MuseGlassCard(
-          tint: MuseColors.sky,
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  widget.template == null
-                      ? 'Nhiệm vụ của bạn'
-                      : 'Thêm gợi ý từ Muse',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 6),
-                const Text(
-                  'Mỗi nhiệm vụ tự tạo được thưởng cố định 5 năng lượng.',
-                ),
-                const SizedBox(height: 16),
-                if (widget.template == null)
-                  DropdownButtonFormField<MissionType>(
-                    value: _missionType,
-                    decoration: const InputDecoration(
-                      labelText: 'Loại nhiệm vụ',
-                      prefixIcon: Icon(Icons.calendar_month_outlined),
-                    ),
-                    items: [
-                      for (final type in MissionType.values)
-                        DropdownMenuItem(value: type, child: Text(type.label)),
+        child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: EdgeInsets.fromLTRB(16, 4, 16, 12 + viewInsets.bottom),
+          child: MuseGlassCard(
+            tint: MuseColors.sky,
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          widget.template == null
+                              ? 'Nhiệm vụ của bạn'
+                              : 'Thêm gợi ý từ Muse',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                      ),
+                      IconButton(
+                        visualDensity: VisualDensity.compact,
+                        tooltip: 'Đóng',
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.close_rounded),
+                      ),
                     ],
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() => _missionType = value);
-                      }
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Tự tạo nhiệm vụ được thưởng cố định 5 năng lượng.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 12),
+                  if (widget.template == null)
+                    _MissionTypeField(
+                      value: _missionType,
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() => _missionType = value);
+                        }
+                      },
+                    )
+                  else
+                    _ScheduleInfo(
+                      icon: Icons.category_outlined,
+                      label: 'Loại nhiệm vụ',
+                      value: _missionType.label,
+                    ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    controller: _titleController,
+                    readOnly: widget.template != null,
+                    maxLength: 200,
+                    decoration: const InputDecoration(
+                      labelText: 'Tên nhiệm vụ',
+                      prefixIcon: Icon(Icons.spa_outlined),
+                      isDense: true,
+                      counterText: '',
+                    ),
+                    validator: (value) {
+                      final length = value?.trim().length ?? 0;
+                      return length < 1 || length > 200
+                          ? 'Tên nhiệm vụ cần từ 1 đến 200 ký tự.'
+                          : null;
                     },
-                  )
-                else
-                  _ScheduleInfo(
-                    icon: Icons.category_outlined,
-                    label: 'Loại: ${_missionType.label}',
                   ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _titleController,
-                  readOnly: widget.template != null,
-                  maxLength: 200,
-                  decoration: const InputDecoration(
-                    labelText: 'Tên nhiệm vụ',
-                    prefixIcon: Icon(Icons.spa_outlined),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _descriptionController,
+                    readOnly: widget.template != null,
+                    maxLength: 500,
+                    maxLines: 2,
+                    decoration: const InputDecoration(
+                      labelText: 'Ghi chú (không bắt buộc)',
+                      prefixIcon: Icon(Icons.notes_rounded),
+                      isDense: true,
+                      counterText: '',
+                    ),
                   ),
-                  validator: (value) {
-                    final length = value?.trim().length ?? 0;
-                    return length < 1 || length > 200
-                        ? 'Tên nhiệm vụ cần từ 1 đến 200 ký tự.'
-                        : null;
-                  },
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _descriptionController,
-                  readOnly: widget.template != null,
-                  maxLength: 500,
-                  maxLines: 3,
-                  decoration: const InputDecoration(
-                    labelText: 'Ghi chú (không bắt buộc)',
-                    prefixIcon: Icon(Icons.notes_rounded),
+                  const SizedBox(height: 8),
+                  _SectionCaption(
+                    icon: Icons.schedule_rounded,
+                    label: 'Thời gian thực hiện',
                   ),
-                ),
-                const SizedBox(height: 4),
-                ..._scheduleFields(context),
-                const SizedBox(height: 12),
-                FilledButton.icon(
-                  onPressed: _submit,
-                  icon: const Icon(Icons.add_rounded),
-                  label: const Text('Thêm nhiệm vụ'),
-                ),
-              ],
+                  const SizedBox(height: 6),
+                  ..._scheduleFields(context),
+                  const SizedBox(height: 10),
+                  FilledButton.icon(
+                    onPressed: _submit,
+                    icon: const Icon(Icons.add_rounded),
+                    label: const Text('Thêm nhiệm vụ'),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -1233,10 +1256,11 @@ class _TimeField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton.icon(
+    return _PickerButton(
+      icon: Icons.schedule_rounded,
+      label: label,
+      value: value.format(context),
       onPressed: onTap,
-      icon: const Icon(Icons.schedule_rounded),
-      label: Text('$label\n${value.format(context)}'),
     );
   }
 }
@@ -1258,29 +1282,24 @@ class _DateTimeField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
       children: [
-        Text(label, style: Theme.of(context).textTheme.labelLarge),
-        const SizedBox(height: 5),
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: onDateTap,
-                icon: const Icon(Icons.calendar_today_outlined),
-                label: Text('${date.day}/${date.month}/${date.year}'),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: onTimeTap,
-                icon: const Icon(Icons.schedule_rounded),
-                label: Text(time.format(context)),
-              ),
-            ),
-          ],
+        Expanded(
+          child: _PickerButton(
+            icon: Icons.calendar_today_outlined,
+            label: '$label · ngày',
+            value: '${date.day}/${date.month}/${date.year}',
+            onPressed: onDateTap,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _PickerButton(
+            icon: Icons.schedule_rounded,
+            label: '$label · giờ',
+            value: time.format(context),
+            onPressed: onTimeTap,
+          ),
         ),
       ],
     );
@@ -1288,10 +1307,11 @@ class _DateTimeField extends StatelessWidget {
 }
 
 class _ScheduleInfo extends StatelessWidget {
-  const _ScheduleInfo({required this.icon, required this.label});
+  const _ScheduleInfo({required this.icon, required this.label, this.value});
 
   final IconData icon;
   final String label;
+  final String? value;
 
   @override
   Widget build(BuildContext context) {
@@ -1303,11 +1323,146 @@ class _ScheduleInfo extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, size: 19, color: MuseColors.ink),
-          const SizedBox(width: 9),
-          Expanded(child: Text(label)),
+          Icon(icon, size: 18, color: MuseColors.ink),
+          const SizedBox(width: 8),
+          Expanded(
+            child:
+                value == null
+                    ? Text(label)
+                    : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          label,
+                          style: Theme.of(context).textTheme.labelSmall,
+                        ),
+                        Text(
+                          value!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(fontWeight: FontWeight.w700),
+                        ),
+                      ],
+                    ),
+          ),
         ],
       ),
+    );
+  }
+}
+
+class _MissionTypeField extends StatelessWidget {
+  const _MissionTypeField({required this.value, required this.onChanged});
+
+  final MissionType value;
+  final ValueChanged<MissionType?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Loại nhiệm vụ',
+          style: Theme.of(
+            context,
+          ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 5),
+        DropdownButtonFormField<MissionType>(
+          value: value,
+          isExpanded: true,
+          decoration: const InputDecoration(
+            prefixIcon: Icon(Icons.calendar_month_outlined),
+            isDense: true,
+            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+          ),
+          items: [
+            for (final type in MissionType.values)
+              DropdownMenuItem(value: type, child: Text(type.label)),
+          ],
+          onChanged: onChanged,
+        ),
+      ],
+    );
+  }
+}
+
+class _PickerButton extends StatelessWidget {
+  const _PickerButton({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton(
+      onPressed: onPressed,
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size(0, 48),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+        tapTargetSize: MaterialTapTargetSize.padded,
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 18),
+          const SizedBox(width: 7),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+                Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionCaption extends StatelessWidget {
+  const _SectionCaption({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: MuseColors.teal),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+            color: MuseColors.teal,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ],
     );
   }
 }
