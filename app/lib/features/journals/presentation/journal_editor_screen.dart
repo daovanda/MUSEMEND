@@ -439,16 +439,16 @@ class _JournalEditorScreenState extends ConsumerState<JournalEditorScreen> {
     }
   }
 
-  String get _entryDateLabel => _fullDateLabel(
-    widget.entry?.entryDate?.toLocal() ?? _vietnamToday(),
-  );
+  String get _entryDateLabel =>
+      _fullDateLabel(widget.entry?.entryDate?.toLocal() ?? _vietnamToday());
 
   String get _writingDateLabel =>
       'Ngày viết · ${_fullDateLabel(widget.entry?.createdAt.toLocal() ?? DateTime.now())}';
 
-  String _fullDateLabel(DateTime value) => 'Ngày ${value.day.toString().padLeft(2, '0')} '
-        'tháng ${value.month.toString().padLeft(2, '0')} '
-        'năm ${value.year}';
+  String _fullDateLabel(DateTime value) =>
+      'Ngày ${value.day.toString().padLeft(2, '0')} '
+      'tháng ${value.month.toString().padLeft(2, '0')} '
+      'năm ${value.year}';
 
   DateTime _vietnamToday() {
     final now = DateTime.now().toUtc().add(const Duration(hours: 7));
@@ -556,7 +556,8 @@ class _FilmStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: 'Dải ảnh đính kèm gồm ${media.length} ảnh. Có thể kéo ngang để xem.',
+      label:
+          'Dải ảnh đính kèm gồm ${media.length} ảnh. Có thể kéo ngang để xem.',
       child: Container(
         height: 178,
         decoration: BoxDecoration(
@@ -580,10 +581,8 @@ class _FilmStrip extends StatelessWidget {
             itemCount: media.length,
             separatorBuilder: (_, _) => const SizedBox(width: 2),
             itemBuilder:
-                (context, index) => _FilmFrame(
-                  media: media[index],
-                  index: index,
-                ),
+                (context, index) =>
+                    _FilmFrame(media: media[index], index: index),
           ),
         ),
       ),

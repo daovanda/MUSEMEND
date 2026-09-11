@@ -209,12 +209,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
     Mood? todayMood,
   }) async {
     if (entry.kind == JournalKind.daily) {
-      await _editDaily(
-        context,
-        ref,
-        entry: entry,
-        todayMood: todayMood,
-      );
+      await _editDaily(context, ref, entry: entry, todayMood: todayMood);
       return;
     }
     if (entry.openedAt == null) {
