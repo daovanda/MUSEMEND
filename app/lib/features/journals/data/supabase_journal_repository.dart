@@ -20,7 +20,7 @@ class SupabaseJournalRepository implements JournalRepository {
     final responses = await Future.wait<dynamic>([
       _client
           .from('journals')
-          .select('id, journal_type, title, updated_at')
+          .select('id, journal_type, title, created_at, updated_at')
           .inFilter('journal_type', ['daily', 'future_letter'])
           .order('updated_at', ascending: false)
           .limit(50),
@@ -46,7 +46,7 @@ class SupabaseJournalRepository implements JournalRepository {
     final responses = await Future.wait<dynamic>([
       _client
           .from('journals')
-          .select('id, journal_type, title, updated_at')
+          .select('id, journal_type, title, created_at, updated_at')
           .eq('journal_type', 'daily'),
       _client
           .from('daily_journals')
@@ -73,6 +73,7 @@ class SupabaseJournalRepository implements JournalRepository {
             kind: JournalKind.daily,
             title: journal['title'] as String?,
             content: detail['content'] as String,
+            createdAt: DateTime.parse(journal['created_at'] as String),
             updatedAt: DateTime.parse(journal['updated_at'] as String),
             entryDate: DateTime.parse(detail['entry_date'] as String),
           );
@@ -87,7 +88,7 @@ class SupabaseJournalRepository implements JournalRepository {
     final responses = await Future.wait<dynamic>([
       _client
           .from('journals')
-          .select('id, journal_type, title, updated_at')
+          .select('id, journal_type, title, created_at, updated_at')
           .eq('id', id)
           .inFilter('journal_type', ['daily', 'future_letter'])
           .limit(1),

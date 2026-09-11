@@ -123,7 +123,22 @@ class _JournalEditorScreenState extends ConsumerState<JournalEditorScreen> {
                       Align(
                         alignment: Alignment.centerRight,
                         child: Text(
-                          _letterDateLabel,
+                          _entryDateLabel,
+                          style: TextStyle(
+                            fontFamily: 'serif',
+                            fontSize: 15,
+                            height: 1.35,
+                            color: MuseColors.teal,
+                            fontStyle: FontStyle.italic,
+                            letterSpacing: .4,
+                          ),
+                        ),
+                      )
+                    else
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          _writingDateLabel,
                           style: TextStyle(
                             fontFamily: 'serif',
                             fontSize: 15,
@@ -169,8 +184,6 @@ class _JournalEditorScreenState extends ConsumerState<JournalEditorScreen> {
                       media: existingMedia,
                       enabled: _savedId != null && !_saving,
                       onAdd: _attachImage,
-                      onChanged: _updateMediaTransform,
-                      onCommit: _persistMediaTransform,
                     ),
                     const SizedBox(height: 28),
                     Row(
@@ -404,29 +417,6 @@ class _JournalEditorScreenState extends ConsumerState<JournalEditorScreen> {
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 
-  void _updateMediaTransform(JournalMedia media) {
-    setState(() {
-      _media = List.unmodifiable([
-        for (final item in _media) item.id == media.id ? media : item,
-      ]);
-    });
-  }
-
-  Future<void> _persistMediaTransform(JournalMedia media) async {
-    try {
-      await ref
-          .read(journalControllerProvider.notifier)
-          .updateMediaTransform(media);
-    } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Chưa thể lưu vị trí ảnh. Hãy thử thao tác lại.'),
-        ),
-      );
-    }
-  }
-
   Future<void> _pickDate() async {
     final now = DateTime.now();
     final selected = await showDatePicker(
@@ -449,15 +439,16 @@ class _JournalEditorScreenState extends ConsumerState<JournalEditorScreen> {
     }
   }
 
-  String get _letterDateLabel {
-    final value =
-        _isLetter
-            ? widget.entry?.updatedAt.toLocal() ?? DateTime.now()
-            : widget.entry?.entryDate?.toLocal() ?? _vietnamToday();
-    return 'Ngày ${value.day.toString().padLeft(2, '0')} '
+  String get _entryDateLabel => _fullDateLabel(
+    widget.entry?.entryDate?.toLocal() ?? _vietnamToday(),
+  );
+
+  String get _writingDateLabel =>
+      'Ngày viết · ${_fullDateLabel(widget.entry?.createdAt.toLocal() ?? DateTime.now())}';
+
+  String _fullDateLabel(DateTime value) => 'Ngày ${value.day.toString().padLeft(2, '0')} '
         'tháng ${value.month.toString().padLeft(2, '0')} '
         'năm ${value.year}';
-  }
 
   DateTime _vietnamToday() {
     final now = DateTime.now().toUtc().add(const Duration(hours: 7));
@@ -509,39 +500,17 @@ class _AttachmentTray extends StatelessWidget {
     required this.media,
     required this.enabled,
     required this.onAdd,
-    required this.onChanged,
-    required this.onCommit,
   });
 
   final List<JournalMedia> media;
   final bool enabled;
   final VoidCallback onAdd;
-  final ValueChanged<JournalMedia> onChanged;
-  final Future<void> Function(JournalMedia) onCommit;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (media.isNotEmpty) ...[
-          _EditableMediaCanvas(
-            media: media,
-            enabled: enabled,
-            onChanged: onChanged,
-            onCommit: onCommit,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Kéo bằng một ngón tay · chụm để đổi cỡ · xoay bằng hai ngón tay',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: MuseColors.mutedInk,
-              fontStyle: FontStyle.italic,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-        ],
         Row(
           children: [
             const Icon(Icons.image_outlined, size: 18, color: MuseColors.teal),
@@ -558,7 +527,18 @@ class _AttachmentTray extends StatelessWidget {
             ),
           ],
         ),
-        if (media.isEmpty)
+        if (media.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          _FilmStrip(media: media),
+          const SizedBox(height: 8),
+          Text(
+            'Vuốt hoặc kéo sang trái/phải để xem ảnh.',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: MuseColors.mutedInk,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ] else
           Text(
             'Bạn có thể lưu trước rồi thêm ảnh vào bất kỳ lúc nào.',
             style: Theme.of(context).textTheme.bodySmall,
@@ -568,207 +548,149 @@ class _AttachmentTray extends StatelessWidget {
   }
 }
 
-class _EditableMediaCanvas extends StatelessWidget {
-  const _EditableMediaCanvas({
-    required this.media,
-    required this.enabled,
-    required this.onChanged,
-    required this.onCommit,
-  });
+class _FilmStrip extends StatelessWidget {
+  const _FilmStrip({required this.media});
 
   final List<JournalMedia> media;
-  final bool enabled;
-  final ValueChanged<JournalMedia> onChanged;
-  final Future<void> Function(JournalMedia) onCommit;
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width = constraints.maxWidth;
-        const height = 310.0;
-        return SizedBox(
-          width: width,
-          height: height,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              const Positioned.fill(child: _CanvasHint()),
-              for (final item in media)
-                _TransformableMedia(
-                  media: item,
-                  canvasSize: Size(width, height),
-                  enabled: enabled,
-                  onChanged: onChanged,
-                  onCommit: onCommit,
-                ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _CanvasHint extends StatelessWidget {
-  const _CanvasHint();
-
-  @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: Center(
-        child: Text(
-          'Ảnh tự do trên trang viết',
-          style: TextStyle(
-            fontFamily: 'serif',
-            fontSize: 15,
-            color: MuseColors.mutedInk.withValues(alpha: .32),
-            fontStyle: FontStyle.italic,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _TransformableMedia extends ConsumerStatefulWidget {
-  const _TransformableMedia({
-    required this.media,
-    required this.canvasSize,
-    required this.enabled,
-    required this.onChanged,
-    required this.onCommit,
-  });
-
-  final JournalMedia media;
-  final Size canvasSize;
-  final bool enabled;
-  final ValueChanged<JournalMedia> onChanged;
-  final Future<void> Function(JournalMedia) onCommit;
-
-  @override
-  ConsumerState<_TransformableMedia> createState() =>
-      _TransformableMediaState();
-}
-
-class _TransformableMediaState extends ConsumerState<_TransformableMedia> {
-  JournalMedia? _startMedia;
-  late JournalMedia _currentMedia = widget.media;
-  Offset _startFocalPoint = Offset.zero;
-
-  @override
-  void didUpdateWidget(covariant _TransformableMedia oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.media.id != widget.media.id || _startMedia == null) {
-      _currentMedia = widget.media;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final media = _currentMedia;
-    final width = widget.canvasSize.width * .64 * media.scale;
-    final height = widget.canvasSize.height * .48 * media.scale;
-    final left =
-        widget.canvasSize.width / 2 +
-        media.offsetX * widget.canvasSize.width -
-        width / 2;
-    final top =
-        widget.canvasSize.height / 2 +
-        media.offsetY * widget.canvasSize.height -
-        height / 2;
-    final signedUrl = ref.watch(journalMediaUrlProvider(media.storagePath));
-
-    return Positioned(
-      left: left,
-      top: top,
-      width: width,
-      height: height,
-      child: Transform.rotate(
-        angle: media.rotation,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Positioned.fill(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onScaleStart: widget.enabled ? _onScaleStart : null,
-                onScaleUpdate: widget.enabled ? _onScaleUpdate : null,
-                onScaleEnd: widget.enabled ? (_) => _onScaleEnd() : null,
-                child: signedUrl.when(
-                  loading: () => const _MediaPlaceholder(),
-                  error:
-                      (_, _) => const _MediaPlaceholder(
-                        icon: Icons.broken_image_outlined,
-                      ),
-                  data:
-                      (url) => Image.network(
-                        url,
-                        fit: BoxFit.contain,
-                        alignment: Alignment.topLeft,
-                        errorBuilder:
-                            (_, _, _) => const _MediaPlaceholder(
-                              icon: Icons.broken_image_outlined,
-                            ),
-                      ),
-                ),
-              ),
-            ),
-            Positioned(
-              left: 0,
-              top: 0,
-              child: IgnorePointer(
-                child: Transform.scale(
-                  scale: media.scale,
-                  alignment: Alignment.topLeft,
-                  child: const _MediaPin(),
-                ),
-              ),
+    return Semantics(
+      label: 'Dải ảnh đính kèm gồm ${media.length} ảnh. Có thể kéo ngang để xem.',
+      child: Container(
+        height: 178,
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: .9),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: MuseColors.teal.withValues(alpha: .14)),
+          boxShadow: [
+            BoxShadow(
+              color: MuseColors.teal.withValues(alpha: .08),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            itemCount: media.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 2),
+            itemBuilder:
+                (context, index) => _FilmFrame(
+                  media: media[index],
+                  index: index,
+                ),
+          ),
+        ),
       ),
     );
   }
+}
 
-  void _onScaleStart(ScaleStartDetails details) {
-    _startMedia = _currentMedia;
-    _startFocalPoint = details.focalPoint;
-  }
+class _FilmFrame extends ConsumerWidget {
+  const _FilmFrame({required this.media, required this.index});
 
-  void _onScaleUpdate(ScaleUpdateDetails details) {
-    final start = _startMedia;
-    if (start == null) return;
-    final next = start.copyWith(
-      offsetX: _clamp(
-        start.offsetX +
-            (details.focalPoint.dx - _startFocalPoint.dx) /
-                widget.canvasSize.width,
-        -2,
-        2,
+  final JournalMedia media;
+  final int index;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final signedUrl = ref.watch(journalMediaUrlProvider(media.storagePath));
+    return Semantics(
+      label: 'Ảnh đính kèm ${index + 1}',
+      image: true,
+      child: SizedBox(
+        width: 148,
+        height: 158,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.symmetric(
+              vertical: BorderSide(
+                color: MuseColors.teal.withValues(alpha: .12),
+              ),
+            ),
+          ),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 19, 12, 19),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: MuseColors.mint.withValues(alpha: .55),
+                        border: Border.all(
+                          color: MuseColors.teal.withValues(alpha: .12),
+                        ),
+                      ),
+                      child: signedUrl.when(
+                        loading: () => const _MediaPlaceholder(),
+                        error:
+                            (_, _) => const _MediaPlaceholder(
+                              icon: Icons.broken_image_outlined,
+                            ),
+                        data:
+                            (url) => Image.network(
+                              url,
+                              fit: BoxFit.contain,
+                              errorBuilder:
+                                  (_, _, _) => const _MediaPlaceholder(
+                                    icon: Icons.broken_image_outlined,
+                                  ),
+                            ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const Positioned(
+                top: 7,
+                left: 9,
+                right: 9,
+                child: _FilmSprocketRow(),
+              ),
+              const Positioned(
+                bottom: 7,
+                left: 9,
+                right: 9,
+                child: _FilmSprocketRow(),
+              ),
+            ],
+          ),
+        ),
       ),
-      offsetY: _clamp(
-        start.offsetY +
-            (details.focalPoint.dy - _startFocalPoint.dy) /
-                widget.canvasSize.height,
-        -2,
-        2,
-      ),
-      scale: _clamp(start.scale * details.scale, .1, 5),
-      rotation: start.rotation + details.rotation,
     );
-    setState(() => _currentMedia = next);
-    widget.onChanged(next);
   }
+}
 
-  void _onScaleEnd() {
-    final current = _currentMedia;
-    _startMedia = null;
-    widget.onCommit(current);
+class _FilmSprocketRow extends StatelessWidget {
+  const _FilmSprocketRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        for (var index = 0; index < 4; index++)
+          SizedBox(
+            width: 16,
+            height: 5,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: MuseColors.sky.withValues(alpha: .38),
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ),
+      ],
+    );
   }
-
-  double _clamp(double value, double min, double max) =>
-      value.clamp(min, max).toDouble();
 }
 
 class _MediaPlaceholder extends StatelessWidget {
@@ -784,34 +706,6 @@ class _MediaPlaceholder extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
       ),
       child: Icon(icon, color: MuseColors.teal),
-    );
-  }
-}
-
-class _MediaPin extends StatelessWidget {
-  const _MediaPin();
-
-  @override
-  Widget build(BuildContext context) {
-    return Transform.rotate(
-      angle: -.18,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: const Color(0xFFE24F55),
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: .22),
-              blurRadius: 5,
-              offset: const Offset(1, 3),
-            ),
-          ],
-        ),
-        child: const Padding(
-          padding: EdgeInsets.all(5),
-          child: Icon(Icons.push_pin, size: 22, color: Color(0xFFFFE8E5)),
-        ),
-      ),
     );
   }
 }

@@ -7,8 +7,8 @@
 
 Nhật ký là không gian viết tự do, không phải một form ngắn trong dialog. Khi tạo
 hoặc chạm vào một daily journal/future letter, app mở `JournalEditorScreen` toàn
-màn hình. Người dùng có thể viết dài, sửa lại, gắn tag và thêm ảnh riêng tư ngay
-trong trang viết.
+màn hình. Người dùng có thể viết dài, sửa lại, gắn tag và thêm ảnh riêng tư vào
+danh sách đính kèm của bài viết.
 
 ## Bố cục trang viết
 
@@ -28,14 +28,18 @@ làm lộ khoảng trống hay điểm nối.
 2. tiêu đề với serif lớn, đậm;
 3. nội dung với serif thoáng, line-height rộng để đọc và viết dài.
 
-Với thư gửi tương lai, ngày hiện tại không chiếm vị trí đầu trang. Ngày thư đến
-được đặt ở phần cuối lá thư, sau nội dung và tùy chọn nhắc, để giữ cảm giác một
-lá thư hoàn chỉnh.
+Với thư gửi tương lai, ngày viết hiển thị ở đầu trang. Ngày thư đến được đặt ở
+phần cuối lá thư, sau nội dung và tùy chọn nhắc, để giữ cảm giác một lá thư hoàn
+chỉnh và phân biệt rõ hai mốc thời gian.
+
+Ngày viết lấy từ `journals.created_at` và không đổi khi người dùng sửa thư; bản
+ghi cũ không có giá trị đọc được sẽ dùng `updated_at` làm giá trị dự phòng.
 
 Các trường vẫn là `TextField` để giữ bàn phím, selection và accessibility của
 Flutter, nhưng decoration trong suốt, không fill, không outline. Divider mảnh
-chỉ dùng để phân nhịp giữa tiêu đề và nội dung. Tag, ảnh và tùy chọn thư nằm sau
-nội dung với nhãn nhẹ; không tạo thêm một “form card” cạnh tranh với trang viết.
+chỉ dùng để phân nhịp giữa tiêu đề và nội dung. Tag, danh sách ảnh và tùy chọn
+thư nằm sau nội dung với nhãn nhẹ; không tạo thêm một “form card” cạnh tranh với
+trang viết. Ảnh không được chèn vào giữa các đoạn văn trong lát cắt hiện tại.
 
 ## Luồng
 
@@ -43,12 +47,11 @@ nội dung với nhãn nhẹ; không tạo thêm một “form card” cạnh tr
 2. Editor gọi `JournalController.saveDaily()` hoặc `saveFutureLetter()` qua
    repository/RPC; không gọi Supabase trực tiếp.
 3. Sau khi có journal ID, nút `Thêm ảnh` gọi picker → upload private →
-   `attach_journal_media()`. Ảnh hiện trên canvas tự do trong vùng ghi chú; người
-   dùng kéo một ngón tay để di chuyển, chụm hai ngón để đổi cỡ và xoay hai ngón
-theo ý muốn. Ảnh dùng `BoxFit.contain`, nên không crop.
-Mỗi ảnh có thêm một ghim đỏ nhỏ đè lên đúng góc trên-trái như một lớp trang trí;
-ghim dùng cùng transform của ảnh (vị trí, góc và tỉ lệ) và không bắt gesture nên
-không cản trở việc kéo, đổi cỡ hoặc xoay ảnh.
+   `attach_journal_media()`. Ảnh được hiển thị trong một dải film ngang nằm
+   trong khung trắng bên dưới nội dung; mỗi ảnh nằm trong một frame nối tiếp và
+   có thể vuốt/kéo sang trái hoặc phải để xem. Preview dùng `BoxFit.contain`,
+   chỉ để xem và không crop. Ảnh không được chèn inline, kéo, đổi cỡ, xoay hoặc
+   phủ thêm ghim/huy hiệu trong editor.
 4. Future letter cho phép đổi ngày mở, mở sớm theo quyết định MVP và tùy chọn nhắc
    trên thiết bị. Payload notification chỉ chứa journal ID.
 5. Lưu thành công quay về danh sách; controller reload nên card hiển thị nội dung
@@ -62,10 +65,11 @@ hiện thông báo an toàn; bản ghi server không bị coi là thất bại n
 không tạo được.
 
 Editor yêu cầu lưu lần đầu trước khi gắn ảnh để có journal ID và storage prefix.
-Các attachment hiện được trình bày trên canvas ảnh trong trang viết. Mỗi gesture
-được lưu vào `journal_media` qua `update_journal_media_transform()` sau khi thả
-tay; metadata vị trí/kích thước/góc vẫn giữ nguyên khi mở lại trang. Vị trí ảnh
-inline giữa từng đoạn văn sẽ là bước riêng khi schema có model block/position.
+Các attachment hiện được trình bày thành danh sách preview chỉ-đọc trong trang
+viết. Các cột transform và RPC `update_journal_media_transform()` vẫn được giữ
+để tương thích dữ liệu/migration cũ, nhưng UI hiện không gọi RPC này và không cho
+người dùng chỉnh vị trí, kích thước hoặc góc ảnh. Vị trí ảnh inline giữa từng
+đoạn văn sẽ là bước riêng khi schema có model block/position.
 Trong giai đoạn triển khai migration theo từng môi trường, thao tác đọc vẫn có
 fallback về ba cột media cũ nếu project từ xa chưa có metadata transform; thao
 tác lưu transform chỉ hoạt động sau khi migration đã được áp dụng.

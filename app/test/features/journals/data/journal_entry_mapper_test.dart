@@ -11,12 +11,14 @@ void main() {
           'id': 'daily-id',
           'journal_type': 'daily',
           'title': 'Hôm nay',
+          'created_at': '2026-09-04T10:00:00Z',
           'updated_at': '2026-09-05T10:00:00Z',
         },
         {
           'id': 'letter-id',
           'journal_type': 'future_letter',
           'title': 'Gửi mình',
+          'created_at': '2026-09-04T09:00:00Z',
           'updated_at': '2026-09-05T09:00:00Z',
         },
       ],
@@ -56,6 +58,7 @@ void main() {
     ]);
 
     expect(entries.first.kind, JournalKind.daily);
+    expect(entries.first.createdAt, DateTime.parse('2026-09-04T10:00:00Z'));
     expect(entries.first.content, 'Một ngày dịu dàng.');
     expect(entries.first.media.single.id, 'media-id');
     expect(entries.first.media.single.offsetX, 0.2);
@@ -64,6 +67,7 @@ void main() {
     expect(entries.first.media.single.rotation, 1.2);
     expect(entries.first.tags.single.name, 'Bình yên');
     expect(entries.last.kind, JournalKind.futureLetter);
+    expect(entries.last.createdAt, DateTime.parse('2026-09-04T09:00:00Z'));
     expect(entries.last.status, 'scheduled');
     expect(entries.last.openedAt, isNull);
   });
