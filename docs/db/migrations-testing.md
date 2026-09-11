@@ -1,7 +1,7 @@
 # Migrations, seed và kiểm thử database
 
 Trạng thái: `implemented` cho migration MVP; coverage còn giới hạn  
-Cập nhật: 2026-09-08
+Cập nhật: 2026-09-11
 
 ## Nguồn sự thật và baseline
 
@@ -37,6 +37,7 @@ Các migration tới `20260907150000` đã có trên nhánh phát triển; dòng
 | `20260907120000` | `daily_journal_one_per_day` | Một daily journal mỗi user/ngày Việt Nam và revoke RPC nền |
 | `20260907150000` | `journal_media_transforms` | Metadata vị trí, scale, xoay ảnh và RPC owner-scoped |
 | `20260908110000` | `curated_world_catalog` | 10 điểm đến/trạm/reward và 10 mission template curated |
+| `20260911140000` | `mission_scheduling_and_recurrence` | Lịch mission, daily series, expire/refresh RPC |
 
 ## Quy ước migration
 
@@ -70,6 +71,8 @@ trên PostgreSQL/Supabase thật.
 - bootstrap hai auth user và phân tách journal qua RLS;
 - one-check-in-per-day, sửa check-in và streak idempotent;
 - custom reward 5, complete idempotent, energy/journey/reward cơ bản;
+- daily schedule/series, refresh idempotent, missed → expired, boundary tuần/
+  tháng/năm và custom range;
 - daily/yearly/future-letter save và quan hệ cùng owner;
 - due notification và soft-delete visibility.
 - journal tags chuẩn hóa/khử trùng, lưu atomic và chặn gắn tag chéo user;

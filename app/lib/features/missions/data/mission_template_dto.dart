@@ -1,4 +1,5 @@
 import 'package:musemend/features/missions/domain/mission_template.dart';
+import 'package:musemend/features/missions/domain/mission_type.dart';
 
 class MissionTemplateDto {
   const MissionTemplateDto({
@@ -8,6 +9,7 @@ class MissionTemplateDto {
     required this.targetMood,
     required this.energyReward,
     required this.estimatedMinutes,
+    required this.missionType,
   });
 
   factory MissionTemplateDto.fromMap(Map<String, dynamic> row) {
@@ -18,6 +20,7 @@ class MissionTemplateDto {
       targetMood: row['target_mood'] as String,
       energyReward: (row['default_energy_reward'] as num).toInt(),
       estimatedMinutes: (row['estimated_minutes'] as num?)?.toInt(),
+      missionType: row['mission_type'] as String,
     );
   }
 
@@ -27,6 +30,7 @@ class MissionTemplateDto {
   final String targetMood;
   final int energyReward;
   final int? estimatedMinutes;
+  final String missionType;
 
   MissionTemplate toDomain() {
     return MissionTemplate(
@@ -36,6 +40,7 @@ class MissionTemplateDto {
       targetMood: targetMood,
       energyReward: energyReward,
       estimatedMinutes: estimatedMinutes,
+      missionType: MissionType.fromDatabase(missionType),
     );
   }
 }

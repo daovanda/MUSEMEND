@@ -764,13 +764,16 @@ class _SkyQuoteCard extends StatelessWidget {
               ),
             ),
           ),
-          Text(
-            quote,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Color(0xFF5B5865),
-              fontSize: 16,
-              height: 1.5,
+          SizedBox(
+            width: double.infinity,
+            child: Text(
+              quote,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Color(0xFF5B5865),
+                fontSize: 16,
+                height: 1.5,
+              ),
             ),
           ),
         ],

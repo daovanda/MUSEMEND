@@ -1,7 +1,7 @@
 # Daily Journal và Future Letter
 
 Trạng thái: `in-progress`
-Cập nhật: 2026-09-10
+Cập nhật: 2026-09-11
 
 ## Phạm vi triển khai
 
@@ -13,20 +13,23 @@ Các khả năng hiện có:
 - tải lịch nhật ký hàng ngày từ tháng hiện tại và tối đa 11 tháng trước có hoạt
   động; tháng hiện tại luôn hiển thị, các tháng quá khứ rỗng được ẩn để kéo xuống
   xem nhanh lịch sử;
-- mỗi ngày có đúng một ô tròn; ô có check-in được tô bằng mood đã chọn, ô đã
-  viết nhưng chưa có mood dùng trạng thái ghi chú; ngày tương lai được để trống và
+- mỗi ngày có đúng một ô tròn; ô có check-in được tô bằng mood đã chọn; không
+  còn biểu tượng bút cho bản ghi cũ thiếu mood. Ngày tương lai được để trống và
   không thể chạm;
-- mỗi ngày chỉ tạo được một daily journal. Ngày hiện tại có nút viết/sửa; ngày
-  quá khứ chỉ mở để sửa nếu bản ghi đã tồn tại, không có nút tạo thêm;
+- mỗi ngày chỉ tạo được một daily journal. Ngày hiện tại chỉ mở editor sau khi
+  đã có mood check-in; nếu chưa có, app nhắc chọn mood trước và nói rõ mood có
+  thể thay đổi bất kỳ lúc nào. Ngày quá khứ chỉ mở để sửa nếu bản ghi đã tồn
+  tại, không có nút tạo thêm;
 - tạo/sửa nhật ký ngày với tiêu đề và nội dung;
 - tạo/sửa thư tương lai, chọn ngày nhắc và đọc/mở trước hạn;
-- trong editor thư tương lai, ngày thư đến được đặt ở phần cuối lá thư; ngày viết
-  không hiển thị ở đầu để giữ đúng nhịp của một lá thư;
+- trong editor thư tương lai, ngày viết hiển thị ở đầu lá thư còn ngày thư đến
+  được đặt ở phần cuối để phân biệt hai mốc thời gian;
 - nhập tối đa 8 tag phân cách bằng dấu phẩy và hiển thị tag trên journal card;
 - tùy chọn lên lịch nhắc cục bộ khi lưu thư tương lai;
-- chọn ảnh JPG/PNG/WebP/HEIC tối đa 10 MiB, upload private, xem preview bằng
-  signed URL 5 phút và chỉnh vị trí/kích thước/góc xoay tự do trên canvas mà
-  không crop ảnh;
+- chọn ảnh JPG/PNG/WebP/HEIC tối đa 10 MiB, upload private, xem preview trong
+  dải film ngang của danh sách ảnh đính kèm bằng signed URL 5 phút; người dùng
+  vuốt/kéo trái phải để xem, ảnh chỉ để xem, không chèn inline, không crop,
+  không đổi cỡ/xoay và không có ghim/huy hiệu;
 - pull-to-refresh, trạng thái loading/empty/retry;
 - mở trực tiếp đúng journal theo ID từ local notification hoặc inbox, kể cả khi
   bản ghi nằm ngoài 50 mục mới nhất;
@@ -94,8 +97,9 @@ analytics. Nội dung hiện là plaintext được RLS bảo vệ, chưa có E2
 - Android E2E với tài khoản QA đã xác nhận tạo daily atomically, tạo future letter
   hẹn ngày mai, mở sớm và reload vẫn giữ đúng nội dung/trạng thái đã mở.
 - Android E2E đã xác nhận Photo Picker → private upload → attach RPC → reload →
-  signed preview. Audit DB xác nhận bucket private, metadata/object khớp 1:1 và
-  mọi path đều đúng prefix owner/journal. Picker vẫn cần kiểm thử trên thiết bị iOS.
+  danh sách signed preview chỉ-đọc. Audit DB xác nhận bucket private,
+  metadata/object khớp 1:1 và mọi path đều đúng prefix owner/journal. Picker vẫn
+  cần kiểm thử trên thiết bị iOS.
 - Android E2E đã xác nhận thêm hai tag vào daily journal, reload hiển thị đúng và
   audit Supabase Dev thấy đúng hai assignments.
 - Android E2E đã xác nhận runtime permission được xin sau khi lưu và AlarmManager

@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:musemend/features/missions/data/mission_dto.dart';
 import 'package:musemend/features/missions/data/mission_template_dto.dart';
 import 'package:musemend/features/missions/domain/mission_status.dart';
+import 'package:musemend/features/missions/domain/mission_type.dart';
 
 void main() {
   test('maps a user mission without trusting a client reward', () {
@@ -14,12 +15,15 @@ void main() {
           'energy_reward': 5,
           'status': 'pending',
           'source_type': 'user_created',
-          'due_at': null,
+          'mission_type': 'daily',
+          'start_at': '2026-09-11T02:00:00Z',
+          'due_at': '2026-09-11T03:00:00Z',
         }).toDomain();
 
     expect(mission.energyReward, 5);
     expect(mission.status, MissionStatus.pending);
     expect(mission.isCustom, isTrue);
+    expect(mission.missionType, MissionType.daily);
   });
 
   test('maps a mood-aware template', () {
@@ -31,9 +35,11 @@ void main() {
           'target_mood': 'sad',
           'default_energy_reward': 5,
           'estimated_minutes': 2,
+          'mission_type': 'weekly',
         }).toDomain();
 
     expect(template.requiresMood, isTrue);
     expect(template.estimatedMinutes, 2);
+    expect(template.missionType, MissionType.weekly);
   });
 }

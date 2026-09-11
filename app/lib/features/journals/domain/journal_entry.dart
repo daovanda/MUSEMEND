@@ -10,18 +10,22 @@ class JournalEntry {
     required this.title,
     required this.content,
     required this.updatedAt,
+    DateTime? createdAt,
     this.entryDate,
     this.deliverAt,
     this.status,
     this.openedAt,
     this.media = const [],
     this.tags = const [],
-  });
+  }) : createdAt = createdAt ?? updatedAt;
 
   final String id;
   final JournalKind kind;
   final String? title;
   final String content;
+
+  /// Original creation time. Falls back to [updatedAt] for older adapters.
+  final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? entryDate;
   final DateTime? deliverAt;

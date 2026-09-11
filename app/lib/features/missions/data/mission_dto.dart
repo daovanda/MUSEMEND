@@ -1,4 +1,5 @@
 import 'package:musemend/features/missions/domain/mission_status.dart';
+import 'package:musemend/features/missions/domain/mission_type.dart';
 import 'package:musemend/features/missions/domain/user_mission.dart';
 
 class MissionDto {
@@ -10,6 +11,8 @@ class MissionDto {
     required this.energyReward,
     required this.status,
     required this.sourceType,
+    required this.missionType,
+    required this.startAt,
     required this.dueAt,
   });
 
@@ -22,6 +25,8 @@ class MissionDto {
       energyReward: (row['energy_reward'] as num).toInt(),
       status: row['status'] as String,
       sourceType: row['source_type'] as String,
+      missionType: row['mission_type'] as String,
+      startAt: DateTime.parse(row['start_at'] as String),
       dueAt:
           row['due_at'] == null
               ? null
@@ -36,6 +41,8 @@ class MissionDto {
   final int energyReward;
   final String status;
   final String sourceType;
+  final String missionType;
+  final DateTime startAt;
   final DateTime? dueAt;
 
   UserMission toDomain() {
@@ -47,6 +54,8 @@ class MissionDto {
       energyReward: energyReward,
       status: MissionStatus.fromDatabase(status),
       sourceType: sourceType,
+      missionType: MissionType.fromDatabase(missionType),
+      startAt: startAt,
       dueAt: dueAt,
     );
   }

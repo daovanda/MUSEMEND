@@ -55,12 +55,14 @@ class JournalEntryMapper {
             if (detail == null) {
               throw FormatException('Daily journal $id has no detail.');
             }
+            final updatedAt = DateTime.parse(journal['updated_at'] as String);
             return JournalEntry(
               id: id,
               kind: JournalKind.daily,
               title: journal['title'] as String?,
               content: detail['content'] as String,
-              updatedAt: DateTime.parse(journal['updated_at'] as String),
+              createdAt: _date(journal['created_at']) ?? updatedAt,
+              updatedAt: updatedAt,
               entryDate: DateTime.parse(detail['entry_date'] as String),
               media: List.unmodifiable(mediaByJournal[id] ?? const []),
               tags: List.unmodifiable(tagsByJournal[id] ?? const []),
@@ -71,12 +73,14 @@ class JournalEntryMapper {
             if (detail == null) {
               throw FormatException('Future letter $id has no detail.');
             }
+            final updatedAt = DateTime.parse(journal['updated_at'] as String);
             return JournalEntry(
               id: id,
               kind: JournalKind.futureLetter,
               title: journal['title'] as String?,
               content: detail['content'] as String,
-              updatedAt: DateTime.parse(journal['updated_at'] as String),
+              createdAt: _date(journal['created_at']) ?? updatedAt,
+              updatedAt: updatedAt,
               deliverAt: DateTime.parse(detail['deliver_at'] as String),
               status: detail['status'] as String,
               openedAt: _date(detail['opened_at']),

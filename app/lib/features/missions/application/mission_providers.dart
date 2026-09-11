@@ -8,6 +8,7 @@ import 'package:musemend/features/missions/domain/mission_completion.dart';
 import 'package:musemend/features/missions/domain/mission_dashboard.dart';
 import 'package:musemend/features/missions/domain/mission_repository.dart';
 import 'package:musemend/features/missions/domain/mission_template.dart';
+import 'package:musemend/features/missions/domain/mission_type.dart';
 
 final missionRepositoryProvider = Provider<MissionRepository>((ref) {
   return SupabaseMissionRepository(ref.watch(supabaseClientProvider));
@@ -27,21 +28,36 @@ class MissionsController extends AsyncNotifier<MissionDashboard> {
     return _repository.loadDashboard(todayMood: reflect.today?.mood);
   }
 
-  Future<bool> addTemplate(MissionTemplate template) async {
+  Future<bool> addTemplate(
+    MissionTemplate template, {
+    required DateTime? startAt,
+    required DateTime? dueAt,
+  }) async {
     return _mutate((reflect) async {
       await _repository.addTemplate(
         template: template,
         todayCheckinId: reflect.today?.id,
+        startAt: startAt,
+        dueAt: dueAt,
       );
     });
   }
 
-  Future<bool> createCustom({
+  Future<bool> createScheduled({
+    required MissionType missionType,
     required String title,
     required String? description,
+    required DateTime? startAt,
+    required DateTime? dueAt,
   }) {
     return _mutate(
-      (_) => _repository.createCustom(title: title, description: description),
+      (_) => _repository.createScheduled(
+        missionType: missionType,
+        title: title,
+        description: description,
+        startAt: startAt,
+        dueAt: dueAt,
+      ),
     );
   }
 
@@ -61,10 +77,12 @@ class MissionsController extends AsyncNotifier<MissionDashboard> {
   Future<bool> _mutate(
     Future<void> Function(ReflectState reflect) operation,
   ) async {
-    final reflect = ref.read(reflectControllerProvider).value;
-    if (reflect == null) return false;
     state = const AsyncLoading();
     try {
+      // The Home screen can still be hydrating the shared check-in provider
+      // when a suggestion is tapped. Await it instead of treating a temporary
+      // AsyncLoading state as a failed mutation.
+      final reflect = await ref.read(reflectControllerProvider.future);
       await operation(reflect);
       state = AsyncData(
         await _repository.loadDashboard(todayMood: reflect.today?.mood),

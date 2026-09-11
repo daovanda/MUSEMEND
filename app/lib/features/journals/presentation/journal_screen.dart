@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:musemend/app/theme/muse_colors.dart';
 import 'package:musemend/core/presentation/muse_ui.dart';
+import 'package:musemend/features/checkin/application/reflect_providers.dart';
+import 'package:musemend/features/checkin/domain/mood.dart';
 import 'package:musemend/features/journals/application/journal_providers.dart';
 import 'package:musemend/features/journals/domain/journal_entry.dart';
 import 'package:musemend/features/journals/domain/journal_media.dart';
@@ -32,11 +35,20 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(reflectControllerProvider, (previous, next) {
+      final previousMood = previous?.value?.today?.mood;
+      final nextMood = next.value?.today?.mood;
+      if (previousMood != nextMood) {
+        ref.invalidate(journalCalendarProvider);
+      }
+    });
     final entries = ref.watch(journalControllerProvider);
     final calendar = ref.watch(journalCalendarProvider);
+    final calendarData = calendar.asData?.value;
     final todayEntry =
-        _findTodayEntryInCalendar(calendar.asData?.value) ??
+        _findTodayEntryInCalendar(calendarData) ??
         _findTodayEntry(entries.asData?.value);
+    final todayMood = _findTodayMoodInCalendar(calendarData);
     final requestedEntry = switch (widget.requestedEntryId) {
       final id? => ref.watch(journalEntryProvider(id)),
       null => null,
@@ -64,9 +76,21 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
                     (value) => _DailyCalendarSection(
                       calendar: value,
                       hasTodayEntry: todayEntry != null,
+                      todayMood: todayMood,
                       onWriteToday:
-                          () => _editDaily(context, ref, entry: todayEntry),
-                      onOpen: (entry) => _openEntry(context, ref, entry),
+                          () => _editDaily(
+                            context,
+                            ref,
+                            entry: todayEntry,
+                            todayMood: todayMood,
+                          ),
+                      onOpen:
+                          (entry) => _openEntry(
+                            context,
+                            ref,
+                            entry,
+                            todayMood: todayMood,
+                          ),
                     ),
               ),
               const SizedBox(height: 28),
@@ -152,6 +176,16 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
     return null;
   }
 
+  Mood? _findTodayMoodInCalendar(JournalCalendarData? data) {
+    if (data == null) return null;
+    for (final month in data.months) {
+      for (final day in month.days) {
+        if (_sameDate(day.date, data.today)) return day.checkin?.mood;
+      }
+    }
+    return null;
+  }
+
   void _scheduleRequestedEntry(JournalEntry? entry) {
     final requestedId = widget.requestedEntryId;
     if (requestedId == null || _handledEntryId == requestedId) return;
@@ -171,10 +205,11 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
   Future<void> _openEntry(
     BuildContext context,
     WidgetRef ref,
-    JournalEntry entry,
-  ) async {
+    JournalEntry entry, {
+    Mood? todayMood,
+  }) async {
     if (entry.kind == JournalKind.daily) {
-      await _editDaily(context, ref, entry: entry);
+      await _editDaily(context, ref, entry: entry, todayMood: todayMood);
       return;
     }
     if (entry.openedAt == null) {
@@ -193,7 +228,21 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
     BuildContext context,
     WidgetRef ref, {
     JournalEntry? entry,
+    Mood? todayMood,
   }) async {
+    final resolvedTodayMood =
+        todayMood ??
+        _findTodayMoodInCalendar(
+          ref.read(journalCalendarProvider).asData?.value,
+        ) ??
+        ref.read(reflectControllerProvider).value?.today?.mood;
+    final isToday =
+        entry == null ||
+        (entry.entryDate != null && _sameDate(entry.entryDate!, _today()));
+    if (isToday && resolvedTodayMood == null) {
+      _promptMoodBeforeWriting(context);
+      return;
+    }
     var selectedEntry = entry;
     if (entry != null) {
       try {
@@ -217,6 +266,22 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
             ),
       ),
     );
+  }
+
+  void _promptMoodBeforeWriting(BuildContext context) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: const Text(
+            'Hãy chọn mood hôm nay trước khi viết. Bạn có thể thay đổi mood bất kỳ lúc nào.',
+          ),
+          action: SnackBarAction(
+            label: 'Chọn mood',
+            onPressed: () => context.go('/reflect'),
+          ),
+        ),
+      );
   }
 
   Future<void> _editLetter(
@@ -311,12 +376,14 @@ class _DailyCalendarSection extends StatelessWidget {
   const _DailyCalendarSection({
     required this.calendar,
     required this.hasTodayEntry,
+    required this.todayMood,
     required this.onWriteToday,
     required this.onOpen,
   });
 
   final JournalCalendarData calendar;
   final bool hasTodayEntry;
+  final Mood? todayMood;
   final VoidCallback onWriteToday;
   final ValueChanged<JournalEntry> onOpen;
 
@@ -328,8 +395,18 @@ class _DailyCalendarSection extends StatelessWidget {
         MuseSectionLabel(
           'Nhật ký hàng ngày',
           trailing: MusePill(
-            label: hasTodayEntry ? 'Sửa hôm nay' : 'Viết hôm nay',
-            icon: hasTodayEntry ? Icons.edit_outlined : Icons.add_rounded,
+            label:
+                todayMood == null
+                    ? 'Chọn mood trước'
+                    : hasTodayEntry
+                    ? 'Sửa hôm nay'
+                    : 'Viết hôm nay',
+            icon:
+                todayMood == null
+                    ? Icons.mood_outlined
+                    : hasTodayEntry
+                    ? Icons.edit_outlined
+                    : Icons.add_rounded,
             onTap: onWriteToday,
           ),
         ),
@@ -505,12 +582,6 @@ class _CalendarDayCell extends StatelessWidget {
                     height: 25,
                     fit: BoxFit.contain,
                   ),
-                ),
-              if (mood == null && !isFuture && day.isWritten)
-                const Icon(
-                  Icons.edit_note_rounded,
-                  size: 18,
-                  color: MuseColors.teal,
                 ),
               Align(
                 alignment: Alignment.bottomCenter,

@@ -1,7 +1,7 @@
 # Màn Bầu trời (Reflect)
 
 - **Trạng thái:** in-progress
-- **Cập nhật:** 2026-09-10
+- **Cập nhật:** 2026-09-11
 - **Nguồn tham chiếu:** page Home, Figma frame `Bầu trời` (`233:893`) và biến thể mood mở (`57:24`)
 
 ## Phạm vi
@@ -43,9 +43,13 @@ tiến độ vẫn do RPC/database xác định; các con số hiển thị ch�
   cho dữ liệu hiện tại.
 - Mission nằm trên panel gradient xanh nhạt sang tím nhạt; khi tài khoản mở Home
   lần đầu trong ngày, server tạo idempotent hai nhiệm vụ starter (`Uống một cốc
-  nước`, `Đi bộ 5 phút`). Các nhiệm vụ được nhóm theo `Buổi sáng`, `Bất kỳ lúc nào`,
-  `Buổi chiều`, `Buổi tối` từ `dueAt` ở UTC+7. Tiến độ cạnh sticker là
-  `earned_energy/required_energy` của checkpoint hiện tại.
+  nước`, `Đi bộ 5 phút`). Daily còn hạn được nhóm theo giờ `startAt` thành sáng,
+  chiều, tối, bất kỳ lúc nào; tuần/tháng/năm/custom có nhóm riêng. Nhiệm vụ quá
+  hạn được server đánh dấu expired khi tải dashboard và không hiển thị. Bên dưới
+  là catalog gợi ý có nhãn loại; thêm daily/custom mở sheet chọn lịch trước khi
+  gọi `create_scheduled_mission()` qua repository. Tiến độ cạnh sticker là
+  `earned_energy/required_energy` của
+  checkpoint hiện tại.
 - Quote P0 hardcode đúng nội dung Figma. Khi có nguồn nội dung động, nó phải đi
   qua application interface và không cho nội dung server tự chèn HTML/URL.
 - `Chia sẻ khoảnh khắc` dùng carousel card đúng composition Home: preview, tiêu
