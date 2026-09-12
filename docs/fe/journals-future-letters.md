@@ -1,7 +1,7 @@
 # Daily Journal và Future Letter
 
 Trạng thái: `in-progress`
-Cập nhật: 2026-09-11
+Cập nhật: 2026-09-12
 
 ## Phạm vi triển khai
 
@@ -26,6 +26,9 @@ Các khả năng hiện có:
   được đặt ở phần cuối để phân biệt hai mốc thời gian;
 - nhập tối đa 8 tag phân cách bằng dấu phẩy và hiển thị tag trên journal card;
 - tùy chọn lên lịch nhắc cục bộ khi lưu thư tương lai;
+- thẻ thư tương lai ở màn danh sách chỉ mở nội dung khi chạm; thao tác thêm ảnh
+  nằm trong editor, còn xóa thư được đặt trong menu ba chấm dọc và vẫn yêu cầu
+  xác nhận trước khi xóa mềm;
 - chọn ảnh JPG/PNG/WebP/HEIC tối đa 10 MiB, upload private, xem preview trong
   dải film ngang của danh sách ảnh đính kèm bằng signed URL 5 phút; người dùng
   vuốt/kéo trái phải để xem, ảnh chỉ để xem, không chèn inline, không crop,
