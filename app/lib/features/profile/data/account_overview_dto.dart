@@ -19,6 +19,7 @@ class AccountOverviewDto {
         themeMode: settings['theme_mode'] as String,
         soundEnabled: settings['sound_enabled'] as bool,
         notificationEnabled: settings['notification_enabled'] as bool,
+        languageCode: settings['language_code'] as String?,
       ),
     );
   }

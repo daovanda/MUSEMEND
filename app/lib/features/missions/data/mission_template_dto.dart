@@ -12,11 +12,28 @@ class MissionTemplateDto {
     required this.missionType,
   });
 
-  factory MissionTemplateDto.fromMap(Map<String, dynamic> row) {
+  factory MissionTemplateDto.fromMap(
+    Map<String, dynamic> row, {
+    required String languageCode,
+  }) {
+    final translations = (row['mission_template_translations'] as List? ?? [])
+        .whereType<Map>()
+        .map(Map<String, dynamic>.from)
+        .toList(growable: false);
+    Map<String, dynamic>? translationFor(String code) {
+      for (final translation in translations) {
+        if (translation['language_code'] == code) return translation;
+      }
+      return null;
+    }
+
+    final translation = translationFor(languageCode) ?? translationFor('en');
     return MissionTemplateDto(
       id: (row['id'] as num).toInt(),
-      title: row['title'] as String,
-      description: row['description'] as String?,
+      title: translation?['title'] as String? ?? row['title'] as String,
+      description:
+          translation?['description'] as String? ??
+          row['description'] as String?,
       targetMood: row['target_mood'] as String,
       energyReward: (row['default_energy_reward'] as num).toInt(),
       estimatedMinutes: (row['estimated_minutes'] as num?)?.toInt(),

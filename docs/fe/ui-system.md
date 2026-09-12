@@ -12,7 +12,11 @@ mờ, bo góc lớn và chuyển động ngắn của màn Bầu trời; không 
 
 ## Implementation
 
-Token màu nằm ở `lib/app/theme/` (`MuseColors`, `buildMuseTheme`). Primitive dùng
+Token màu nằm ở `lib/app/theme/` (`MuseColors`, `buildMuseTheme`). Trong MVP,
+giao diện mặc định là sáng; Flutter cũng dùng `ThemeMode.light` trong lúc chưa tải
+được setting và ánh xạ giá trị mặc định cũ `system` sang sáng để tránh nháy hoặc
+quay lại nền tối theo thiết bị. Người đã chủ động chọn giao diện tối vẫn được tôn
+trọng, nhưng dark theme còn là phạm vi in-progress. Primitive dùng
 chung nằm tại `lib/core/presentation/muse_ui.dart`:
 
 - `MusePageBackground`: nền gradient theo page/accent, có dark-mode fallback và

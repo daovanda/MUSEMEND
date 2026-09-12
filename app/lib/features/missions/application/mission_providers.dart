@@ -1,4 +1,7 @@
+import 'dart:ui';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:musemend/core/localization/supported_locales.dart';
 import 'package:musemend/core/supabase/supabase_client_provider.dart';
 import 'package:musemend/features/checkin/application/reflect_providers.dart';
 import 'package:musemend/features/checkin/application/reflect_state.dart';
@@ -9,6 +12,7 @@ import 'package:musemend/features/missions/domain/mission_dashboard.dart';
 import 'package:musemend/features/missions/domain/mission_repository.dart';
 import 'package:musemend/features/missions/domain/mission_template.dart';
 import 'package:musemend/features/missions/domain/mission_type.dart';
+import 'package:musemend/features/profile/application/profile_providers.dart';
 
 final missionRepositoryProvider = Provider<MissionRepository>((ref) {
   return SupabaseMissionRepository(ref.watch(supabaseClientProvider));
@@ -25,7 +29,11 @@ class MissionsController extends AsyncNotifier<MissionDashboard> {
   @override
   Future<MissionDashboard> build() async {
     final reflect = await ref.watch(reflectControllerProvider.future);
-    return _repository.loadDashboard(todayMood: reflect.today?.mood);
+    ref.watch(appLanguageCodeProvider);
+    return _repository.loadDashboard(
+      todayMood: reflect.today?.mood,
+      languageCode: _languageCode,
+    );
   }
 
   Future<bool> addTemplate(
@@ -85,12 +93,23 @@ class MissionsController extends AsyncNotifier<MissionDashboard> {
       final reflect = await ref.read(reflectControllerProvider.future);
       await operation(reflect);
       state = AsyncData(
-        await _repository.loadDashboard(todayMood: reflect.today?.mood),
+        await _repository.loadDashboard(
+          todayMood: reflect.today?.mood,
+          languageCode: _languageCode,
+        ),
       );
       return true;
     } catch (error, stackTrace) {
       state = AsyncError(error, stackTrace);
       return false;
     }
+  }
+
+  String get _languageCode {
+    final stored = ref.read(appLanguageCodeProvider).value;
+    return resolveSupportedLanguageCode(
+      stored ??
+          resolveDeviceLocale(PlatformDispatcher.instance.locales).languageCode,
+    );
   }
 }

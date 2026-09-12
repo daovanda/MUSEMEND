@@ -1,0 +1,3 @@
+{
+  "@@locale": "de", "appTitle": "MuseMend", "navSky": "Himmel", "navJournal": "Tagebuch", "navExplore": "Entdecken", "navProfile": "Profil", "language": "Sprache", "languageAutomatic": "Automatisch (Gerät)", "languageAutomaticDescription": "Verwendet die Gerätesprache. Nicht unterstützte Sprachen verwenden Englisch.", "profileAndSettings": "Profil und Einstellungen", "displayName": "Anzeigename", "cloudName": "Wolkenname", "appearance": "Darstellung", "themeSystem": "Geräteeinstellung", "themeLight": "Hell", "themeDark": "Dunkel", "sound": "Ton", "notifications": "Benachrichtigungen", "cancel": "Abbrechen", "save": "Speichern", "settingsUpdated": "Einstellungen aktualisiert.", "settingsUpdateFailed": "Einstellungen konnten nicht aktualisiert werden."
+}

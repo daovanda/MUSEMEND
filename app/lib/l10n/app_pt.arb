@@ -1,0 +1,3 @@
+{
+  "@@locale": "pt", "appTitle": "MuseMend", "navSky": "Céu", "navJournal": "Diário", "navExplore": "Explorar", "navProfile": "Perfil", "language": "Idioma", "languageAutomatic": "Automático (dispositivo)", "languageAutomaticDescription": "Usa o idioma do dispositivo. Idiomas não suportados usarão inglês.", "profileAndSettings": "Perfil e definições", "displayName": "Nome de exibição", "cloudName": "Nome da nuvem", "appearance": "Aparência", "themeSystem": "Definição do dispositivo", "themeLight": "Claro", "themeDark": "Escuro", "sound": "Som", "notifications": "Notificações", "cancel": "Cancelar", "save": "Guardar", "settingsUpdated": "Definições atualizadas.", "settingsUpdateFailed": "Não foi possível atualizar as definições."
+}

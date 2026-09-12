@@ -1,0 +1,3 @@
+{
+  "@@locale": "ms", "appTitle": "MuseMend", "navSky": "Langit", "navJournal": "Jurnal", "navExplore": "Teroka", "navProfile": "Profil", "language": "Bahasa", "languageAutomatic": "Automatik (peranti)", "languageAutomaticDescription": "Menggunakan bahasa peranti. Bahasa yang belum disokong akan menggunakan bahasa Inggeris.", "profileAndSettings": "Profil dan tetapan", "displayName": "Nama paparan", "cloudName": "Nama awan", "appearance": "Paparan", "themeSystem": "Tetapan peranti", "themeLight": "Cerah", "themeDark": "Gelap", "sound": "Bunyi", "notifications": "Pemberitahuan", "cancel": "Batal", "save": "Simpan", "settingsUpdated": "Tetapan dikemas kini.", "settingsUpdateFailed": "Tetapan tidak dapat dikemas kini."
+}

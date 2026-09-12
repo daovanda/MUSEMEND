@@ -11,6 +11,7 @@ void main() {
             'theme_mode': 'system',
             'sound_enabled': true,
             'notification_enabled': false,
+            'language_code': 'vi',
           },
         ).toDomain();
 
@@ -18,5 +19,6 @@ void main() {
     expect(overview.profile.accountStatus, 'active');
     expect(overview.settings.cloudName, 'Mây Nhỏ');
     expect(overview.settings.notificationEnabled, isFalse);
+    expect(overview.settings.languageCode, 'vi');
   });
 }

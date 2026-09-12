@@ -8,6 +8,7 @@ import 'package:musemend/features/notifications/application/notification_provide
 import 'package:musemend/features/notifications/domain/inbox_notification.dart';
 import 'package:musemend/features/profile/application/profile_providers.dart';
 import 'package:musemend/features/profile/domain/account_overview.dart';
+import 'package:musemend/l10n/generated/app_localizations.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -243,6 +244,7 @@ class ProfileScreen extends ConsumerWidget {
           themeMode: draft.themeMode,
           soundEnabled: draft.soundEnabled,
           notificationEnabled: draft.notificationEnabled,
+          languageCode: draft.languageCode,
         );
     if (saved && !draft.notificationEnabled) {
       try {
@@ -255,7 +257,9 @@ class ProfileScreen extends ConsumerWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          saved ? 'Đã cập nhật cài đặt.' : 'Chưa thể cập nhật cài đặt.',
+          saved
+              ? AppLocalizations.of(context).settingsUpdated
+              : AppLocalizations.of(context).settingsUpdateFailed,
         ),
       ),
     );
@@ -325,6 +329,7 @@ class _SettingsDialogState extends State<_SettingsDialog> {
   late String _themeMode = widget.overview.settings.themeMode;
   late bool _soundEnabled = widget.overview.settings.soundEnabled;
   late bool _notificationEnabled = widget.overview.settings.notificationEnabled;
+  late String _languageCode = widget.overview.settings.languageCode ?? 'system';
 
   @override
   void dispose() {
@@ -335,8 +340,9 @@ class _SettingsDialogState extends State<_SettingsDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return AlertDialog(
-      title: const Text('Hồ sơ và cài đặt'),
+      title: Text(strings.profileAndSettings),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -344,20 +350,58 @@ class _SettingsDialogState extends State<_SettingsDialog> {
             TextField(
               controller: _displayName,
               maxLength: 80,
-              decoration: const InputDecoration(labelText: 'Tên hiển thị'),
+              decoration: InputDecoration(labelText: strings.displayName),
             ),
             TextField(
               controller: _cloudName,
               maxLength: 40,
-              decoration: const InputDecoration(labelText: 'Tên của Mây'),
+              decoration: InputDecoration(labelText: strings.cloudName),
+            ),
+            DropdownButtonFormField<String>(
+              value: _languageCode,
+              decoration: InputDecoration(
+                labelText: strings.language,
+                helperText: strings.languageAutomaticDescription,
+              ),
+              items: [
+                DropdownMenuItem(
+                  value: 'system',
+                  child: Text(strings.languageAutomatic),
+                ),
+                const DropdownMenuItem(value: 'en', child: Text('English')),
+                const DropdownMenuItem(value: 'vi', child: Text('Tiếng Việt')),
+                const DropdownMenuItem(value: 'ja', child: Text('日本語')),
+                const DropdownMenuItem(value: 'fr', child: Text('Français')),
+                const DropdownMenuItem(value: 'es', child: Text('Español')),
+                const DropdownMenuItem(value: 'it', child: Text('Italiano')),
+                const DropdownMenuItem(value: 'de', child: Text('Deutsch')),
+                const DropdownMenuItem(value: 'ko', child: Text('한국어')),
+                const DropdownMenuItem(value: 'pt', child: Text('Português')),
+                const DropdownMenuItem(
+                  value: 'ms',
+                  child: Text('Bahasa Melayu'),
+                ),
+                const DropdownMenuItem(
+                  value: 'id',
+                  child: Text('Bahasa Indonesia'),
+                ),
+                const DropdownMenuItem(value: 'th', child: Text('ไทย')),
+              ],
+              onChanged: (value) => setState(() => _languageCode = value!),
             ),
             DropdownButtonFormField<String>(
               value: _themeMode,
-              decoration: const InputDecoration(labelText: 'Giao diện'),
-              items: const [
-                DropdownMenuItem(value: 'system', child: Text('Theo hệ thống')),
-                DropdownMenuItem(value: 'light', child: Text('Sáng')),
-                DropdownMenuItem(value: 'dark', child: Text('Tối')),
+              decoration: InputDecoration(labelText: strings.appearance),
+              items: [
+                DropdownMenuItem(
+                  value: 'system',
+                  child: Text(strings.themeSystem),
+                ),
+                DropdownMenuItem(
+                  value: 'light',
+                  child: Text(strings.themeLight),
+                ),
+                DropdownMenuItem(value: 'dark', child: Text(strings.themeDark)),
               ],
               onChanged: (value) => setState(() => _themeMode = value!),
             ),
@@ -365,14 +409,14 @@ class _SettingsDialogState extends State<_SettingsDialog> {
               contentPadding: EdgeInsets.zero,
               value: _soundEnabled,
               onChanged: (value) => setState(() => _soundEnabled = value),
-              title: const Text('Âm thanh'),
+              title: Text(strings.sound),
             ),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
               value: _notificationEnabled,
               onChanged:
                   (value) => setState(() => _notificationEnabled = value),
-              title: const Text('Thông báo'),
+              title: Text(strings.notifications),
               subtitle: const Text('Nhắc thư tương lai trên thiết bị'),
             ),
           ],
@@ -381,7 +425,7 @@ class _SettingsDialogState extends State<_SettingsDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Hủy'),
+          child: Text(strings.cancel),
         ),
         FilledButton(
           onPressed:
@@ -395,9 +439,11 @@ class _SettingsDialogState extends State<_SettingsDialog> {
                       themeMode: _themeMode,
                       soundEnabled: _soundEnabled,
                       notificationEnabled: _notificationEnabled,
+                      languageCode:
+                          _languageCode == 'system' ? null : _languageCode,
                     ),
                   ),
-          child: const Text('Lưu'),
+          child: Text(strings.save),
         ),
       ],
     );
@@ -416,6 +462,7 @@ class _SettingsDraft {
     required this.themeMode,
     required this.soundEnabled,
     required this.notificationEnabled,
+    required this.languageCode,
   });
 
   final String? displayName;
@@ -423,6 +470,7 @@ class _SettingsDraft {
   final String themeMode;
   final bool soundEnabled;
   final bool notificationEnabled;
+  final String? languageCode;
 }
 
 class _DeleteAccountDialog extends StatefulWidget {

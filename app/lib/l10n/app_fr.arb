@@ -1,0 +1,3 @@
+{
+  "@@locale": "fr", "appTitle": "MuseMend", "navSky": "Ciel", "navJournal": "Journal", "navExplore": "Explorer", "navProfile": "Profil", "language": "Langue", "languageAutomatic": "Automatique (appareil)", "languageAutomaticDescription": "Utilise la langue de l’appareil. Les langues non prises en charge utilisent l’anglais.", "profileAndSettings": "Profil et paramètres", "displayName": "Nom affiché", "cloudName": "Nom du nuage", "appearance": "Apparence", "themeSystem": "Réglage de l’appareil", "themeLight": "Clair", "themeDark": "Sombre", "sound": "Son", "notifications": "Notifications", "cancel": "Annuler", "save": "Enregistrer", "settingsUpdated": "Paramètres mis à jour.", "settingsUpdateFailed": "Impossible de mettre à jour les paramètres."
+}

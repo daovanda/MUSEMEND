@@ -15,7 +15,10 @@ ngày/tuần/tháng/năm/custom, hoàn thành/bỏ qua và hiển thị năng l�
 `user_missions`, sau đó đọc
 `user_missions`, `mission_templates`, `travel_progress` và chỉ ghi qua RPC.
 `MissionsController` lấy check-in hôm nay từ application contract của Reflect để
-lọc template và cung cấp `source_checkin_id` khi template yêu cầu mood.
+lọc template và cung cấp `source_checkin_id` khi template yêu cầu mood. Controller
+cũng truyền locale đã resolve; repository đọc `mission_template_translations` và
+overlay bản dịch lên cả gợi ý Muse lẫn mission tạo từ template. Mission user tự
+viết giữ nguyên nội dung.
 
 UI `MissionsSection` nằm sau check-in trên Reflect:
 

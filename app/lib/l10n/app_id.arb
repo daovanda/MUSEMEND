@@ -1,0 +1,3 @@
+{
+  "@@locale": "id", "appTitle": "MuseMend", "navSky": "Langit", "navJournal": "Jurnal", "navExplore": "Jelajahi", "navProfile": "Profil", "language": "Bahasa", "languageAutomatic": "Otomatis (perangkat)", "languageAutomaticDescription": "Menggunakan bahasa perangkat. Bahasa yang belum didukung akan menggunakan bahasa Inggris.", "profileAndSettings": "Profil dan pengaturan", "displayName": "Nama tampilan", "cloudName": "Nama awan", "appearance": "Tampilan", "themeSystem": "Pengaturan perangkat", "themeLight": "Terang", "themeDark": "Gelap", "sound": "Suara", "notifications": "Notifikasi", "cancel": "Batal", "save": "Simpan", "settingsUpdated": "Pengaturan diperbarui.", "settingsUpdateFailed": "Pengaturan tidak dapat diperbarui."
+}

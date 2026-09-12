@@ -13,14 +13,16 @@ hard-code. Nội dung chỉ là plain text và luôn được Flutter render b�
 Module `features/quotes/` tách thành domain, data và application:
 
 - `DailyQuote` và `DailyQuoteRepository` là contract domain;
-- `SupabaseDailyQuoteRepository` gọi RPC `get_daily_quote()` và DTO kiểm tra
+- `SupabaseDailyQuoteRepository` gọi RPC `get_daily_quote(p_language_code)` và DTO kiểm tra
   response trước khi ánh xạ;
-- `dailyQuoteProvider` tải quote, tự hủy khi màn hình rời đi và tự invalidate sau
+- `dailyQuoteProvider` resolve lựa chọn user/locale thiết bị, fallback ngôn ngữ
+  chưa hỗ trợ về English, tải quote, tự hủy khi màn hình rời đi và tự invalidate sau
   nửa đêm UTC+7 nếu app vẫn mở;
 - `_SkyQuoteCard` hiển thị loading, dữ liệu hoặc lỗi có nút thử lại.
 
-Không đưa HTML, URL hoặc attribution từ DB vào widget. Flutter không tự chọn
-random và không gửi ngày lên server, nên reload trong cùng ngày không đổi câu.
+Không đưa HTML, URL hoặc attribution từ DB vào widget. Flutter gửi locale đã
+resolve nhưng không tự chọn random và không gửi ngày lên server, nên reload trong
+cùng ngày không đổi câu. Locale chưa hỗ trợ được chuẩn hóa thành `en`.
 
 ## Validation, riêng tư và lỗi
 

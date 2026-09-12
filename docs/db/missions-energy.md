@@ -13,6 +13,8 @@ phân bổ cho hành trình được theo dõi riêng bằng `journey_energy_use
 
 - `mission_templates`: catalog do server quản lý, gồm loại nhiệm vụ, mood mục tiêu,
   phần thưởng mặc định và trạng thái active.
+- `mission_template_translations`: tiêu đề/mô tả gợi ý Muse theo locale; tiếng
+  Việt là bản tham chiếu biên tập, tiếng Anh là fallback runtime.
 - `user_missions`: snapshot title/description/reward tại lúc tạo; `start_at` và
   `due_at` là khoảng hiệu lực; `occurrence_key` chống tạo trùng.
 - `recurrence_series_id` chỉ áp dụng cho daily mission. Mọi occurrence trong cùng

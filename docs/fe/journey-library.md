@@ -28,6 +28,11 @@ tương đối chưa được tự ghép thành URL khi chưa chốt bucket/cata
 
 ## Kiến trúc
 
+`JourneyController` resolve locale từ lựa chọn user hoặc thiết bị rồi truyền qua
+`JourneyRepository`. Adapter đọc kèm năm relation translation cho điểm đến, trạm,
+địa danh, món ăn và vật phẩm. Mapper chọn locale yêu cầu → English → cột gốc tiếng
+Việt, nên màn Khám phá thay đổi cùng ngôn ngữ app mà không dịch nội dung user.
+
 Miền `features/journey/` tách theo:
 
 - `domain`: dashboard, điểm đến, checkpoint, collectible, trạng thái và repository

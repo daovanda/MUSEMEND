@@ -41,6 +41,8 @@ Các migration tới `20260907150000` đã có trên nhánh phát triển; dòng
 | `20260912090000` | `daily_quotes` | 100 daily quote và RPC xoay theo ngày Việt Nam |
 | `20260912140000` | `global_destinations` | Đổi schema tỉnh thành điểm đến toàn cầu, giữ nguyên dữ liệu/ID/RLS |
 | `20260912180000` | `new_user_onboarding` | Trạng thái onboarding, cách xưng hô và RPC hoàn tất owner-scoped |
+| `20260912200000` | `default_light_theme` | Đặt theme mặc định sáng và chuyển default `system` cũ sang `light` |
+| `20260912210000` | `multilingual_catalog_reset` | 12 locale, 7 bảng dịch, fallback English và reset toàn bộ dữ liệu Development |
 
 ## Quy ước migration
 
@@ -82,11 +84,14 @@ trên PostgreSQL/Supabase thật.
 - daily journal một-mục-mỗi-ngày, tái sử dụng khi gọi tạo trùng và chặn đổi sang
   ngày đã có mục khác;
 - cập nhật metadata vị trí/scale/góc xoay media và chặn user khác sửa transform;
-- số lượng, country metadata, artwork path và reward của curated catalog;
+- tồn tại đủ bảy bảng translation, 12 locale active và fallback locale lạ về `en`;
 - nâng cấp tên bảng/khóa ngoại toàn cầu, backfill quốc gia và loại bỏ bảng tỉnh cũ;
-- 100 daily quote, phân bổ đều năm chủ đề, vòng quay ổn định và đổi theo ngày;
+- quote đa ngôn ngữ dùng fixture transaction sau reset và vòng quay ổn định theo ngày;
 - cột profile/settings được phép, cột trạng thái bị chặn và account deletion khóa profile.
 - tài khoản mới có onboarding chưa hoàn tất và RPC chỉ cập nhật profile của session.
+- tài khoản mới có `theme_mode=light`; migration không ghi đè lựa chọn `dark`.
+- reset pre-launch xóa catalog/user cũ; fixture kiểm thử được rollback và không
+  phục hồi dữ liệu phát triển.
 
 Chưa có test cho:
 

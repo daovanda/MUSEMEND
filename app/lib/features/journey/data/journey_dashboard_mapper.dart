@@ -7,7 +7,10 @@ import 'package:musemend/features/journey/domain/library_collectible.dart';
 class JourneyDashboardMapper {
   const JourneyDashboardMapper();
 
-  JourneyDashboard fromResponses(List<dynamic> responses) {
+  JourneyDashboard fromResponses(
+    List<dynamic> responses, {
+    required String languageCode,
+  }) {
     if (responses.length != 11) {
       throw const FormatException('Incomplete journey dashboard response.');
     }
@@ -44,11 +47,17 @@ class JourneyDashboardMapper {
         .map((row) {
           final id = (row['id'] as num).toInt();
           final saved = progressByCheckpoint[id];
+          final copy = _withTranslation(
+            row,
+            relation: 'checkpoint_translations',
+            languageCode: languageCode,
+            fields: const ['title', 'description'],
+          );
           return JourneyCheckpoint(
             id: id,
             number: (row['checkpoint_number'] as num).toInt(),
-            title: row['title'] as String,
-            description: row['description'] as String?,
+            title: copy['title'] as String,
+            description: copy['description'] as String?,
             requiredEnergy: (row['required_energy'] as num).toInt(),
             earnedEnergy: (saved?['earned_energy'] as num?)?.toInt() ?? 0,
             status: saved?['status'] as String? ?? 'locked',
@@ -64,10 +73,16 @@ class JourneyDashboardMapper {
                 (row['destination_id'] as num).toInt() == currentDestinationId,
             orElse: () => null,
           );
+      final destinationCopy = _withTranslation(
+        destinationRow,
+        relation: 'destination_translations',
+        languageCode: languageCode,
+        fields: const ['name', 'description'],
+      );
       destination = JourneyDestination(
         id: currentDestinationId,
-        name: destinationRow['name'] as String,
-        description: destinationRow['description'] as String?,
+        name: destinationCopy['name'] as String,
+        description: destinationCopy['description'] as String?,
         countryCode: destinationRow['country_code'] as String?,
         destinationType:
             destinationRow['destination_type'] as String? ?? 'region',
@@ -85,18 +100,24 @@ class JourneyDashboardMapper {
         landmarks,
         foreignKey: 'landmark_id',
         kind: CollectibleKind.landmark,
+        translationRelation: 'landmark_translations',
+        languageCode: languageCode,
       ),
       ..._collectibles(
         unlockedFoods,
         foods,
         foreignKey: 'food_id',
         kind: CollectibleKind.food,
+        translationRelation: 'food_translations',
+        languageCode: languageCode,
       ),
       ..._collectibles(
         unlockedItems,
         items,
         foreignKey: 'destination_item_id',
         kind: CollectibleKind.item,
+        translationRelation: 'destination_item_translations',
+        languageCode: languageCode,
       ),
     ]..sort((a, b) => b.unlockedAt.compareTo(a.unlockedAt));
 
@@ -115,6 +136,8 @@ class JourneyDashboardMapper {
     Map<int, Map<String, dynamic>> catalog, {
     required String foreignKey,
     required CollectibleKind kind,
+    required String translationRelation,
+    required String languageCode,
   }) {
     return unlocks
         .map((unlock) {
@@ -123,11 +146,17 @@ class JourneyDashboardMapper {
           if (item == null) {
             throw FormatException('Unlocked catalog item $id is unavailable.');
           }
+          final copy = _withTranslation(
+            item,
+            relation: translationRelation,
+            languageCode: languageCode,
+            fields: const ['name', 'description'],
+          );
           return LibraryCollectible(
             id: id,
             kind: kind,
-            name: item['name'] as String,
-            description: item['description'] as String?,
+            name: copy['name'] as String,
+            description: copy['description'] as String?,
             rarity: item['rarity'] as String,
             unlockedAt: DateTime.parse(unlock['unlocked_at'] as String),
             isViewed: unlock['is_viewed'] as bool,
@@ -167,4 +196,33 @@ class JourneyDashboardMapper {
   }
 
   int? _nullableInt(Object? value) => (value as num?)?.toInt();
+
+  Map<String, dynamic> _withTranslation(
+    Map<String, dynamic> row, {
+    required String relation,
+    required String languageCode,
+    required List<String> fields,
+  }) {
+    final copy = Map<String, dynamic>.from(row);
+    final translations = (row[relation] as List? ?? const <dynamic>[])
+        .whereType<Map>()
+        .map(Map<String, dynamic>.from)
+        .toList(growable: false);
+    Map<String, dynamic>? selected;
+    for (final code in [languageCode, 'en']) {
+      for (final translation in translations) {
+        if (translation['language_code'] == code) {
+          selected = translation;
+          break;
+        }
+      }
+      if (selected != null) break;
+    }
+    if (selected != null) {
+      for (final field in fields) {
+        if (selected[field] != null) copy[field] = selected[field];
+      }
+    }
+    return copy;
+  }
 }

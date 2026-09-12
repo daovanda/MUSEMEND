@@ -25,7 +25,7 @@ void main() {
       <dynamic>[],
       <dynamic>[],
       <dynamic>[],
-    ]);
+    ], languageCode: 'vi');
 
     expect(dashboard.status, JourneyStatus.notStarted);
     expect(dashboard.availableEnergy, 5);
@@ -54,6 +54,13 @@ void main() {
           'destination_type': 'city',
           'cover_asset_path': null,
           'map_asset_path': null,
+          'destination_translations': [
+            {
+              'language_code': 'en',
+              'name': 'Hanoi',
+              'description': 'Capital city',
+            },
+          ],
         },
       ],
       [
@@ -65,6 +72,9 @@ void main() {
           'description': null,
           'required_energy': 10,
           'asset_path': firstCheckpointAsset,
+          'checkpoint_translations': [
+            {'language_code': 'en', 'title': 'Station 2', 'description': null},
+          ],
         },
         {
           'id': 10,
@@ -74,6 +84,9 @@ void main() {
           'description': null,
           'required_energy': 10,
           'asset_path': currentCheckpointAsset,
+          'checkpoint_translations': [
+            {'language_code': 'en', 'title': 'Station 1', 'description': null},
+          ],
         },
       ],
       [
@@ -92,14 +105,26 @@ void main() {
       <dynamic>[],
       <dynamic>[],
       [
-        {'id': 20, 'name': 'Hồ Gươm', 'description': null, 'rarity': 'common'},
+        {
+          'id': 20,
+          'name': 'Hồ Gươm',
+          'description': null,
+          'rarity': 'common',
+          'landmark_translations': [
+            {
+              'language_code': 'en',
+              'name': 'Hoan Kiem Lake',
+              'description': null,
+            },
+          ],
+        },
       ],
       <dynamic>[],
       <dynamic>[],
-    ]);
+    ], languageCode: 'en');
 
     expect(dashboard.status, JourneyStatus.inProgress);
-    expect(dashboard.destination?.name, 'Hà Nội');
+    expect(dashboard.destination?.name, 'Hanoi');
     expect(dashboard.destination?.countryCode, 'VN');
     expect(dashboard.destination?.destinationType, 'city');
     expect(
@@ -113,6 +138,6 @@ void main() {
       currentCheckpointAsset,
     );
     expect(dashboard.collectibles.single.kind, CollectibleKind.landmark);
-    expect(dashboard.collectibles.single.name, 'Hồ Gươm');
+    expect(dashboard.collectibles.single.name, 'Hoan Kiem Lake');
   });
 }
