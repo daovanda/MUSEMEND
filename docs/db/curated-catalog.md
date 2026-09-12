@@ -1,7 +1,7 @@
 # Curated travel và mission catalog
 
 Trạng thái: `implemented`  
-Cập nhật: 2026-09-08
+Cập nhật: 2026-09-12
 
 ## Phạm vi
 
@@ -16,23 +16,34 @@ do server quản lý, gồm:
 
 Các route curated đứng trước ba route `demo-*` đối với user chưa khởi hành. Việc
 đổi `order_index` không làm chuyển user đang đi dở vì con trỏ hành trình lưu ID
-tỉnh/trạm. Trạm Hội An đầu tiên cần 10 năng lượng để giữ nhịp MVP hai nhiệm vụ
+điểm đến/trạm. Trạm Hội An đầu tiên cần 10 năng lượng để giữ nhịp MVP hai nhiệm vụ
 5 điểm; các trạm sau tăng dần tới 55.
 
 Đây là dữ liệu mẫu hư cấu theo phong cách MuseMend, không phải hướng dẫn du lịch
 hay nội dung thương mại. Tọa độ chỉ phục vụ metadata catalog; app MVP chưa dùng
 cho chỉ đường.
 
-## Tương thích mô hình hiện tại
+## Mô hình điểm đến toàn cầu
 
-Tên bảng `provinces` được giữ để không phá RPC và client hiện có, nhưng bản ghi có
-thể đại diện cho tỉnh, thành phố, đảo, di sản hoặc vùng. Hai cột mới mô tả rõ hơn:
+Migration `20260912140000_global_destinations.sql` đổi tên mô hình cũ theo nghĩa
+toàn cầu. Đây là migration rename tại chỗ nên ID, dữ liệu user, khóa ngoại, RLS và
+grants được giữ nguyên:
+
+- `provinces` → `destinations`;
+- `province_checkpoints` → `destination_checkpoints`;
+- `province_items` → `destination_items`;
+- hai bảng unlock tương ứng cũng dùng tên `unlocked_destinations` và
+  `unlocked_destination_items`;
+- các cột khóa ngoại `province_id` đổi thành `destination_id`.
+
+Metadata địa lý dùng:
 
 - `country_code`: mã quốc gia ISO hai ký tự viết hoa;
 - `destination_type`: một trong `province`, `city`, `island`, `heritage`, `region`.
 
-`region` cũ vẫn dùng cho ba miền Việt Nam và để `NULL` với điểm đến quốc tế.
-`province_checkpoints.asset_path` là đường dẫn artwork do server quyết định; client
+`vietnam_region` chỉ dùng cho ba miền Việt Nam và để `NULL` với điểm đến quốc tế.
+`country_code` là bắt buộc; migration backfill ba route demo thành `VN` trước khi
+thêm `NOT NULL`. `destination_checkpoints.asset_path` là đường dẫn artwork do server quyết định; client
 không được ghi cột này.
 
 ## Seed, idempotency và bảo mật

@@ -1,6 +1,6 @@
 import 'package:musemend/features/journey/domain/journey_checkpoint.dart';
 import 'package:musemend/features/journey/domain/journey_dashboard.dart';
-import 'package:musemend/features/journey/domain/journey_province.dart';
+import 'package:musemend/features/journey/domain/journey_destination.dart';
 import 'package:musemend/features/journey/domain/journey_status.dart';
 import 'package:musemend/features/journey/domain/library_collectible.dart';
 
@@ -13,10 +13,10 @@ class JourneyDashboardMapper {
     }
 
     final progress = _object(responses[0]);
-    final provinces = _rows(responses[1]);
+    final destinations = _rows(responses[1]);
     final checkpoints = _rows(responses[2]);
     final checkpointProgress = _rows(responses[3]);
-    final unlockedProvinces = _rows(responses[4]);
+    final unlockedDestinations = _rows(responses[4]);
     final unlockedLandmarks = _rows(responses[5]);
     final unlockedFoods = _rows(responses[6]);
     final unlockedItems = _rows(responses[7]);
@@ -24,19 +24,22 @@ class JourneyDashboardMapper {
     final foods = _rowsById(responses[9]);
     final items = _rowsById(responses[10]);
 
-    final currentProvinceId = _nullableInt(progress['current_province_id']);
+    final currentDestinationId = _nullableInt(
+      progress['current_destination_id'],
+    );
     final currentCheckpointId = _nullableInt(progress['current_checkpoint_id']);
-    final provinceRow = _findById(provinces, currentProvinceId);
+    final destinationRow = _findById(destinations, currentDestinationId);
     final progressByCheckpoint = <int, Map<String, dynamic>>{
       for (final row in checkpointProgress)
         (row['checkpoint_id'] as num).toInt(): row,
     };
 
-    JourneyProvince? province;
-    if (provinceRow != null && currentProvinceId != null) {
-      final provinceCheckpoints = checkpoints
+    JourneyDestination? destination;
+    if (destinationRow != null && currentDestinationId != null) {
+      final destinationCheckpoints = checkpoints
         .where(
-          (row) => (row['province_id'] as num).toInt() == currentProvinceId,
+          (row) =>
+              (row['destination_id'] as num).toInt() == currentDestinationId,
         )
         .map((row) {
           final id = (row['id'] as num).toInt();
@@ -53,23 +56,26 @@ class JourneyDashboardMapper {
           );
         })
         .toList(growable: false)..sort((a, b) => a.number.compareTo(b.number));
-      final unlocked = unlockedProvinces
+      final unlocked = unlockedDestinations
           .cast<Map<String, dynamic>?>()
           .firstWhere(
             (row) =>
                 row != null &&
-                (row['province_id'] as num).toInt() == currentProvinceId,
+                (row['destination_id'] as num).toInt() == currentDestinationId,
             orElse: () => null,
           );
-      province = JourneyProvince(
-        id: currentProvinceId,
-        name: provinceRow['name'] as String,
-        description: provinceRow['description'] as String?,
+      destination = JourneyDestination(
+        id: currentDestinationId,
+        name: destinationRow['name'] as String,
+        description: destinationRow['description'] as String?,
+        countryCode: destinationRow['country_code'] as String?,
+        destinationType:
+            destinationRow['destination_type'] as String? ?? 'region',
         completionPercent:
             (unlocked?['completion_percent'] as num?)?.toInt() ?? 0,
-        checkpoints: provinceCheckpoints,
-        coverAssetPath: provinceRow['cover_asset_path'] as String?,
-        mapAssetPath: provinceRow['map_asset_path'] as String?,
+        checkpoints: destinationCheckpoints,
+        coverAssetPath: destinationRow['cover_asset_path'] as String?,
+        mapAssetPath: destinationRow['map_asset_path'] as String?,
       );
     }
 
@@ -89,7 +95,7 @@ class JourneyDashboardMapper {
       ..._collectibles(
         unlockedItems,
         items,
-        foreignKey: 'province_item_id',
+        foreignKey: 'destination_item_id',
         kind: CollectibleKind.item,
       ),
     ]..sort((a, b) => b.unlockedAt.compareTo(a.unlockedAt));
@@ -98,7 +104,7 @@ class JourneyDashboardMapper {
       status: JourneyStatus.fromDatabase(progress['journey_status'] as String),
       currentEnergy: (progress['current_energy'] as num).toInt(),
       journeyEnergyUsed: (progress['journey_energy_used'] as num).toInt(),
-      province: province,
+      destination: destination,
       currentCheckpointId: currentCheckpointId,
       collectibles: collectibles,
     );

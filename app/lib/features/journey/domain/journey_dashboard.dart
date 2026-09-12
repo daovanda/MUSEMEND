@@ -1,4 +1,4 @@
-import 'package:musemend/features/journey/domain/journey_province.dart';
+import 'package:musemend/features/journey/domain/journey_destination.dart';
 import 'package:musemend/features/journey/domain/journey_status.dart';
 import 'package:musemend/features/journey/domain/library_collectible.dart';
 
@@ -7,7 +7,7 @@ class JourneyDashboard {
     required this.status,
     required this.currentEnergy,
     required this.journeyEnergyUsed,
-    required this.province,
+    required this.destination,
     required this.currentCheckpointId,
     required this.collectibles,
   });
@@ -15,7 +15,7 @@ class JourneyDashboard {
   final JourneyStatus status;
   final int currentEnergy;
   final int journeyEnergyUsed;
-  final JourneyProvince? province;
+  final JourneyDestination? destination;
   final int? currentCheckpointId;
   final List<LibraryCollectible> collectibles;
 

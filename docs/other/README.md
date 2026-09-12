@@ -12,6 +12,7 @@ quyết định, hệ quả và trạng thái.
 - [Roadmap MVP](./mvp-roadmap.md)
 - [ADR-0001 — Kiến trúc Flutter client](./adr-0001-mvp-client-architecture.md)
 - [ADR-0002 — Bầu trời làm neo thị giác](./adr-0002-sky-led-ui-direction.md)
+- [ADR-0003 — Mô hình điểm đến toàn cầu](./adr-0003-global-destination-model.md)
 - [CI/CD](./ci-cd.md): workflow, quality gate, deploy Dev/Production và giới hạn hiện tại.
 - [GitHub Environments](./github-environments.md): variables, secrets và production approval.
 - [Android QA Release](./android-qa-release.md): ký APK, GitHub Release và phân phối QA.

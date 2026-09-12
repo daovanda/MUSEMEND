@@ -14,7 +14,7 @@ Thứ tự hiện tại:
 
 1. Bầu trời và navigation dùng chung.
 2. Các màn Home khác theo từng feature sau khi Bầu trời được QA.
-3. Province, checkpoint, landmark, food và item chỉ gắn artwork khi catalog động
+3. Destination, checkpoint, landmark, food và item chỉ gắn artwork khi catalog động
    có asset riêng và mapping server rõ ràng.
 
 ## Nhóm frame đã nhận diện trên Home
@@ -41,7 +41,7 @@ Frame gốc rộng `390`, cao `1741`, nền dọc `#E0F2F7 → #FBF9F5 → #FBF9
 | Mascot mây | `image 23` (`174:44`) | `145×97`, left `122`, top `98` | asset tĩnh |
 | Mood bubble | `85:559` | `332×179`, left `29`, top `206`, radius `48` | white 60%, border white 50%, background blur `12` |
 | Mood selector | `85:567` | `268×93`, left `32`, top `42` trong bubble | 5 mood tĩnh, xếp chồng có rotation |
-| Journey | `74:611` | `360×142`, left `16`, top `489` | tỉnh/trạm/checkpoint là dữ liệu động |
+| Journey | `74:611` | `360×142`, left `16`, top `489` | điểm đến/trạm/checkpoint là dữ liệu động |
 | Mission group | `199:881` | `325×324`, left `28`, top `804` | nhóm theo thời điểm, nội dung từ DB |
 | Quote | `Quote` | dưới mission | câu theo ngày từ DB, có dấu ngoặc kép trang trí |
 | Chia sẻ khoảnh khắc | `Heading 3 - Chia sẻ khoảnh khắc` | carousel dưới quote | card preview/title/subtitle/share; nội dung mẫu cứng |
@@ -74,7 +74,7 @@ Hai nút mood dùng radius pill, border white 80%, shadow đen 5%; gradient từ
 
 Không hardcode theo ảnh Figma:
 
-- tỉnh, số trạm, checkpoint và `required_energy`;
+- điểm đến, số trạm, checkpoint và `required_energy`;
 - landmark, food, item và phần thưởng của trạm;
 - nhiệm vụ, thời gian, trạng thái và năng lượng thưởng.
 

@@ -2,14 +2,17 @@ BEGIN;
 DO $$
 DECLARE quote_today record; quote_today_again record; quote_tomorrow record; today date:=(now() AT TIME ZONE 'Asia/Ho_Chi_Minh')::date;
 BEGIN
- IF (SELECT count(*) FROM public.provinces WHERE code LIKE 'curated-%') <> 10 THEN RAISE EXCEPTION 'curated destinations missing'; END IF;
- IF (SELECT count(*) FROM public.province_checkpoints c JOIN public.provinces p ON p.id=c.province_id WHERE p.code LIKE 'curated-%' AND c.asset_path IS NOT NULL) <> 10 THEN RAISE EXCEPTION 'curated checkpoint artwork missing'; END IF;
+ IF to_regclass('public.provinces') IS NOT NULL OR to_regclass('public.province_checkpoints') IS NOT NULL THEN RAISE EXCEPTION 'legacy province tables still exposed'; END IF;
+ IF to_regclass('public.destinations') IS NULL OR to_regclass('public.destination_checkpoints') IS NULL THEN RAISE EXCEPTION 'global destination tables missing'; END IF;
+ IF (SELECT count(*) FROM public.destinations WHERE code LIKE 'curated-%') <> 10 THEN RAISE EXCEPTION 'curated destinations missing'; END IF;
+ IF (SELECT count(*) FROM public.destination_checkpoints c JOIN public.destinations d ON d.id=c.destination_id WHERE d.code LIKE 'curated-%' AND c.asset_path IS NOT NULL) <> 10 THEN RAISE EXCEPTION 'curated checkpoint artwork missing'; END IF;
  IF (SELECT count(*) FROM public.landmarks WHERE code LIKE 'curated-%') <> 10 THEN RAISE EXCEPTION 'curated landmarks missing'; END IF;
  IF (SELECT count(*) FROM public.foods WHERE code LIKE 'curated-%') <> 10 THEN RAISE EXCEPTION 'curated foods missing'; END IF;
- IF (SELECT count(*) FROM public.province_items WHERE code LIKE 'curated-%') <> 10 THEN RAISE EXCEPTION 'curated items missing'; END IF;
+ IF (SELECT count(*) FROM public.destination_items WHERE code LIKE 'curated-%') <> 10 THEN RAISE EXCEPTION 'curated items missing'; END IF;
  IF (SELECT count(*) FROM public.mission_templates WHERE code LIKE 'curated-%') <> 10 THEN RAISE EXCEPTION 'curated missions missing'; END IF;
- IF (SELECT count(*) FROM public.checkpoint_rewards r JOIN public.province_checkpoints c ON c.id=r.checkpoint_id JOIN public.provinces p ON p.id=c.province_id WHERE p.code LIKE 'curated-%') <> 30 THEN RAISE EXCEPTION 'curated rewards missing'; END IF;
- IF EXISTS(SELECT 1 FROM public.provinces WHERE code LIKE 'curated-%' AND country_code IS NULL) THEN RAISE EXCEPTION 'curated destination country missing'; END IF;
+ IF (SELECT count(*) FROM public.checkpoint_rewards r JOIN public.destination_checkpoints c ON c.id=r.checkpoint_id JOIN public.destinations d ON d.id=c.destination_id WHERE d.code LIKE 'curated-%') <> 30 THEN RAISE EXCEPTION 'curated rewards missing'; END IF;
+ IF EXISTS(SELECT 1 FROM public.destinations WHERE country_code IS NULL) THEN RAISE EXCEPTION 'destination country missing'; END IF;
+ IF EXISTS(SELECT 1 FROM public.checkpoint_rewards WHERE reward_type='destination_item' AND destination_item_id IS NULL) THEN RAISE EXCEPTION 'destination item reward target missing'; END IF;
  IF (SELECT count(DISTINCT mission_type) FROM public.mission_templates WHERE is_active AND mission_type IN ('daily','weekly','monthly','yearly','custom'))<>5 THEN RAISE EXCEPTION 'mission suggestion types missing'; END IF;
  IF (SELECT count(*) FROM public.daily_quotes)<>100 THEN RAISE EXCEPTION 'daily quote catalog must contain exactly 100 rows'; END IF;
  IF EXISTS(SELECT 1 FROM public.daily_quotes GROUP BY topic HAVING count(*)<>20) OR (SELECT count(DISTINCT topic) FROM public.daily_quotes)<>5 THEN RAISE EXCEPTION 'daily quote topics must contain 20 rows each'; END IF;
