@@ -43,7 +43,7 @@ Frame gốc rộng `390`, cao `1741`, nền dọc `#E0F2F7 → #FBF9F5 → #FBF9
 | Mood selector | `85:567` | `268×93`, left `32`, top `42` trong bubble | 5 mood tĩnh, xếp chồng có rotation |
 | Journey | `74:611` | `360×142`, left `16`, top `489` | tỉnh/trạm/checkpoint là dữ liệu động |
 | Mission group | `199:881` | `325×324`, left `28`, top `804` | nhóm theo thời điểm, nội dung từ DB |
-| Quote | `Quote` | dưới mission | câu mẫu cứng, có dấu ngoặc kép trang trí |
+| Quote | `Quote` | dưới mission | câu theo ngày từ DB, có dấu ngoặc kép trang trí |
 | Chia sẻ khoảnh khắc | `Heading 3 - Chia sẻ khoảnh khắc` | carousel dưới quote | card preview/title/subtitle/share; nội dung mẫu cứng |
 | Bottom nav center | `195:289` | nút `56×56`, top `-19` | nền `#366672`, icon mây `#EFFBFF`; chạm về Bầu trời, giữ để chọn mood |
 

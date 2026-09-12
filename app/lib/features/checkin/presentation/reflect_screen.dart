@@ -16,6 +16,7 @@ import 'package:musemend/features/journey/application/journey_providers.dart';
 import 'package:musemend/features/journey/domain/journey_checkpoint.dart';
 import 'package:musemend/features/journey/domain/journey_dashboard.dart';
 import 'package:musemend/features/missions/presentation/missions_section.dart';
+import 'package:musemend/features/quotes/application/daily_quote_providers.dart';
 
 class ReflectScreen extends ConsumerStatefulWidget {
   const ReflectScreen({super.key});
@@ -723,14 +724,12 @@ class _CheckpointDot extends StatelessWidget {
   }
 }
 
-class _SkyQuoteCard extends StatelessWidget {
+class _SkyQuoteCard extends ConsumerWidget {
   const _SkyQuoteCard();
 
-  static const quote =
-      '“Chỉ cần bạn không dừng lại thì việc bạn tiến chậm cũng không là vấn đề.”';
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final quoteState = ref.watch(dailyQuoteProvider);
     return Container(
       width: double.infinity,
       constraints: const BoxConstraints(minHeight: 112),
@@ -766,14 +765,38 @@ class _SkyQuoteCard extends StatelessWidget {
           ),
           SizedBox(
             width: double.infinity,
-            child: Text(
-              quote,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Color(0xFF5B5865),
-                fontSize: 16,
-                height: 1.5,
-              ),
+            child: quoteState.when(
+              data:
+                  (quote) => Text(
+                    '“${quote.content}”',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Color(0xFF5B5865),
+                      fontSize: 16,
+                      height: 1.5,
+                    ),
+                  ),
+              loading:
+                  () => const Center(
+                    child: SizedBox.square(
+                      dimension: 22,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+              error:
+                  (_, _) => Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'Chưa thể tải lời nhắn hôm nay.',
+                        textAlign: TextAlign.center,
+                      ),
+                      TextButton(
+                        onPressed: () => ref.invalidate(dailyQuoteProvider),
+                        child: const Text('Thử lại'),
+                      ),
+                    ],
+                  ),
             ),
           ),
         ],
