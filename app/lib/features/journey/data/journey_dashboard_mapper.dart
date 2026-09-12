@@ -61,8 +61,7 @@ class JourneyDashboardMapper {
           .firstWhere(
             (row) =>
                 row != null &&
-                (row['destination_id'] as num).toInt() ==
-                    currentDestinationId,
+                (row['destination_id'] as num).toInt() == currentDestinationId,
             orElse: () => null,
           );
       destination = JourneyDestination(
