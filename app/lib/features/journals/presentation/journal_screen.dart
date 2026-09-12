@@ -126,7 +126,6 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
                         _JournalCard(
                           entry: entry,
                           onTap: () => _openEntry(context, ref, entry),
-                          onAttach: () => _attachImage(context, ref, entry),
                           onDelete: () => _delete(context, ref, entry),
                         ),
                     ],
@@ -334,27 +333,6 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
     }
     if (!context.mounted) return;
     _showResult(context, deleted, 'Đã xóa mục nhật ký.');
-  }
-
-  Future<void> _attachImage(
-    BuildContext context,
-    WidgetRef ref,
-    JournalEntry entry,
-  ) async {
-    final result = await ref
-        .read(journalControllerProvider.notifier)
-        .attachImage(entry.id);
-    if (!context.mounted || result == JournalImageResult.canceled) return;
-    final message = switch (result) {
-      JournalImageResult.success => 'Ảnh đã được lưu riêng tư.',
-      JournalImageResult.tooLarge => 'Ảnh vượt quá giới hạn 10 MiB.',
-      JournalImageResult.unsupported => 'Chỉ hỗ trợ JPG, PNG, WebP hoặc HEIC.',
-      JournalImageResult.failed => 'Chưa thể tải ảnh lên. Hãy thử lại.',
-      JournalImageResult.canceled => '',
-    };
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _showResult(BuildContext context, bool success, String successMessage) {
@@ -664,13 +642,11 @@ class _JournalCard extends ConsumerWidget {
   const _JournalCard({
     required this.entry,
     required this.onTap,
-    required this.onAttach,
     required this.onDelete,
   });
 
   final JournalEntry entry;
   final VoidCallback onTap;
-  final VoidCallback onAttach;
   final VoidCallback onDelete;
 
   @override
@@ -725,24 +701,25 @@ class _JournalCard extends ConsumerWidget {
                 ),
             ],
           ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                tooltip: 'Thêm ảnh riêng tư',
-                onPressed: onAttach,
-                icon: Badge(
-                  isLabelVisible: entry.media.isNotEmpty,
-                  label: Text('${entry.media.length}'),
-                  child: const Icon(Icons.add_photo_alternate_outlined),
-                ),
-              ),
-              IconButton(
-                tooltip: 'Xóa',
-                onPressed: onDelete,
-                icon: const Icon(Icons.delete_outline),
-              ),
-            ],
+          trailing: PopupMenuButton<_JournalCardAction>(
+            tooltip: 'Tùy chọn thư',
+            icon: const Icon(Icons.more_vert_rounded),
+            onSelected: (action) {
+              if (action == _JournalCardAction.delete) onDelete();
+            },
+            itemBuilder:
+                (context) => const [
+                  PopupMenuItem(
+                    value: _JournalCardAction.delete,
+                    child: Row(
+                      children: [
+                        Icon(Icons.delete_outline),
+                        SizedBox(width: 10),
+                        Text('Xóa thư'),
+                      ],
+                    ),
+                  ),
+                ],
           ),
         ),
       ),
@@ -757,6 +734,8 @@ class _JournalCard extends ConsumerWidget {
     return clean.isEmpty ? 'Chưa có nội dung' : clean;
   }
 }
+
+enum _JournalCardAction { delete }
 
 class _PrivateImage extends ConsumerWidget {
   const _PrivateImage({required this.media});

@@ -13,7 +13,8 @@ và đăng xuất. Profile/settings bootstrap phía DB vẫn là nguồn sự th
 `AuthRepository` là contract domain. `SupabaseAuthRepository` là adapter duy nhất
 gọi Supabase Auth. `AuthController` điều phối thao tác và trạng thái async;
 `SignInScreen` validate form. `authSessionProvider` điều khiển redirect
-`/splash` → `/sign-in` hoặc `/reflect`.
+`/splash` → `/sign-in`; sau khi có session, router đọc trạng thái onboarding để
+đưa tài khoản mới tới `/onboarding` và tài khoản đã hoàn tất tới `/reflect`.
 
 Màn auth dùng cùng ngôn ngữ thị giác với Bầu trời: artwork phong cảnh và mascot
 cục bộ, nền chuyển từ xanh trời sang kem/tím pastel, logo gradient và form kính
@@ -29,7 +30,8 @@ chuyển động không lộ mép. Đây chỉ là motion trang trí; controller
 `MediaQuery.disableAnimations` bật và nội dung form hoàn toàn không chuyển vị trí.
 
 Đăng ký gửi duy nhất metadata `display_name`; trigger DB tạo profile/settings và
-travel progress. UI không gửi `user_id`, role hoặc quyền.
+travel progress. Tên này được điền sẵn trong onboarding, nhưng người dùng có thể
+đổi hoặc bỏ qua. UI không gửi `user_id`, role hoặc quyền.
 
 ## Validation và lỗi
 

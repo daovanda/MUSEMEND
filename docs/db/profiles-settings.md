@@ -1,7 +1,7 @@
 # Profile và settings
 
 Trạng thái: `implemented`  
-Cập nhật: 2026-09-05
+Cập nhật: 2026-09-12
 
 ## Mục tiêu và phạm vi
 
@@ -14,6 +14,8 @@ nhật ký.
 - `auth.users` là nguồn danh tính do Supabase Auth quản lý.
 - `profiles.id` vừa là khóa chính vừa tham chiếu `auth.users.id` với
   `ON DELETE CASCADE`. Trạng thái tài khoản: `active`, `suspended`, `deleted`.
+- `profiles.onboarding_completed_at` xác định tài khoản đã hoàn tất/bỏ qua lời
+  chào trên mọi thiết bị; `preferred_address` lưu cách xưng hô tùy chọn.
 - `user_settings.user_id` tham chiếu `profiles.id`, là duy nhất cho mỗi người dùng
   và bị cascade khi profile bị xóa.
 - `travel_progress` cũng được tạo cùng tài khoản để các RPC năng lượng/hành trình
@@ -38,7 +40,9 @@ Client được:
   `biometric_lock_enabled`, `ai_personalization_enabled`.
 
 Client không được tự cập nhật `account_status`, `deleted_at`, `auth_provider`,
-`avatar_url`, khóa sở hữu hay timestamp hệ thống. Yêu cầu xóa tài khoản phải dùng
+`avatar_url`, trạng thái onboarding, cách xưng hô, khóa sở hữu hay timestamp hệ
+thống. Onboarding chỉ hoàn tất qua `complete_onboarding()`, hàm cho phép đặt tên
+2–80 ký tự và cách xưng hô trong tập cố định. Yêu cầu xóa tài khoản phải dùng
 `request_account_deletion()` được mô tả trong
 [notifications-cleanup.md](./notifications-cleanup.md).
 
@@ -71,6 +75,7 @@ giai đoạn rollout. Không rollback bằng cách sửa baseline.
 
 - Chưa có flow cập nhật avatar an toàn hoặc bucket avatar.
 - Chưa có flow khôi phục/cancel sau `request_account_deletion()`.
+- Cách xưng hô đã được lưu nhưng chưa được áp dụng cho toàn bộ chuỗi UI.
 - Provider ngoài danh sách hiện bị ghi thành `email`, cần migration nếu bổ sung.
 - Cần test cụ thể cho column-level privileges và trạng thái suspended/deleted.
 

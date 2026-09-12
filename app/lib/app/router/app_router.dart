@@ -8,10 +8,13 @@ import 'package:musemend/features/checkin/presentation/reflect_screen.dart';
 import 'package:musemend/features/journals/presentation/journal_screen.dart';
 import 'package:musemend/features/library/presentation/library_screen.dart';
 import 'package:musemend/features/notifications/application/notification_providers.dart';
+import 'package:musemend/features/onboarding/application/onboarding_providers.dart';
+import 'package:musemend/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:musemend/features/profile/presentation/profile_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final auth = ref.watch(authSessionProvider);
+  final onboarding = ref.watch(onboardingProfileProvider);
   final initialNotificationJournalId = ref.watch(
     initialNotificationJournalIdProvider,
   );
@@ -21,11 +24,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isLoading = auth.isLoading;
       final isSignedIn = auth.asData?.value != null;
       final isAuthRoute = state.matchedLocation == '/sign-in';
+      final isOnboardingRoute = state.matchedLocation == '/onboarding';
       final isSplash = state.matchedLocation == '/splash';
 
       if (isLoading) return isSplash ? null : '/splash';
       if (!isSignedIn) return isAuthRoute ? null : '/sign-in';
-      if (isAuthRoute || isSplash) {
+      if (onboarding.isLoading) return isSplash ? null : '/splash';
+      if (onboarding.hasError) {
+        return isOnboardingRoute ? null : '/onboarding';
+      }
+      final needsOnboarding = onboarding.asData?.value?.isCompleted != true;
+      if (needsOnboarding) {
+        return isOnboardingRoute ? null : '/onboarding';
+      }
+      if (isAuthRoute || isOnboardingRoute || isSplash) {
         return initialNotificationJournalId == null
             ? '/reflect'
             : Uri(
@@ -43,6 +55,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/sign-in',
         builder: (context, state) => const SignInScreen(),
+      ),
+      GoRoute(
+        path: '/onboarding',
+        builder: (context, state) => const OnboardingScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {

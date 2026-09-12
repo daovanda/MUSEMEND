@@ -30,6 +30,16 @@ SELECT set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000001'
 DO $$
 DECLARE c public.daily_checkins; c2 public.daily_checkins; v jsonb; m public.user_missions; scheduled public.user_missions; r jsonb; p public.travel_progress; j uuid; j2 uuid; media_id uuid; media_path text; starter_count integer; blocked boolean:=false; today date:=(now() AT TIME ZONE 'Asia/Ho_Chi_Minh')::date; daily_quote record;
 BEGIN
+ IF NOT EXISTS(
+  SELECT 1 FROM public.profiles
+  WHERE id=auth.uid() AND onboarding_completed_at IS NULL
+ ) THEN RAISE EXCEPTION 'new account onboarding state is incorrect'; END IF;
+ PERFORM public.complete_onboarding('An', 'ban_minh');
+ IF NOT EXISTS(
+  SELECT 1 FROM public.profiles
+  WHERE id=auth.uid() AND display_name='An'
+    AND preferred_address='ban_minh' AND onboarding_completed_at IS NOT NULL
+ ) THEN RAISE EXCEPTION 'onboarding completion failed'; END IF;
  SELECT * INTO daily_quote FROM public.get_daily_quote();
  IF daily_quote.rotation_order IS NULL OR daily_quote.quote_date<>today THEN RAISE EXCEPTION 'authenticated daily quote RPC failed'; END IF;
  SELECT * INTO c FROM public.upsert_daily_checkin('sad',2,'first');

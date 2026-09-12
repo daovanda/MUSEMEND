@@ -15,6 +15,7 @@ accessibility, bảo mật dữ liệu trên thiết bị và kiểm thử.
 - [Frontend asset manifest](./assets.md) — in-progress
 - [Application foundation](./application-foundation.md) — implemented
 - [Authentication](./authentication.md) — in-progress
+- [Onboarding tài khoản mới](./new-user-onboarding.md) — implemented
 - [Daily check-in và streak](./daily-checkin.md) — in-progress
 - [Màn Bầu trời (Reflect)](./sky-screen.md) — in-progress
 - [Missions và energy](./missions-energy.md) — in-progress
