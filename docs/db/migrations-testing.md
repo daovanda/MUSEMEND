@@ -1,7 +1,7 @@
 # Migrations, seed và kiểm thử database
 
 Trạng thái: `implemented` cho migration MVP; coverage còn giới hạn  
-Cập nhật: 2026-09-11
+Cập nhật: 2026-09-12
 
 ## Nguồn sự thật và baseline
 
@@ -39,6 +39,7 @@ Các migration tới `20260907150000` đã có trên nhánh phát triển; dòng
 | `20260908110000` | `curated_world_catalog` | 10 điểm đến/trạm/reward và 10 mission template curated |
 | `20260911140000` | `mission_scheduling_and_recurrence` | Lịch mission, daily series, expire/refresh RPC |
 | `20260912090000` | `daily_quotes` | 100 daily quote và RPC xoay theo ngày Việt Nam |
+| `20260912140000` | `global_destinations` | Đổi schema tỉnh thành điểm đến toàn cầu, giữ nguyên dữ liệu/ID/RLS |
 
 ## Quy ước migration
 
@@ -81,6 +82,7 @@ trên PostgreSQL/Supabase thật.
   ngày đã có mục khác;
 - cập nhật metadata vị trí/scale/góc xoay media và chặn user khác sửa transform;
 - số lượng, country metadata, artwork path và reward của curated catalog;
+- nâng cấp tên bảng/khóa ngoại toàn cầu, backfill quốc gia và loại bỏ bảng tỉnh cũ;
 - 100 daily quote, phân bổ đều năm chủ đề, vòng quay ổn định và đổi theo ngày;
 - cột profile/settings được phép, cột trạng thái bị chặn và account deletion khóa profile.
 

@@ -1,7 +1,7 @@
 # Journey, checkpoints và rewards
 
 Trạng thái: `implemented`  
-Cập nhật: 2026-09-08
+Cập nhật: 2026-09-12
 
 ## Mục tiêu và phạm vi
 
@@ -13,33 +13,34 @@ luôn nằm ở database.
 
 Catalog server-owned:
 
-- `provinces` → `province_checkpoints` theo `order_index`;
-- mỗi tỉnh có `landmarks`, `foods`, `province_items`;
-- `checkpoint_rewards` trỏ đúng một loại reward: landmark, food, province item
+- `destinations` → `destination_checkpoints` theo `order_index`;
+- mỗi điểm đến có `landmarks`, `foods`, `destination_items`;
+- `checkpoint_rewards` trỏ đúng một loại reward: landmark, food, destination item
   hoặc energy. Constraint yêu cầu đúng cột đích và số lượng/năng lượng dương.
-- `province_checkpoints.required_energy > 0` là số điểm cần phân bổ cho từng trạm.
-- `province_checkpoints.asset_path` trỏ tới artwork server-owned. Catalog mở rộng
-  dùng `provinces.country_code` và `destination_type`; tên bảng cũ được giữ để
-  tương thích với RPC và client MVP.
+- `destination_checkpoints.required_energy > 0` là số điểm cần phân bổ cho từng trạm.
+- `destinations.country_code` là mã quốc gia ISO hai ký tự bắt buộc;
+  `destination_type` phân biệt tỉnh, thành phố, đảo, di sản hoặc vùng đất.
+- `destinations.vietnam_region` chỉ còn là metadata tùy chọn cho ba miền Việt Nam.
+- `destination_checkpoints.asset_path` trỏ tới artwork server-owned.
 
 Dữ liệu user-owned:
 
-- `travel_progress`: con trỏ tỉnh/trạm, energy và trạng thái toàn hành trình;
+- `travel_progress`: con trỏ điểm đến/trạm, energy và trạng thái toàn hành trình;
 - `user_checkpoint_progress`: trạng thái/energy tại từng checkpoint;
-- `unlocked_provinces`, `unlocked_landmarks`, `unlocked_foods`,
-  `unlocked_province_items`: bộ sưu tập unique theo user/item;
+- `unlocked_destinations`, `unlocked_landmarks`, `unlocked_foods`,
+  `unlocked_destination_items`: bộ sưu tập unique theo user/item;
 - `travel_events`: audit timeline của journey, energy và reward.
 
-Trigger từ chối `current_checkpoint_id` không thuộc `current_province_id`.
+Trigger từ chối `current_checkpoint_id` không thuộc `current_destination_id`.
 
 ## Luồng và RPC
 
 ### `start_journey()`
 
-Chọn tỉnh active đầu tiên theo `(order_index, id)` mà user chưa hoàn thành, sau đó
+Chọn điểm đến active đầu tiên theo `(order_index, id)` mà user chưa hoàn thành, sau đó
 chọn checkpoint active đầu tiên. RPC upsert unlock/progress, ghi event bắt đầu và
 gọi engine advance. Nếu đã có checkpoint hiện tại, hàm trả trạng thái hiện có. Sau
-khi hoàn thành một tỉnh, gọi lại để bắt đầu tỉnh tiếp theo.
+khi hoàn thành một điểm đến, gọi lại để bắt đầu điểm tiếp theo.
 
 ### `advance_journey()`
 
@@ -53,7 +54,7 @@ Nếu đủ `required_energy`, checkpoint được hoàn thành và
 `journey_energy_used` tăng; `current_energy` không bị trừ vì energy là điểm tích
 lũy. Engine có thể vượt nhiều checkpoint trong một transaction. Reward collection
 được upsert chống trùng; energy reward được cộng vào cả current/lifetime và có thể
-giúp đi tiếp ngay. Cuối tỉnh, trạng thái tạm là `paused`; nếu mọi tỉnh active đều
+giúp đi tiếp ngay. Cuối điểm đến, trạng thái tạm là `paused`; nếu mọi điểm đến active đều
 đã hoàn thành thì chuyển `completed`.
 
 `complete_mission()` gọi engine tự động sau khi cộng năng lượng.
@@ -74,15 +75,15 @@ unlock item cho phép cập nhật duy nhất `is_viewed`; equip phải gọi RP
 
 Migration demo seed idempotent tạo:
 
-- 3 tỉnh mẫu: Hà Nội, Đà Nẵng, Lâm Đồng;
-- mỗi tỉnh 5 checkpoint, mỗi checkpoint cần 10 energy;
-- 15 landmark, 15 food và 3 badge hoàn thành tỉnh;
+- 3 điểm đến mẫu Việt Nam: Hà Nội, Đà Nẵng, Lâm Đồng;
+- mỗi điểm đến 5 checkpoint, mỗi checkpoint cần 10 energy;
+- 15 landmark, 15 food và 3 badge hoàn thành điểm đến;
 - 33 reward mapping: landmark + food cho từng trạm, thêm badge ở trạm 5.
 
 Mã catalog có prefix `demo-`; đây không phải catalog địa lý/nội dung production.
 
-Các cột `provinces.cover_asset_path`, `provinces.map_asset_path` và
-`landmarks.asset_path`, `foods.asset_path`, `province_items.asset_path` đã được
+Các cột `destinations.cover_asset_path`, `destinations.map_asset_path` và
+`landmarks.asset_path`, `foods.asset_path`, `destination_items.asset_path` đã được
 repository Flutter đọc vào domain model. Seed demo hiện vẫn để các cột catalog
 ở `NULL`: export cloud mascot dùng chung không phải asset của một dòng catalog,
 còn sprite Figma đang chứa nhiều object/crop nên chưa thể gán đúng từng item.
@@ -94,12 +95,13 @@ migration/seed idempotent.
 
 Integration test bắt đầu journey, hoàn thành hai custom mission, xác nhận energy
 10, checkpoint đầu hoàn tất, `journey_energy_used=10` và mở landmark + food. Gọi
-complete lặp được kiểm tra không cộng đôi. Chưa test hết tỉnh, đổi tỉnh, energy
+complete lặp được kiểm tra không cộng đôi. Chưa test hết điểm đến, đổi điểm đến, energy
 bonus, equip category, catalog inactive hoặc concurrency nhiều request.
 
 ## Migration và rollback
 
-`mvp_journey` chứa engine và RPC; `mvp_demo_catalog` chứa seed. Thay đổi thứ tự,
+`mvp_journey` chứa engine và RPC; `mvp_demo_catalog` chứa seed; migration
+`global_destinations` đổi vocabulary mà không đổi ID hay xóa dữ liệu. Thay đổi thứ tự,
 required energy hoặc reward trên dữ liệu đã có có thể làm con trỏ user không còn
 nhất quán; cần migration dữ liệu và kế hoạch rollback riêng, không update thủ công
 trên Dashboard.
@@ -108,7 +110,7 @@ trên Dashboard.
 
 - Artwork riêng cho food/item vẫn dùng placeholder; cần một đợt content review
   và export riêng trước production.
-- App phải gọi `start_journey()` khi user muốn chuyển sang tỉnh kế tiếp.
+- App phải gọi `start_journey()` khi user muốn chuyển sang điểm đến kế tiếp.
 - Chưa có admin/content publishing workflow hay version catalog.
 - Chưa có test tải/lock contention và invariant toàn hành trình.
 

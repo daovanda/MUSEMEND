@@ -1,7 +1,7 @@
 # Màn Bầu trời (Reflect)
 
 - **Trạng thái:** in-progress
-- **Cập nhật:** 2026-09-11
+- **Cập nhật:** 2026-09-12
 - **Nguồn tham chiếu:** page Home, Figma frame `Bầu trời` (`233:893`) và biến thể mood mở (`57:24`)
 
 ## Phạm vi
@@ -16,7 +16,7 @@ lời nhắc viết nhật ký.
 ```text
 ReflectScreen
   ├─ reflectControllerProvider → check-in hôm nay, streak, save/update
-  ├─ journeyControllerProvider → năng lượng, tỉnh, checkpoint, tiến độ
+  ├─ journeyControllerProvider → năng lượng, điểm đến, checkpoint, tiến độ
   └─ MissionsSection(skyStyle: true) → repository/RPC nhiệm vụ
 ```
 
@@ -37,8 +37,8 @@ tiến độ vẫn do RPC/database xác định; các con số hiển thị ch�
   white 50% và background blur `12`. Năm artwork ánh xạ nhãn `QUẠO`,
   `TRỐNG RỖNG`, `ỔN ÁP`, `THƯ GIÃN`, `CHỮA LÀNH` về đúng enum DB.
 - `LƯU NHANH` lưu check-in; `LƯU VÀ VIẾT TÂM TƯ` lưu rồi mở `/journal`.
-- Journey hiển thị tỉnh, trạm và tối đa năm checkpoint từ `JourneyDashboard`;
-  `province_checkpoints.asset_path` được truyền tới `CatalogArtwork` khi đã có
+- Journey hiển thị điểm đến, trạm và tối đa năm checkpoint từ `JourneyDashboard`;
+  `destination_checkpoints.asset_path` được truyền tới `CatalogArtwork` khi đã có
   export được duyệt, còn `NULL` dùng placeholder. Không dùng sprite cố định thay
   cho dữ liệu hiện tại.
 - Mission nằm trên panel gradient xanh nhạt sang tím nhạt; khi tài khoản mở Home

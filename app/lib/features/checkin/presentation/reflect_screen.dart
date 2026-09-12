@@ -123,7 +123,7 @@ class _ReflectScreenState extends ConsumerState<ReflectScreen> {
                   skyEnergyRequired: checkpoint?.requiredEnergy,
                   skyArtworkPath:
                       checkpoint?.assetPath ??
-                      journey?.province?.coverAssetPath,
+                      journey?.destination?.coverAssetPath,
                 ),
               ),
               MuseContentFrame(
@@ -148,7 +148,7 @@ class _ReflectScreenState extends ConsumerState<ReflectScreen> {
   JourneyCheckpoint? _currentCheckpoint(JourneyDashboard? journey) {
     final id = journey?.currentCheckpointId;
     if (id == null) return null;
-    for (final checkpoint in journey?.province?.checkpoints ?? const []) {
+    for (final checkpoint in journey?.destination?.checkpoints ?? const []) {
       if (checkpoint.id == id) return checkpoint;
     }
     return null;
@@ -555,8 +555,8 @@ class _JourneyOverview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final province = journey?.province;
-    final checkpoints = province?.checkpoints ?? const [];
+    final destination = journey?.destination;
+    final checkpoints = destination?.checkpoints ?? const [];
     var currentNumber =
         (checkpoints.where((checkpoint) => checkpoint.isCompleted).length + 1)
             .clamp(1, checkpoints.isEmpty ? 1 : checkpoints.length);
@@ -568,7 +568,7 @@ class _JourneyOverview extends StatelessWidget {
     }
     return Semantics(
       label:
-          'Hành trình Việt Nam, trạm $currentNumber trên ${checkpoints.length}',
+          'Hành trình ${destination?.name ?? 'đang chờ'}, trạm $currentNumber trên ${checkpoints.length}',
       child: SizedBox(
         height: 142,
         child: Column(
@@ -576,9 +576,9 @@ class _JourneyOverview extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                const Text(
-                  'VIỆT NAM',
-                  style: TextStyle(
+                Text(
+                  (destination?.name ?? 'HÀNH TRÌNH').toUpperCase(),
+                  style: const TextStyle(
                     color: Color(0xFF343B3D),
                     fontSize: 16,
                     height: 1,

@@ -1,17 +1,18 @@
 # Journey và Library
 
-Trạng thái: `in-progress`
-Cập nhật: 2026-09-10
+Trạng thái: `implemented`
+Cập nhật: 2026-09-12
 
 ## Phạm vi hiện đã triển khai
 
 Tab Library đọc dashboard hành trình của user đang đăng nhập và hiển thị:
 
-- trạng thái hành trình, tỉnh và checkpoint hiện tại;
-- năng lượng còn có thể phân bổ, phần trăm hoàn thành tỉnh;
-- tiến độ của từng checkpoint trong tỉnh hiện tại;
+- thẻ ảnh lớn cho điểm đến hiện tại, quốc gia, loại, tên và mô tả;
+- năng lượng còn có thể phân bổ, phần trăm hoàn thành điểm đến;
+- danh sách trạm có artwork, tên, mô tả và tiến độ riêng;
 - bộ sưu tập địa danh, món ăn và vật phẩm đã mở khóa;
-- thao tác bắt đầu hành trình/đến tỉnh tiếp theo và đồng bộ tiến độ.
+- bộ lọc `Tất cả`, `Địa danh`, `Món ăn`, `Vật phẩm` kèm số lượng;
+- thao tác bắt đầu hành trình/đến điểm tiếp theo và đồng bộ tiến độ.
 
 Màn hình hỗ trợ pull-to-refresh, loading, lỗi có thể thử lại và trạng thái rỗng.
 Nền Khám phá giữ accent lavender trên lớp xanh trời–kem chung và các cụm mây
@@ -20,7 +21,7 @@ Content pack curated có 10 ảnh checkpoint bundled, gồm 5 điểm đến Vi�
 điểm đến quốc tế. Food/item chưa có artwork riêng nên vẫn dùng placeholder có
 kiểm soát. Repository
 map `asset_path` của landmark/food/item và checkpoint, cùng `cover_asset_path` và
-`map_asset_path` của province, để có thể thay artwork khi content được publish;
+`map_asset_path` của destination, để có thể thay artwork khi content được publish;
 `NULL` luôn được xử lý như fallback, không tải URL do người dùng cung cấp.
 `CatalogArtwork` chỉ nhận local asset hoặc HTTPS URL server-owned; storage path
 tương đối chưa được tự ghép thành URL khi chưa chốt bucket/catalog resolver.
@@ -29,7 +30,7 @@ tương đối chưa được tự ghép thành URL khi chưa chốt bucket/cata
 
 Miền `features/journey/` tách theo:
 
-- `domain`: dashboard, tỉnh, checkpoint, collectible, trạng thái và repository
+- `domain`: dashboard, điểm đến, checkpoint, collectible, trạng thái và repository
   contract;
 - `data`: Supabase adapter và mapper tổng hợp nhiều response thành domain model;
 - `application`: Riverpod `JourneyController` điều phối load/start/advance;
@@ -46,7 +47,7 @@ không tự quyết định phần thưởng.
 
 Mutation chỉ đi qua:
 
-- `start_journey()` để máy chủ chọn tỉnh/checkpoint hợp lệ;
+- `start_journey()` để máy chủ chọn điểm đến/checkpoint hợp lệ;
 - `advance_journey()` để máy chủ phân bổ energy, vượt trạm và unlock atomically;
 - `complete_mission()` tự invalidate dashboard sau khi engine journey chạy.
 
@@ -54,18 +55,20 @@ Các response lỗi không được hiển thị nguyên văn nhằm tránh lộ
 
 ## Kiểm thử
 
-- Unit test mapper phải bao phủ trạng thái chưa khởi hành và tỉnh đang tiến hành,
+- Unit test mapper bao phủ trạng thái chưa khởi hành và điểm đến đang tiến hành,
   bao gồm collectible đã mở khóa.
+- Widget test xác nhận mô tả/trạm được render và bộ lọc chỉ giữ đúng loại
+  collectible đã chọn.
 - Integration test DB hiện xác nhận mốc 10 energy hoàn thành checkpoint đầu và mở
   landmark + food.
 - E2E trên Android emulator với tài khoản QA đã xác nhận: bắt đầu hành trình ở Hà
   Nội phân bổ 5/10 energy; hoàn thành nhiệm vụ thứ hai đưa tổng điểm lên 10, tự
-  hoàn tất trạm 1, chuyển sang trạm 2, cập nhật tỉnh thành 20% và mở đúng một địa
+  hoàn tất trạm 1, chuyển sang trạm 2, cập nhật điểm đến thành 20% và mở đúng một địa
   danh cùng một món ăn.
 
 ## Chưa thuộc phần hoàn thiện này
 
-- chi tiết từng collectible, đánh dấu đã xem và trang bị item;
+- trang chi tiết riêng cho từng collectible, đánh dấu đã xem và trang bị item;
 - artwork riêng cho food/item và quy trình content review/publishing production;
 - animation nhận thưởng và lịch sử sự kiện;
 - offline-first/cache cục bộ (giai đoạn sau MVP đọc/ghi trực tiếp Supabase).

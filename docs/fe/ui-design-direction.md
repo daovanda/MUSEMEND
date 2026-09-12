@@ -142,7 +142,7 @@ app/assets/
 ## 11. Giới hạn và việc còn lại
 
 - Artwork nền, mascot và năm mood của Bầu trời đã được export trực tiếp từ page
-  Home. Asset catalog theo tỉnh/trạm vẫn chờ export riêng và dữ liệu server.
+  Home. Asset catalog theo điểm đến/trạm vẫn chờ export riêng và dữ liệu server.
 - Mapping năm mood Bầu trời đã chốt về enum DB; những nhãn cảm xúc khác trong các
   frame Home tương lai phải có quyết định riêng trước khi thêm.
 - Package/bundle ID đã chốt là `com.musemend.app` cho Android và iOS.

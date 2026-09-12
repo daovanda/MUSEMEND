@@ -24,7 +24,7 @@ thế mà không sửa nghiệp vụ. Frame screenshot chỉ là tài liệu tha
 | Mood THƯ GIÃN | `85:573`, source `1024×1024` | `app/assets/illustrations/clouds/moods/good.png` | integrated |
 | Mood CHỮA LÀNH | `85:595`, source `1024×1024` | `app/assets/illustrations/clouds/moods/great.png` | integrated |
 | Journey decoration sprite | Home mission/weather source, `2400×1309` | `app/assets/illustrations/journey/sky-collection-sprite.png` | reference only; excluded from app bundle |
-| Province/landmark/food/item | Catalog Supabase (`asset_path`) | repository map vào domain model | implemented mapping; catalog paths pending approved per-item exports |
+| Destination/landmark/food/item | Catalog Supabase (`asset_path`) | repository map vào domain model | implemented mapping; catalog paths pending approved per-item exports |
 | 10 checkpoint curated | MuseMend generated artwork | `app/assets/illustrations/journey/checkpoints/*.png` | integrated; 5 Việt Nam + 5 quốc tế |
 | Quote card | Figma `Quote` | Flutter card, plain text từ daily quote RPC | implemented |
 

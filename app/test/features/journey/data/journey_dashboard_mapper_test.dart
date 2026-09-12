@@ -9,7 +9,7 @@ void main() {
   test('maps a journey that has not started', () {
     final dashboard = mapper.fromResponses([
       {
-        'current_province_id': null,
+        'current_destination_id': null,
         'current_checkpoint_id': null,
         'current_energy': 5,
         'journey_energy_used': 0,
@@ -29,7 +29,7 @@ void main() {
 
     expect(dashboard.status, JourneyStatus.notStarted);
     expect(dashboard.availableEnergy, 5);
-    expect(dashboard.province, isNull);
+    expect(dashboard.destination, isNull);
     expect(dashboard.canStart, isTrue);
   });
 
@@ -39,19 +39,27 @@ void main() {
         'assets/illustrations/journey/checkpoint-1.png';
     final dashboard = mapper.fromResponses([
       {
-        'current_province_id': 1,
+        'current_destination_id': 1,
         'current_checkpoint_id': 10,
         'current_energy': 5,
         'journey_energy_used': 0,
         'journey_status': 'in_progress',
       },
       [
-        {'id': 1, 'name': 'Hà Nội', 'description': 'Thủ đô'},
+        {
+          'id': 1,
+          'name': 'Hà Nội',
+          'description': 'Thủ đô',
+          'country_code': 'VN',
+          'destination_type': 'city',
+          'cover_asset_path': null,
+          'map_asset_path': null,
+        },
       ],
       [
         {
           'id': 11,
-          'province_id': 1,
+          'destination_id': 1,
           'checkpoint_number': 2,
           'title': 'Trạm 2',
           'description': null,
@@ -60,7 +68,7 @@ void main() {
         },
         {
           'id': 10,
-          'province_id': 1,
+          'destination_id': 1,
           'checkpoint_number': 1,
           'title': 'Trạm 1',
           'description': null,
@@ -72,7 +80,7 @@ void main() {
         {'checkpoint_id': 10, 'earned_energy': 5, 'status': 'in_progress'},
       ],
       [
-        {'province_id': 1, 'completion_percent': 0},
+        {'destination_id': 1, 'completion_percent': 0},
       ],
       [
         {
@@ -91,15 +99,17 @@ void main() {
     ]);
 
     expect(dashboard.status, JourneyStatus.inProgress);
-    expect(dashboard.province?.name, 'Hà Nội');
+    expect(dashboard.destination?.name, 'Hà Nội');
+    expect(dashboard.destination?.countryCode, 'VN');
+    expect(dashboard.destination?.destinationType, 'city');
     expect(
-      dashboard.province?.checkpoints.map((checkpoint) => checkpoint.number),
+      dashboard.destination?.checkpoints.map((checkpoint) => checkpoint.number),
       [1, 2],
     );
-    expect(dashboard.province?.checkpoints.first.earnedEnergy, 5);
-    expect(dashboard.province?.checkpoints.first.progress, 0.5);
+    expect(dashboard.destination?.checkpoints.first.earnedEnergy, 5);
+    expect(dashboard.destination?.checkpoints.first.progress, 0.5);
     expect(
-      dashboard.province?.checkpoints.first.assetPath,
+      dashboard.destination?.checkpoints.first.assetPath,
       currentCheckpointAsset,
     );
     expect(dashboard.collectibles.single.kind, CollectibleKind.landmark);
