@@ -1,7 +1,7 @@
 # Missions và energy client
 
 **Trạng thái:** `in-progress`
-**Cập nhật:** 2026-09-11
+**Cập nhật:** 2026-09-12
 
 ## Mục tiêu và phạm vi
 
@@ -31,7 +31,20 @@ UI `MissionsSection` nằm sau check-in trên Reflect:
   kết thúc cố định do server tính;
 - khi chọn template daily/custom, sheet lịch tương ứng mở trước khi gửi command;
   template tuần/tháng/năm dùng boundary server;
-- ngoài bốn nhóm daily còn có nhóm nhiệm vụ tuần, tháng, năm và tùy chỉnh;
+- bottom sheet tạo nhiệm vụ dùng khung kính có chiều cao tối đa theo viewport và
+  cuộn độc lập khi bàn phím mở; phần `Loại nhiệm vụ` hiển thị trực tiếp năm nút
+  viên thuốc Ngày/Tuần/Tháng/Năm/Tùy chỉnh, mặc định chọn Ngày và tự xuống dòng
+  trên màn hình hẹp; ngày bắt đầu/kết thúc của loại tùy chỉnh và mọi ô giờ được
+  nhập trực tiếp trong khung bằng bàn phím theo `dd/MM/yyyy` và `HH:mm`, không mở
+  date/time picker hoặc modal phụ; ngày quá khứ và ngày/giờ không hợp lệ bị từ chối;
+- tên và ghi chú của nhiệm vụ tự tạo dùng nhãn cố định phía trên thay vì floating
+  label để không chạm viền hoặc đè nội dung khi tăng cỡ chữ;
+- bottom sheet thêm gợi ý giữ nguyên loại do template quyết định, hiển thị loại
+  và năng lượng bằng badge viên thuốc; tên cùng ghi chú dùng khối chỉ đọc có nhãn
+  nằm trong nội dung thay vì floating label để không đè chữ;
+- ngoài bốn nhóm daily còn có nhóm nhiệm vụ tuần, tháng, năm và tùy chỉnh; UI chỉ
+  dựng tiêu đề của nhóm khi nhóm đó có ít nhất một nhiệm vụ để không hiển thị các
+  phần trống;
 - tiến độ checkpoint hiển thị `earned_energy/required_energy` từ journey state.
 
 Repository lọc các dòng có `due_at` trong tương lai hoặc `NULL` trước khi dựng

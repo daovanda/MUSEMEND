@@ -50,8 +50,9 @@ tiến độ vẫn do RPC/database xác định; các con số hiển thị ch�
   gọi `create_scheduled_mission()` qua repository. Tiến độ cạnh sticker là
   `earned_energy/required_energy` của
   checkpoint hiện tại.
-- Quote P0 hardcode đúng nội dung Figma. Khi có nguồn nội dung động, nó phải đi
-  qua application interface và không cho nội dung server tự chèn HTML/URL.
+- Quote đọc plain text từ RPC `get_daily_quote()` qua module `features/quotes`.
+  Server chọn câu ổn định theo ngày Việt Nam; provider tự tải lại sau nửa đêm nếu
+  app vẫn mở và không cho nội dung server tự chèn HTML/URL.
 - `Chia sẻ khoảnh khắc` dùng carousel card đúng composition Home: preview, tiêu
   đề, mô tả và nút chia sẻ. Nội dung hiện là mẫu cứng; hành vi export/share thực
   tế được để vòng sau và không truy cập journal riêng tư trong lát cắt này.
@@ -122,7 +123,6 @@ Thay đổi asset bundle này không cần migration DB.
   Home và mood picker nhưng emulator vẫn mất kết nối sau một số lần chạy; lặp
   visual QA trên thiết bị thật trước khi gọi là pixel-perfect.
 - Bổ sung golden test cho text scale 200% và màn hình nhỏ.
-- Chốt nguồn quote động sau khi có content model.
 
 ## Liên quan
 

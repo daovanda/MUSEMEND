@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:musemend/app/theme/muse_colors.dart';
 import 'package:musemend/core/presentation/catalog_artwork.dart';
@@ -295,6 +296,17 @@ class _SkyMissionPanel extends StatelessWidget {
         grouped[_periodFor(mission)]!.add(mission);
       }
     }
+    final groupedByType = <MissionType, List<UserMission>>{
+      for (final type in const [
+        MissionType.weekly,
+        MissionType.monthly,
+        MissionType.yearly,
+        MissionType.custom,
+      ])
+        type: dashboard.missions
+            .where((mission) => mission.missionType == type)
+            .toList(growable: false),
+    };
     final progress =
         energyEarned == null || energyRequired == null
             ? '--/--'
@@ -367,28 +379,23 @@ class _SkyMissionPanel extends StatelessWidget {
           ),
         ),
         for (final entry in _missionPeriodLabels.entries)
-          _SkyMissionGroup(
-            label: entry.value,
-            missions: grouped[entry.key]!,
-            onComplete: onComplete,
-            onSkip: onSkip,
-            onCreate: onCreate,
-          ),
-        for (final type in const [
-          MissionType.weekly,
-          MissionType.monthly,
-          MissionType.yearly,
-          MissionType.custom,
-        ])
-          _SkyMissionGroup(
-            label: 'Nhiệm vụ ${type.label.toLowerCase()}',
-            missions: dashboard.missions
-                .where((mission) => mission.missionType == type)
-                .toList(growable: false),
-            onComplete: onComplete,
-            onSkip: onSkip,
-            onCreate: onCreate,
-          ),
+          if (grouped[entry.key]!.isNotEmpty)
+            _SkyMissionGroup(
+              label: entry.value,
+              missions: grouped[entry.key]!,
+              onComplete: onComplete,
+              onSkip: onSkip,
+              onCreate: onCreate,
+            ),
+        for (final entry in groupedByType.entries)
+          if (entry.value.isNotEmpty)
+            _SkyMissionGroup(
+              label: 'Nhiệm vụ ${entry.key.label.toLowerCase()}',
+              missions: entry.value,
+              onComplete: onComplete,
+              onSkip: onSkip,
+              onCreate: onCreate,
+            ),
         if (dashboard.suggestions.isNotEmpty) ...[
           const SizedBox(height: 10),
           _SkySuggestionGroup(
@@ -964,89 +971,113 @@ class _CreateMissionSheetState extends State<_CreateMissionSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final viewInsets = MediaQuery.viewInsetsOf(context);
+    final viewport = MediaQuery.sizeOf(context);
+    final template = widget.template;
     return SafeArea(
-      child: SingleChildScrollView(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.viewInsetsOf(context).bottom,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: viewport.height * .9,
+          maxWidth: 560,
         ),
-        child: MuseGlassCard(
-          tint: MuseColors.sky,
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  widget.template == null
-                      ? 'Nhiệm vụ của bạn'
-                      : 'Thêm gợi ý từ Muse',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 6),
-                const Text(
-                  'Mỗi nhiệm vụ tự tạo được thưởng cố định 5 năng lượng.',
-                ),
-                const SizedBox(height: 16),
-                if (widget.template == null)
-                  DropdownButtonFormField<MissionType>(
-                    value: _missionType,
-                    decoration: const InputDecoration(
-                      labelText: 'Loại nhiệm vụ',
-                      prefixIcon: Icon(Icons.calendar_month_outlined),
-                    ),
-                    items: [
-                      for (final type in MissionType.values)
-                        DropdownMenuItem(value: type, child: Text(type.label)),
+        child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: EdgeInsets.fromLTRB(16, 4, 16, 12 + viewInsets.bottom),
+          child: MuseGlassCard(
+            tint: MuseColors.sky,
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          widget.template == null
+                              ? 'Nhiệm vụ của bạn'
+                              : 'Thêm gợi ý từ Muse',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                      ),
+                      IconButton(
+                        visualDensity: VisualDensity.compact,
+                        tooltip: 'Đóng',
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.close_rounded),
+                      ),
                     ],
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() => _missionType = value);
-                      }
-                    },
-                  )
-                else
-                  _ScheduleInfo(
-                    icon: Icons.category_outlined,
-                    label: 'Loại: ${_missionType.label}',
                   ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _titleController,
-                  readOnly: widget.template != null,
-                  maxLength: 200,
-                  decoration: const InputDecoration(
-                    labelText: 'Tên nhiệm vụ',
-                    prefixIcon: Icon(Icons.spa_outlined),
+                  const SizedBox(height: 2),
+                  Text(
+                    template == null
+                        ? 'Tự tạo nhiệm vụ được thưởng cố định 5 năng lượng.'
+                        : 'Gợi ý đã được Muse chuẩn bị sẵn cho bạn.',
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
-                  validator: (value) {
-                    final length = value?.trim().length ?? 0;
-                    return length < 1 || length > 200
-                        ? 'Tên nhiệm vụ cần từ 1 đến 200 ký tự.'
-                        : null;
-                  },
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _descriptionController,
-                  readOnly: widget.template != null,
-                  maxLength: 500,
-                  maxLines: 3,
-                  decoration: const InputDecoration(
-                    labelText: 'Ghi chú (không bắt buộc)',
-                    prefixIcon: Icon(Icons.notes_rounded),
+                  const SizedBox(height: 12),
+                  if (template == null) ...[
+                    _MissionTypeField(
+                      value: _missionType,
+                      onChanged:
+                          (value) => setState(() => _missionType = value),
+                    ),
+                    const SizedBox(height: 10),
+                    const _FieldLabel(label: 'Tên nhiệm vụ'),
+                    const SizedBox(height: 4),
+                    TextFormField(
+                      controller: _titleController,
+                      maxLength: 200,
+                      decoration: const InputDecoration(
+                        hintText: 'Nhập tên nhiệm vụ',
+                        prefixIcon: Icon(Icons.spa_outlined),
+                        isDense: true,
+                        counterText: '',
+                      ),
+                      validator: (value) {
+                        final length = value?.trim().length ?? 0;
+                        return length < 1 || length > 200
+                            ? 'Tên nhiệm vụ cần từ 1 đến 200 ký tự.'
+                            : null;
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    const _FieldLabel(label: 'Ghi chú (không bắt buộc)'),
+                    const SizedBox(height: 4),
+                    TextFormField(
+                      controller: _descriptionController,
+                      maxLength: 500,
+                      maxLines: 2,
+                      decoration: const InputDecoration(
+                        hintText: 'Thêm một lời nhắc nhẹ nhàng',
+                        prefixIcon: Icon(Icons.notes_rounded),
+                        isDense: true,
+                        counterText: '',
+                      ),
+                    ),
+                  ] else
+                    _TemplateMissionSummary(
+                      template: template,
+                      missionType: _missionType,
+                    ),
+                  const SizedBox(height: 8),
+                  _SectionCaption(
+                    icon: Icons.schedule_rounded,
+                    label: 'Thời gian thực hiện',
                   ),
-                ),
-                const SizedBox(height: 4),
-                ..._scheduleFields(context),
-                const SizedBox(height: 12),
-                FilledButton.icon(
-                  onPressed: _submit,
-                  icon: const Icon(Icons.add_rounded),
-                  label: const Text('Thêm nhiệm vụ'),
-                ),
-              ],
+                  const SizedBox(height: 6),
+                  ..._scheduleFields(context),
+                  const SizedBox(height: 10),
+                  FilledButton.icon(
+                    onPressed: _submit,
+                    icon: const Icon(Icons.add_rounded),
+                    label: const Text('Thêm nhiệm vụ'),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -1064,7 +1095,7 @@ class _CreateMissionSheetState extends State<_CreateMissionSheet> {
                 child: _TimeField(
                   label: 'Bắt đầu',
                   value: _dailyStart,
-                  onTap: () => _pickTime(true),
+                  onChanged: (value) => setState(() => _dailyStart = value),
                 ),
               ),
               const SizedBox(width: 10),
@@ -1072,7 +1103,7 @@ class _CreateMissionSheetState extends State<_CreateMissionSheet> {
                 child: _TimeField(
                   label: 'Kết thúc',
                   value: _dailyEnd,
-                  onTap: () => _pickTime(false),
+                  onChanged: (value) => setState(() => _dailyEnd = value),
                 ),
               ),
             ],
@@ -1110,67 +1141,19 @@ class _CreateMissionSheetState extends State<_CreateMissionSheet> {
             label: 'Bắt đầu',
             date: _customStartDate,
             time: _customStartTime,
-            onDateTap: () => _pickDate(true),
-            onTimeTap: () => _pickCustomTime(true),
+            onDateChanged: (value) => setState(() => _customStartDate = value),
+            onTimeChanged: (value) => setState(() => _customStartTime = value),
           ),
           const SizedBox(height: 10),
           _DateTimeField(
             label: 'Kết thúc',
             date: _customEndDate,
             time: _customEndTime,
-            onDateTap: () => _pickDate(false),
-            onTimeTap: () => _pickCustomTime(false),
+            onDateChanged: (value) => setState(() => _customEndDate = value),
+            onTimeChanged: (value) => setState(() => _customEndTime = value),
           ),
         ];
     }
-  }
-
-  Future<void> _pickTime(bool isStart) async {
-    final selected = await showTimePicker(
-      context: context,
-      initialTime: isStart ? _dailyStart : _dailyEnd,
-    );
-    if (selected == null || !mounted) return;
-    setState(() {
-      if (isStart) {
-        _dailyStart = selected;
-      } else {
-        _dailyEnd = selected;
-      }
-    });
-  }
-
-  Future<void> _pickDate(bool isStart) async {
-    final today = _vietnamToday();
-    final selected = await showDatePicker(
-      context: context,
-      initialDate: isStart ? _customStartDate : _customEndDate,
-      firstDate: today,
-      lastDate: DateTime(today.year + 10, 12, 31),
-    );
-    if (selected == null || !mounted) return;
-    setState(() {
-      if (isStart) {
-        _customStartDate = selected;
-      } else {
-        _customEndDate = selected;
-      }
-    });
-  }
-
-  Future<void> _pickCustomTime(bool isStart) async {
-    final selected = await showTimePicker(
-      context: context,
-      initialTime: isStart ? _customStartTime : _customEndTime,
-    );
-    if (selected == null || !mounted) return;
-    setState(() {
-      if (isStart) {
-        _customStartTime = selected;
-      } else {
-        _customEndTime = selected;
-      }
-    });
   }
 
   void _submit() {
@@ -1220,23 +1203,187 @@ class _CreateMissionSheetState extends State<_CreateMissionSheet> {
   int _minutes(TimeOfDay time) => time.hour * 60 + time.minute;
 }
 
-class _TimeField extends StatelessWidget {
+class _TimeField extends StatefulWidget {
   const _TimeField({
     required this.label,
     required this.value,
-    required this.onTap,
+    required this.onChanged,
   });
 
   final String label;
   final TimeOfDay value;
-  final VoidCallback onTap;
+  final ValueChanged<TimeOfDay> onChanged;
+
+  @override
+  State<_TimeField> createState() => _TimeFieldState();
+}
+
+class _TimeFieldState extends State<_TimeField> {
+  late final TextEditingController _controller;
+  late final FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: _formatTime(widget.value));
+    _focusNode = FocusNode();
+  }
+
+  @override
+  void didUpdateWidget(covariant _TimeField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final nextText = _formatTime(widget.value);
+    if (!_focusNode.hasFocus && _controller.text != nextText) {
+      _controller.text = nextText;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton.icon(
-      onPressed: onTap,
-      icon: const Icon(Icons.schedule_rounded),
-      label: Text('$label\n${value.format(context)}'),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 10, bottom: 4),
+          child: Text(
+            widget.label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: MuseColors.ink.withValues(alpha: .78),
+            ),
+          ),
+        ),
+        TextFormField(
+          controller: _controller,
+          focusNode: _focusNode,
+          keyboardType: TextInputType.datetime,
+          textInputAction: TextInputAction.next,
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'[0-9:]')),
+            LengthLimitingTextInputFormatter(5),
+          ],
+          decoration: const InputDecoration(
+            prefixIcon: Icon(Icons.schedule_rounded),
+            hintText: 'HH:mm',
+            isDense: true,
+            contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+          ),
+          validator:
+              (value) =>
+                  _parseTime(value) == null ? 'Nhập giờ dạng HH:mm.' : null,
+          onChanged: (value) {
+            final parsed = _parseTime(value);
+            if (parsed != null) widget.onChanged(parsed);
+          },
+          onFieldSubmitted: (value) {
+            final parsed = _parseTime(value);
+            if (parsed != null) _controller.text = _formatTime(parsed);
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _DateField extends StatefulWidget {
+  const _DateField({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final String label;
+  final DateTime value;
+  final ValueChanged<DateTime> onChanged;
+
+  @override
+  State<_DateField> createState() => _DateFieldState();
+}
+
+class _DateFieldState extends State<_DateField> {
+  late final TextEditingController _controller;
+  late final FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: _formatDate(widget.value));
+    _focusNode = FocusNode();
+  }
+
+  @override
+  void didUpdateWidget(covariant _DateField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final nextText = _formatDate(widget.value);
+    if (!_focusNode.hasFocus && _controller.text != nextText) {
+      _controller.text = nextText;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 10, bottom: 4),
+          child: Text(
+            widget.label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: MuseColors.ink.withValues(alpha: .78),
+            ),
+          ),
+        ),
+        TextFormField(
+          controller: _controller,
+          focusNode: _focusNode,
+          keyboardType: TextInputType.datetime,
+          textInputAction: TextInputAction.next,
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'[0-9/]')),
+            LengthLimitingTextInputFormatter(10),
+          ],
+          decoration: const InputDecoration(
+            prefixIcon: Icon(Icons.calendar_today_outlined),
+            hintText: 'dd/MM/yyyy',
+            isDense: true,
+            contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+          ),
+          validator: (value) {
+            final parsed = _parseDate(value);
+            if (parsed == null) return 'Nhập ngày dạng dd/MM/yyyy.';
+            if (parsed.isBefore(_vietnamToday())) {
+              return 'Không chọn ngày quá khứ.';
+            }
+            return null;
+          },
+          onChanged: (value) {
+            final parsed = _parseDate(value);
+            if (parsed != null && !parsed.isBefore(_vietnamToday())) {
+              widget.onChanged(parsed);
+            }
+          },
+          onFieldSubmitted: (value) {
+            final parsed = _parseDate(value);
+            if (parsed != null && !parsed.isBefore(_vietnamToday())) {
+              _controller.text = _formatDate(parsed);
+            }
+          },
+        ),
+      ],
     );
   }
 }
@@ -1246,41 +1393,35 @@ class _DateTimeField extends StatelessWidget {
     required this.label,
     required this.date,
     required this.time,
-    required this.onDateTap,
-    required this.onTimeTap,
+    required this.onDateChanged,
+    required this.onTimeChanged,
   });
 
   final String label;
   final DateTime date;
   final TimeOfDay time;
-  final VoidCallback onDateTap;
-  final VoidCallback onTimeTap;
+  final ValueChanged<DateTime> onDateChanged;
+  final ValueChanged<TimeOfDay> onTimeChanged;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: Theme.of(context).textTheme.labelLarge),
-        const SizedBox(height: 5),
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: onDateTap,
-                icon: const Icon(Icons.calendar_today_outlined),
-                label: Text('${date.day}/${date.month}/${date.year}'),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: onTimeTap,
-                icon: const Icon(Icons.schedule_rounded),
-                label: Text(time.format(context)),
-              ),
-            ),
-          ],
+        Expanded(
+          child: _DateField(
+            label: '$label · ngày',
+            value: date,
+            onChanged: onDateChanged,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _TimeField(
+            label: '$label · giờ',
+            value: time,
+            onChanged: onTimeChanged,
+          ),
         ),
       ],
     );
@@ -1303,11 +1444,242 @@ class _ScheduleInfo extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, size: 19, color: MuseColors.ink),
-          const SizedBox(width: 9),
+          Icon(icon, size: 18, color: MuseColors.ink),
+          const SizedBox(width: 8),
           Expanded(child: Text(label)),
         ],
       ),
+    );
+  }
+}
+
+class _FieldLabel extends StatelessWidget {
+  const _FieldLabel({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 10),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: MuseColors.ink.withValues(alpha: .78),
+        ),
+      ),
+    );
+  }
+}
+
+class _MissionTypeField extends StatelessWidget {
+  const _MissionTypeField({required this.value, required this.onChanged});
+
+  final MissionType value;
+  final ValueChanged<MissionType> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Loại nhiệm vụ',
+          style: Theme.of(
+            context,
+          ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 7),
+        Wrap(
+          spacing: 7,
+          runSpacing: 7,
+          children: [
+            for (final type in MissionType.values)
+              ChoiceChip(
+                label: Text(type.label),
+                selected: type == value,
+                onSelected: (_) => onChanged(type),
+                showCheckmark: false,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                backgroundColor: Colors.white.withValues(alpha: .5),
+                selectedColor: MuseColors.teal.withValues(alpha: .18),
+                side: BorderSide(
+                  color:
+                      type == value
+                          ? MuseColors.teal.withValues(alpha: .72)
+                          : Colors.white.withValues(alpha: .82),
+                ),
+                shape: const StadiumBorder(),
+                labelStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: type == value ? MuseColors.teal : MuseColors.ink,
+                  fontWeight: type == value ? FontWeight.w800 : FontWeight.w600,
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _TemplateMissionSummary extends StatelessWidget {
+  const _TemplateMissionSummary({
+    required this.template,
+    required this.missionType,
+  });
+
+  final MissionTemplate template;
+  final MissionType missionType;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Wrap(
+          spacing: 7,
+          runSpacing: 7,
+          children: [
+            _SummaryPill(
+              icon: Icons.calendar_month_outlined,
+              label: missionType.label,
+            ),
+            _SummaryPill(
+              icon: Icons.air_rounded,
+              label: '+${template.energyReward} năng lượng',
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        _TemplateDetail(
+          icon: Icons.spa_outlined,
+          label: 'Tên nhiệm vụ',
+          value: template.title,
+        ),
+        if (template.description?.trim().isNotEmpty ?? false) ...[
+          const SizedBox(height: 8),
+          _TemplateDetail(
+            icon: Icons.notes_rounded,
+            label: 'Ghi chú',
+            value: template.description!.trim(),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _SummaryPill extends StatelessWidget {
+  const _SummaryPill({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: ShapeDecoration(
+        color: MuseColors.teal.withValues(alpha: .13),
+        shape: StadiumBorder(
+          side: BorderSide(color: MuseColors.teal.withValues(alpha: .42)),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: MuseColors.teal),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: MuseColors.teal,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TemplateDetail extends StatelessWidget {
+  const _TemplateDetail({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: .52),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withValues(alpha: .76)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Icon(icon, size: 18, color: MuseColors.ink),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: MuseColors.ink.withValues(alpha: .72),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: MuseColors.ink,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionCaption extends StatelessWidget {
+  const _SectionCaption({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: MuseColors.teal),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+            color: MuseColors.teal,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -1332,6 +1704,37 @@ String _periodLabelForTime(TimeOfDay time) {
   if (time.hour >= 12 && time.hour < 17) return 'Buổi chiều';
   if (time.hour >= 17 && time.hour < 22) return 'Buổi tối';
   return 'Bất kỳ lúc nào';
+}
+
+String _formatDate(DateTime date) =>
+    '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year.toString().padLeft(4, '0')}';
+
+DateTime? _parseDate(String? input) {
+  final match = RegExp(
+    r'^(\d{2})/(\d{2})/(\d{4})$',
+  ).firstMatch(input?.trim() ?? '');
+  if (match == null) return null;
+  final day = int.parse(match.group(1)!);
+  final month = int.parse(match.group(2)!);
+  final year = int.parse(match.group(3)!);
+  if (year < 1 || month < 1 || month > 12 || day < 1 || day > 31) return null;
+  final parsed = DateTime(year, month, day);
+  if (parsed.year != year || parsed.month != month || parsed.day != day) {
+    return null;
+  }
+  return parsed;
+}
+
+String _formatTime(TimeOfDay time) =>
+    '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+
+TimeOfDay? _parseTime(String? input) {
+  final match = RegExp(r'^(\d{2}):(\d{2})$').firstMatch(input?.trim() ?? '');
+  if (match == null) return null;
+  final hour = int.parse(match.group(1)!);
+  final minute = int.parse(match.group(2)!);
+  if (hour > 23 || minute > 59) return null;
+  return TimeOfDay(hour: hour, minute: minute);
 }
 
 String _missionScheduleLabel(UserMission mission) {

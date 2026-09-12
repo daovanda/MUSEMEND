@@ -11,6 +11,7 @@ schema trước đợt hardening MVP và không đại diện cho trạng thái 
 
 - [Profile và settings](./profiles-settings.md)
 - [Daily check-in và streak](./daily-checkins-streak.md)
+- [Daily quotes catalog](./daily-quotes.md)
 - [Missions và energy](./missions-energy.md)
 - [Journey, checkpoints và rewards](./journey-rewards.md)
 - [Curated travel và mission catalog](./curated-catalog.md)

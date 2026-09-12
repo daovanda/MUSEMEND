@@ -1,5 +1,6 @@
 BEGIN;
 DO $$
+DECLARE quote_today record; quote_today_again record; quote_tomorrow record; today date:=(now() AT TIME ZONE 'Asia/Ho_Chi_Minh')::date;
 BEGIN
  IF (SELECT count(*) FROM public.provinces WHERE code LIKE 'curated-%') <> 10 THEN RAISE EXCEPTION 'curated destinations missing'; END IF;
  IF (SELECT count(*) FROM public.province_checkpoints c JOIN public.provinces p ON p.id=c.province_id WHERE p.code LIKE 'curated-%' AND c.asset_path IS NOT NULL) <> 10 THEN RAISE EXCEPTION 'curated checkpoint artwork missing'; END IF;
@@ -10,6 +11,13 @@ BEGIN
  IF (SELECT count(*) FROM public.checkpoint_rewards r JOIN public.province_checkpoints c ON c.id=r.checkpoint_id JOIN public.provinces p ON p.id=c.province_id WHERE p.code LIKE 'curated-%') <> 30 THEN RAISE EXCEPTION 'curated rewards missing'; END IF;
  IF EXISTS(SELECT 1 FROM public.provinces WHERE code LIKE 'curated-%' AND country_code IS NULL) THEN RAISE EXCEPTION 'curated destination country missing'; END IF;
  IF (SELECT count(DISTINCT mission_type) FROM public.mission_templates WHERE is_active AND mission_type IN ('daily','weekly','monthly','yearly','custom'))<>5 THEN RAISE EXCEPTION 'mission suggestion types missing'; END IF;
+ IF (SELECT count(*) FROM public.daily_quotes)<>100 THEN RAISE EXCEPTION 'daily quote catalog must contain exactly 100 rows'; END IF;
+ IF EXISTS(SELECT 1 FROM public.daily_quotes GROUP BY topic HAVING count(*)<>20) OR (SELECT count(DISTINCT topic) FROM public.daily_quotes)<>5 THEN RAISE EXCEPTION 'daily quote topics must contain 20 rows each'; END IF;
+ SELECT * INTO quote_today FROM muse_private.daily_quote_for_date(today);
+ SELECT * INTO quote_today_again FROM muse_private.daily_quote_for_date(today);
+ SELECT * INTO quote_tomorrow FROM muse_private.daily_quote_for_date(today+1);
+ IF quote_today.rotation_order IS NULL OR quote_today.rotation_order<>quote_today_again.rotation_order THEN RAISE EXCEPTION 'daily quote is not deterministic'; END IF;
+ IF quote_today.rotation_order=quote_tomorrow.rotation_order THEN RAISE EXCEPTION 'daily quote did not change on the next day'; END IF;
 END $$;
 INSERT INTO auth.users(id,email,raw_user_meta_data,raw_app_meta_data) VALUES
  ('10000000-0000-4000-8000-000000000001','a@example.invalid','{"display_name":"A"}','{"provider":"email"}'),
@@ -17,8 +25,10 @@ INSERT INTO auth.users(id,email,raw_user_meta_data,raw_app_meta_data) VALUES
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000001',true);
 DO $$
-DECLARE c public.daily_checkins; c2 public.daily_checkins; v jsonb; m public.user_missions; scheduled public.user_missions; r jsonb; p public.travel_progress; j uuid; j2 uuid; media_id uuid; media_path text; starter_count integer; blocked boolean:=false; today date:=(now() AT TIME ZONE 'Asia/Ho_Chi_Minh')::date;
+DECLARE c public.daily_checkins; c2 public.daily_checkins; v jsonb; m public.user_missions; scheduled public.user_missions; r jsonb; p public.travel_progress; j uuid; j2 uuid; media_id uuid; media_path text; starter_count integer; blocked boolean:=false; today date:=(now() AT TIME ZONE 'Asia/Ho_Chi_Minh')::date; daily_quote record;
 BEGIN
+ SELECT * INTO daily_quote FROM public.get_daily_quote();
+ IF daily_quote.rotation_order IS NULL OR daily_quote.quote_date<>today THEN RAISE EXCEPTION 'authenticated daily quote RPC failed'; END IF;
  SELECT * INTO c FROM public.upsert_daily_checkin('sad',2,'first');
  SELECT * INTO c2 FROM public.upsert_daily_checkin('good',4,'edited');
  IF c.id<>c2.id OR c2.mood<>'good' OR (SELECT count(*) FROM public.daily_checkins)<>1 THEN RAISE EXCEPTION 'check-in failed'; END IF;
