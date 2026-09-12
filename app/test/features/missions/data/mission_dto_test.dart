@@ -36,10 +36,40 @@ void main() {
           'default_energy_reward': 5,
           'estimated_minutes': 2,
           'mission_type': 'weekly',
-        }).toDomain();
+          'mission_template_translations': [
+            {
+              'language_code': 'en',
+              'title': 'Breathe slowly',
+              'description': 'Three gentle breaths',
+            },
+          ],
+        }, languageCode: 'en').toDomain();
 
     expect(template.requiresMood, isTrue);
     expect(template.estimatedMinutes, 2);
     expect(template.missionType, MissionType.weekly);
+    expect(template.title, 'Breathe slowly');
+  });
+
+  test('falls back from unsupported template locale to English', () {
+    final template =
+        MissionTemplateDto.fromMap({
+          'id': 11,
+          'title': 'Uống một cốc nước',
+          'description': null,
+          'target_mood': 'all',
+          'default_energy_reward': 5,
+          'estimated_minutes': 1,
+          'mission_type': 'daily',
+          'mission_template_translations': [
+            {
+              'language_code': 'en',
+              'title': 'Drink a glass of water',
+              'description': null,
+            },
+          ],
+        }, languageCode: 'ru').toDomain();
+
+    expect(template.title, 'Drink a glass of water');
   });
 }

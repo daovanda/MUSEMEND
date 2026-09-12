@@ -17,7 +17,11 @@ nhật ký.
 - `profiles.onboarding_completed_at` xác định tài khoản đã hoàn tất/bỏ qua lời
   chào trên mọi thiết bị; `preferred_address` lưu cách xưng hô tùy chọn.
 - `user_settings.user_id` tham chiếu `profiles.id`, là duy nhất cho mỗi người dùng
-  và bị cascade khi profile bị xóa.
+  và bị cascade khi profile bị xóa. `theme_mode` mặc định là `light`; migration
+  chuyển các bản ghi còn ở mặc định cũ `system` sang `light` nhưng giữ nguyên lựa
+  chọn `dark` hoặc `light` đã có.
+- `user_settings.language_code` nullable và tham chiếu `supported_languages`;
+  `NULL` nghĩa là theo locale thiết bị, locale ngoài allowlist fallback về `en`.
 - `travel_progress` cũng được tạo cùng tài khoản để các RPC năng lượng/hành trình
   luôn có bản ghi ban đầu.
 
@@ -69,7 +73,9 @@ profile. Chưa có assertion riêng cho từng OAuth provider.
 Baseline tạo hai bảng; migration `mvp_security_storage` thay policy rộng bằng quyền
 tối thiểu và thay `handle_new_auth_user()` để hỗ trợ provider. Nếu cần đổi trường
 profile/settings, dùng migration forward-only và giữ DTO Flutter tương thích trong
-giai đoạn rollout. Không rollback bằng cách sửa baseline.
+giai đoạn rollout. Migration `default_light_theme` đổi default bằng forward
+migration và backfill duy nhất giá trị mặc định cũ `system`. Không rollback bằng
+cách sửa baseline.
 
 ## Giới hạn và việc còn lại
 

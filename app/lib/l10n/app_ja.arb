@@ -1,0 +1,3 @@
+{
+  "@@locale": "ja", "appTitle": "MuseMend", "navSky": "空", "navJournal": "日記", "navExplore": "探索", "navProfile": "プロフィール", "language": "言語", "languageAutomatic": "自動（端末）", "languageAutomaticDescription": "端末の言語を使用します。未対応の言語では英語を使用します。", "profileAndSettings": "プロフィールと設定", "displayName": "表示名", "cloudName": "雲の名前", "appearance": "外観", "themeSystem": "端末の設定", "themeLight": "ライト", "themeDark": "ダーク", "sound": "サウンド", "notifications": "通知", "cancel": "キャンセル", "save": "保存", "settingsUpdated": "設定を更新しました。", "settingsUpdateFailed": "設定を更新できませんでした。"
+}

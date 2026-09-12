@@ -6,7 +6,7 @@
 ## Mục tiêu và phạm vi
 
 Xác nhận bootstrap sau Auth bằng cách đọc profile/settings của session hiện tại,
-hiển thị và chỉnh sửa tên user, tên Mây, theme, âm thanh và notification. Profile
+hiển thị và chỉnh sửa tên user, tên Mây, theme, ngôn ngữ, âm thanh và notification. Profile
 cũng chứa inbox, thông tin privacy/giới hạn, sign-out và request account deletion.
 Màn Cá nhân dùng nền xanh trời–kem với accent mint và mây chuyển động dùng chung;
 opacity tự thích nghi dark mode và chuyển động dừng theo Reduce Motion.
@@ -18,6 +18,8 @@ opacity tự thích nghi dark mode và chuyển động dừng theo Reduce Motio
 `user_id`. DTO tách tên cột DB khỏi presentation. `accountOverviewProvider` quản lý
 loading/error/retry và mutation. Theme controller tải lại mode theo authenticated
 session để áp dụng `system`/`light`/`dark` sau restart.
+Language controller dùng `NULL` cho tự động theo thiết bị và lưu mã locale khi
+user chọn thủ công; locale ngoài 12 ngôn ngữ hỗ trợ fallback về tiếng Anh.
 
 Update dùng hai statement chỉ chứa các cột client được grant. Settings được lưu
 trước profile; nếu request thứ hai lỗi, provider reload để không giả định cả hai

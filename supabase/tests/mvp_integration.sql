@@ -1,21 +1,79 @@
 BEGIN;
 DO $$
-DECLARE quote_today record; quote_today_again record; quote_tomorrow record; today date:=(now() AT TIME ZONE 'Asia/Ho_Chi_Minh')::date;
 BEGIN
  IF to_regclass('public.provinces') IS NOT NULL OR to_regclass('public.province_checkpoints') IS NOT NULL THEN RAISE EXCEPTION 'legacy province tables still exposed'; END IF;
  IF to_regclass('public.destinations') IS NULL OR to_regclass('public.destination_checkpoints') IS NULL THEN RAISE EXCEPTION 'global destination tables missing'; END IF;
- IF (SELECT count(*) FROM public.destinations WHERE code LIKE 'curated-%') <> 10 THEN RAISE EXCEPTION 'curated destinations missing'; END IF;
- IF (SELECT count(*) FROM public.destination_checkpoints c JOIN public.destinations d ON d.id=c.destination_id WHERE d.code LIKE 'curated-%' AND c.asset_path IS NOT NULL) <> 10 THEN RAISE EXCEPTION 'curated checkpoint artwork missing'; END IF;
- IF (SELECT count(*) FROM public.landmarks WHERE code LIKE 'curated-%') <> 10 THEN RAISE EXCEPTION 'curated landmarks missing'; END IF;
- IF (SELECT count(*) FROM public.foods WHERE code LIKE 'curated-%') <> 10 THEN RAISE EXCEPTION 'curated foods missing'; END IF;
- IF (SELECT count(*) FROM public.destination_items WHERE code LIKE 'curated-%') <> 10 THEN RAISE EXCEPTION 'curated items missing'; END IF;
- IF (SELECT count(*) FROM public.mission_templates WHERE code LIKE 'curated-%') <> 10 THEN RAISE EXCEPTION 'curated missions missing'; END IF;
- IF (SELECT count(*) FROM public.checkpoint_rewards r JOIN public.destination_checkpoints c ON c.id=r.checkpoint_id JOIN public.destinations d ON d.id=c.destination_id WHERE d.code LIKE 'curated-%') <> 30 THEN RAISE EXCEPTION 'curated rewards missing'; END IF;
- IF EXISTS(SELECT 1 FROM public.destinations WHERE country_code IS NULL) THEN RAISE EXCEPTION 'destination country missing'; END IF;
- IF EXISTS(SELECT 1 FROM public.checkpoint_rewards WHERE reward_type='destination_item' AND destination_item_id IS NULL) THEN RAISE EXCEPTION 'destination item reward target missing'; END IF;
- IF (SELECT count(DISTINCT mission_type) FROM public.mission_templates WHERE is_active AND mission_type IN ('daily','weekly','monthly','yearly','custom'))<>5 THEN RAISE EXCEPTION 'mission suggestion types missing'; END IF;
- IF (SELECT count(*) FROM public.daily_quotes)<>100 THEN RAISE EXCEPTION 'daily quote catalog must contain exactly 100 rows'; END IF;
- IF EXISTS(SELECT 1 FROM public.daily_quotes GROUP BY topic HAVING count(*)<>20) OR (SELECT count(DISTINCT topic) FROM public.daily_quotes)<>5 THEN RAISE EXCEPTION 'daily quote topics must contain 20 rows each'; END IF;
+ IF to_regclass('public.destination_translations') IS NULL
+    OR to_regclass('public.checkpoint_translations') IS NULL
+    OR to_regclass('public.landmark_translations') IS NULL
+    OR to_regclass('public.food_translations') IS NULL
+    OR to_regclass('public.destination_item_translations') IS NULL
+    OR to_regclass('public.mission_template_translations') IS NULL
+    OR to_regclass('public.daily_quote_translations') IS NULL
+ THEN RAISE EXCEPTION 'multilingual catalog tables missing'; END IF;
+ IF (SELECT count(*) FROM public.supported_languages WHERE is_active)<>12 THEN RAISE EXCEPTION 'supported language catalog must contain 12 active rows'; END IF;
+ IF muse_private.resolve_language_code('vi')<>'vi' OR muse_private.resolve_language_code('xx')<>'en' OR muse_private.resolve_language_code(NULL)<>'en' THEN RAISE EXCEPTION 'language fallback must resolve unsupported locales to English'; END IF;
+ IF EXISTS(SELECT 1 FROM auth.users) THEN RAISE EXCEPTION 'development auth users were not reset'; END IF;
+ IF EXISTS(SELECT 1 FROM public.destinations)
+    OR EXISTS(SELECT 1 FROM public.destination_checkpoints)
+    OR EXISTS(SELECT 1 FROM public.landmarks)
+    OR EXISTS(SELECT 1 FROM public.foods)
+    OR EXISTS(SELECT 1 FROM public.destination_items)
+    OR EXISTS(SELECT 1 FROM public.mission_templates)
+    OR EXISTS(SELECT 1 FROM public.daily_quotes)
+ THEN RAISE EXCEPTION 'legacy application catalog was not reset'; END IF;
+END $$;
+
+-- Transaction-scoped fixtures keep domain/RLS/RPC coverage without restoring
+-- any demo content after this test rolls back.
+DO $$
+DECLARE destination_id bigint; checkpoint_id bigint; landmark_id bigint; food_id bigint; item_id bigint;
+BEGIN
+ INSERT INTO public.destinations(code,name,description,country_code,destination_type,order_index)
+ VALUES('test-destination','Test destination','Test-only route','VN','city',1)
+ RETURNING id INTO destination_id;
+ INSERT INTO public.destination_translations(destination_id,language_code,name,description)
+ VALUES(destination_id,'en','Test destination','Test-only route'),(destination_id,'vi','Điểm đến thử nghiệm','Hành trình chỉ dùng trong test');
+ INSERT INTO public.destination_checkpoints(destination_id,checkpoint_number,title,description,required_energy,order_index)
+ VALUES(destination_id,1,'Test checkpoint','Test-only checkpoint',10,1)
+ RETURNING id INTO checkpoint_id;
+ INSERT INTO public.checkpoint_translations(checkpoint_id,language_code,title,description)
+ VALUES(checkpoint_id,'en','Test checkpoint','Test-only checkpoint'),(checkpoint_id,'vi','Trạm thử nghiệm','Trạm chỉ dùng trong test');
+ INSERT INTO public.landmarks(destination_id,code,name,description,order_index)
+ VALUES(destination_id,'test-landmark','Test landmark','Test-only landmark',1)
+ RETURNING id INTO landmark_id;
+ INSERT INTO public.foods(destination_id,code,name,description,order_index)
+ VALUES(destination_id,'test-food','Test food','Test-only food',1)
+ RETURNING id INTO food_id;
+ INSERT INTO public.destination_items(destination_id,code,name,item_type,description,order_index)
+ VALUES(destination_id,'test-item','Test item','badge','Test-only item',1)
+ RETURNING id INTO item_id;
+ INSERT INTO public.checkpoint_rewards(checkpoint_id,reward_type,landmark_id,order_index)
+ VALUES(checkpoint_id,'landmark',landmark_id,1);
+ INSERT INTO public.checkpoint_rewards(checkpoint_id,reward_type,food_id,order_index)
+ VALUES(checkpoint_id,'food',food_id,2);
+ INSERT INTO public.checkpoint_rewards(checkpoint_id,reward_type,destination_item_id,order_index)
+ VALUES(checkpoint_id,'destination_item',item_id,3);
+END $$;
+
+INSERT INTO public.mission_templates(code,title,description,mission_type,target_mood,default_energy_reward,estimated_minutes) VALUES
+ ('demo-water','Uống một cốc nước','Nhiệm vụ khởi đầu dùng trong kiểm thử','daily','all',5,1),
+ ('demo-walk','Đi bộ năm phút','Nhiệm vụ khởi đầu dùng trong kiểm thử','daily','all',5,5);
+INSERT INTO public.mission_template_translations(mission_template_id,language_code,title,description)
+SELECT id,'en',
+ CASE code WHEN 'demo-water' THEN 'Drink a glass of water' ELSE 'Walk for five minutes' END,
+ 'Test starter mission'
+FROM public.mission_templates;
+INSERT INTO public.daily_quotes(rotation_order,topic,content) VALUES
+ (1,'life','Câu nhắn thử nghiệm thứ nhất.'),
+ (2,'life','Câu nhắn thử nghiệm thứ hai.');
+INSERT INTO public.daily_quote_translations(quote_rotation_order,language_code,content) VALUES
+ (1,'en','English fallback quote one.'),(1,'vi','Câu nhắn thử nghiệm thứ nhất.'),
+ (2,'en','English fallback quote two.'),(2,'vi','Câu nhắn thử nghiệm thứ hai.');
+
+DO $$
+DECLARE quote_today record; quote_today_again record; quote_tomorrow record; today date:=(now() AT TIME ZONE 'Asia/Ho_Chi_Minh')::date;
+BEGIN
  SELECT * INTO quote_today FROM muse_private.daily_quote_for_date(today);
  SELECT * INTO quote_today_again FROM muse_private.daily_quote_for_date(today);
  SELECT * INTO quote_tomorrow FROM muse_private.daily_quote_for_date(today+1);
@@ -25,10 +83,20 @@ END $$;
 INSERT INTO auth.users(id,email,raw_user_meta_data,raw_app_meta_data) VALUES
  ('10000000-0000-4000-8000-000000000001','a@example.invalid','{"display_name":"A"}','{"provider":"email"}'),
  ('20000000-0000-4000-8000-000000000002','b@example.invalid','{"display_name":"B"}','{"provider":"email"}');
+DO $$
+BEGIN
+ IF EXISTS(
+  SELECT 1 FROM public.user_settings
+  WHERE user_id IN (
+    '10000000-0000-4000-8000-000000000001'::uuid,
+    '20000000-0000-4000-8000-000000000002'::uuid
+  ) AND theme_mode <> 'light'::public.theme_mode_type
+ ) THEN RAISE EXCEPTION 'new account theme must default to light'; END IF;
+END $$;
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000001',true);
 DO $$
-DECLARE c public.daily_checkins; c2 public.daily_checkins; v jsonb; m public.user_missions; scheduled public.user_missions; r jsonb; p public.travel_progress; j uuid; j2 uuid; media_id uuid; media_path text; starter_count integer; blocked boolean:=false; today date:=(now() AT TIME ZONE 'Asia/Ho_Chi_Minh')::date; daily_quote record;
+DECLARE c public.daily_checkins; c2 public.daily_checkins; v jsonb; m public.user_missions; scheduled public.user_missions; r jsonb; p public.travel_progress; j uuid; j2 uuid; media_id uuid; media_path text; starter_count integer; blocked boolean:=false; today date:=(now() AT TIME ZONE 'Asia/Ho_Chi_Minh')::date; daily_quote record; daily_quote_vi record; daily_quote_unknown record;
 BEGIN
  IF NOT EXISTS(
   SELECT 1 FROM public.profiles
@@ -42,6 +110,10 @@ BEGIN
  ) THEN RAISE EXCEPTION 'onboarding completion failed'; END IF;
  SELECT * INTO daily_quote FROM public.get_daily_quote();
  IF daily_quote.rotation_order IS NULL OR daily_quote.quote_date<>today THEN RAISE EXCEPTION 'authenticated daily quote RPC failed'; END IF;
+ SELECT * INTO daily_quote_vi FROM public.get_daily_quote('vi');
+ SELECT * INTO daily_quote_unknown FROM public.get_daily_quote('xx');
+ IF daily_quote_vi.content NOT LIKE 'Câu nhắn thử nghiệm%' THEN RAISE EXCEPTION 'Vietnamese quote source was not selected'; END IF;
+ IF daily_quote_unknown.content NOT LIKE 'English fallback quote%' THEN RAISE EXCEPTION 'unsupported quote locale did not fall back to English'; END IF;
  SELECT * INTO c FROM public.upsert_daily_checkin('sad',2,'first');
  SELECT * INTO c2 FROM public.upsert_daily_checkin('good',4,'edited');
  IF c.id<>c2.id OR c2.mood<>'good' OR (SELECT count(*) FROM public.daily_checkins)<>1 THEN RAISE EXCEPTION 'check-in failed'; END IF;

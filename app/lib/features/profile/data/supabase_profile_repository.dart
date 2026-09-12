@@ -14,7 +14,10 @@ class SupabaseProfileRepository implements ProfileRepository {
       _client.from('profiles').select('display_name, account_status').single(),
       _client
           .from('user_settings')
-          .select('cloud_name, theme_mode, sound_enabled, notification_enabled')
+          .select(
+            'cloud_name, theme_mode, sound_enabled, notification_enabled, '
+            'language_code',
+          )
           .single(),
     ]);
     return AccountOverviewDto(
@@ -30,6 +33,7 @@ class SupabaseProfileRepository implements ProfileRepository {
     required String themeMode,
     required bool soundEnabled,
     required bool notificationEnabled,
+    required String? languageCode,
   }) async {
     final userId = _client.auth.currentUser?.id;
     if (userId == null) throw StateError('Authenticated user required.');
@@ -40,6 +44,7 @@ class SupabaseProfileRepository implements ProfileRepository {
           'theme_mode': themeMode,
           'sound_enabled': soundEnabled,
           'notification_enabled': notificationEnabled,
+          'language_code': languageCode,
         })
         .eq('user_id', userId)
         .select('user_id')

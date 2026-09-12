@@ -8,6 +8,7 @@ import 'package:musemend/features/checkin/application/reflect_providers.dart';
 import 'package:musemend/features/checkin/domain/mood.dart';
 import 'package:musemend/features/checkin/presentation/mood_visuals.dart';
 import 'package:musemend/features/notifications/application/notification_providers.dart';
+import 'package:musemend/l10n/generated/app_localizations.dart';
 
 class MvpShell extends ConsumerStatefulWidget {
   const MvpShell({required this.navigationShell, super.key});
@@ -94,16 +95,16 @@ class _MuseBottomNavigation extends StatelessWidget {
   final StatefulNavigationShell shell;
   final Future<void> Function(Mood mood) onMoodSelected;
 
-  static const _items = [
-    (Icons.auto_awesome_outlined, 'Bầu trời'),
-    (Icons.edit_note_rounded, 'Nhật ký'),
-    (Icons.explore_outlined, 'Khám phá'),
-    (Icons.person_outline_rounded, 'Cá nhân'),
-  ];
-
   @override
   Widget build(BuildContext context) {
     final selected = shell.currentIndex;
+    final strings = AppLocalizations.of(context);
+    final items = [
+      (Icons.auto_awesome_outlined, strings.navSky),
+      (Icons.edit_note_rounded, strings.navJournal),
+      (Icons.explore_outlined, strings.navExplore),
+      (Icons.person_outline_rounded, strings.navProfile),
+    ];
     return Material(
       color: Colors.transparent,
       child: SafeArea(
@@ -145,10 +146,10 @@ class _MuseBottomNavigation extends StatelessWidget {
                         child: Row(
                           children: [
                             for (var index = 0; index < 2; index++)
-                              Expanded(child: _item(index, selected)),
+                              Expanded(child: _item(items, index, selected)),
                             const Expanded(child: SizedBox()),
-                            for (var index = 2; index < _items.length; index++)
-                              Expanded(child: _item(index, selected)),
+                            for (var index = 2; index < items.length; index++)
+                              Expanded(child: _item(items, index, selected)),
                           ],
                         ),
                       ),
@@ -174,10 +175,10 @@ class _MuseBottomNavigation extends StatelessWidget {
     );
   }
 
-  Widget _item(int index, int selected) {
+  Widget _item(List<(IconData, String)> items, int index, int selected) {
     return _NavItem(
-      icon: _items[index].$1,
-      label: _items[index].$2,
+      icon: items[index].$1,
+      label: items[index].$2,
       selected: selected == index,
       onTap:
           () => shell.goBranch(

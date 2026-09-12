@@ -1,0 +1,3 @@
+{
+  "@@locale": "th", "appTitle": "MuseMend", "navSky": "ท้องฟ้า", "navJournal": "บันทึก", "navExplore": "สำรวจ", "navProfile": "โปรไฟล์", "language": "ภาษา", "languageAutomatic": "อัตโนมัติ (อุปกรณ์)", "languageAutomaticDescription": "ใช้ภาษาของอุปกรณ์ ภาษาที่ยังไม่รองรับจะแสดงเป็นภาษาอังกฤษ", "profileAndSettings": "โปรไฟล์และการตั้งค่า", "displayName": "ชื่อที่แสดง", "cloudName": "ชื่อก้อนเมฆ", "appearance": "รูปแบบ", "themeSystem": "ตามอุปกรณ์", "themeLight": "สว่าง", "themeDark": "มืด", "sound": "เสียง", "notifications": "การแจ้งเตือน", "cancel": "ยกเลิก", "save": "บันทึก", "settingsUpdated": "อัปเดตการตั้งค่าแล้ว", "settingsUpdateFailed": "ไม่สามารถอัปเดตการตั้งค่าได้"
+}

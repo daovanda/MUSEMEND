@@ -1,5 +1,5 @@
 import 'package:musemend/features/quotes/domain/daily_quote.dart';
 
 abstract interface class DailyQuoteRepository {
-  Future<DailyQuote> loadToday();
+  Future<DailyQuote> loadToday({required String languageCode});
 }

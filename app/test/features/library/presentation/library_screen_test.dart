@@ -63,7 +63,9 @@ void main() {
 
 class _FakeJourneyRepository implements JourneyRepository {
   @override
-  Future<JourneyDashboard> loadDashboard() async => JourneyDashboard(
+  Future<JourneyDashboard> loadDashboard({
+    required String languageCode,
+  }) async => JourneyDashboard(
     status: JourneyStatus.inProgress,
     currentEnergy: 8,
     journeyEnergyUsed: 3,

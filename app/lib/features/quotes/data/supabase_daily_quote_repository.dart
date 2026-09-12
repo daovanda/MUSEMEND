@@ -9,8 +9,11 @@ class SupabaseDailyQuoteRepository implements DailyQuoteRepository {
   final SupabaseClient _client;
 
   @override
-  Future<DailyQuote> loadToday() async {
-    final result = await _client.rpc('get_daily_quote');
+  Future<DailyQuote> loadToday({required String languageCode}) async {
+    final result = await _client.rpc(
+      'get_daily_quote',
+      params: {'p_language_code': languageCode},
+    );
     final row = _singleObject(result);
     return DailyQuoteDto.fromMap(row).toDomain();
   }

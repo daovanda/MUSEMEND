@@ -8,6 +8,7 @@ abstract interface class ProfileRepository {
     required String themeMode,
     required bool soundEnabled,
     required bool notificationEnabled,
+    required String? languageCode,
   });
   Future<void> requestAccountDeletion();
 }

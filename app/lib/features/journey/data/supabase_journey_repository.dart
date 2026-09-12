@@ -10,7 +10,7 @@ class SupabaseJourneyRepository implements JourneyRepository {
   static const _mapper = JourneyDashboardMapper();
 
   @override
-  Future<JourneyDashboard> loadDashboard() async {
+  Future<JourneyDashboard> loadDashboard({required String languageCode}) async {
     final responses = await Future.wait<dynamic>([
       _client
           .from('travel_progress')
@@ -23,7 +23,8 @@ class SupabaseJourneyRepository implements JourneyRepository {
           .from('destinations')
           .select(
             'id, name, description, country_code, destination_type, '
-            'cover_asset_path, map_asset_path',
+            'cover_asset_path, map_asset_path, '
+            'destination_translations(language_code, name, description)',
           )
           .eq('is_active', true)
           .order('order_index', ascending: true),
@@ -31,7 +32,8 @@ class SupabaseJourneyRepository implements JourneyRepository {
           .from('destination_checkpoints')
           .select(
             'id, destination_id, checkpoint_number, title, description, '
-            'required_energy, asset_path',
+            'required_energy, asset_path, '
+            'checkpoint_translations(language_code, title, description)',
           )
           .eq('is_active', true)
           .order('order_index', ascending: true),
@@ -50,18 +52,27 @@ class SupabaseJourneyRepository implements JourneyRepository {
           .select('destination_item_id, unlocked_at, is_viewed, is_equipped'),
       _client
           .from('landmarks')
-          .select('id, name, description, rarity, asset_path')
+          .select(
+            'id, name, description, rarity, asset_path, '
+            'landmark_translations(language_code, name, description)',
+          )
           .eq('is_active', true),
       _client
           .from('foods')
-          .select('id, name, description, rarity, asset_path')
+          .select(
+            'id, name, description, rarity, asset_path, '
+            'food_translations(language_code, name, description)',
+          )
           .eq('is_active', true),
       _client
           .from('destination_items')
-          .select('id, name, description, rarity, asset_path')
+          .select(
+            'id, name, description, rarity, asset_path, '
+            'destination_item_translations(language_code, name, description)',
+          )
           .eq('is_active', true),
     ]);
-    return _mapper.fromResponses(responses);
+    return _mapper.fromResponses(responses, languageCode: languageCode);
   }
 
   @override

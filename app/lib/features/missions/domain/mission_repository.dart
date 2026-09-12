@@ -5,7 +5,10 @@ import 'package:musemend/features/missions/domain/mission_template.dart';
 import 'package:musemend/features/missions/domain/mission_type.dart';
 
 abstract interface class MissionRepository {
-  Future<MissionDashboard> loadDashboard({required Mood? todayMood});
+  Future<MissionDashboard> loadDashboard({
+    required Mood? todayMood,
+    required String languageCode,
+  });
 
   Future<void> addTemplate({
     required MissionTemplate template,

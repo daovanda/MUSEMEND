@@ -18,7 +18,10 @@ class SupabaseMissionRepository implements MissionRepository {
   static const _uuid = Uuid();
 
   @override
-  Future<MissionDashboard> loadDashboard({required Mood? todayMood}) async {
+  Future<MissionDashboard> loadDashboard({
+    required Mood? todayMood,
+    required String languageCode,
+  }) async {
     await _refreshScheduledMissions();
     // Starter missions are materialized by an idempotent server command. This
     // keeps the Home screen useful for a new account while preserving server
@@ -50,7 +53,8 @@ class SupabaseMissionRepository implements MissionRepository {
           .from('mission_templates')
           .select(
             'id, title, description, target_mood, default_energy_reward, '
-            'estimated_minutes, mission_type',
+            'estimated_minutes, mission_type, '
+            'mission_template_translations(language_code, title, description)',
           )
           .eq('is_active', true)
           .order('id', ascending: true),
@@ -60,7 +64,7 @@ class SupabaseMissionRepository implements MissionRepository {
           .single(),
     ]);
 
-    final missions = _deduplicateActiveSystemMissions(
+    final snapshotMissions = _deduplicateActiveSystemMissions(
       _mapRows(results[0], MissionDto.fromMap).map((dto) => dto.toDomain()),
     );
     final usedTemplateIds =
@@ -79,10 +83,37 @@ class SupabaseMissionRepository implements MissionRepository {
             })
             .map((row) => (row['template_id'] as num).toInt())
             .toSet();
+    final localizedTemplates = _mapRows(
+      results[2],
+      (row) => MissionTemplateDto.fromMap(row, languageCode: languageCode),
+    ).map((dto) => dto.toDomain()).toList(growable: false);
+    final localizedTemplatesById = {
+      for (final template in localizedTemplates) template.id: template,
+    };
+    final missions = snapshotMissions
+        .map((mission) {
+          final template =
+              mission.templateId == null
+                  ? null
+                  : localizedTemplatesById[mission.templateId];
+          if (template == null) return mission;
+          return UserMission(
+            id: mission.id,
+            templateId: mission.templateId,
+            title: template.title,
+            description: template.description,
+            energyReward: mission.energyReward,
+            status: mission.status,
+            sourceType: mission.sourceType,
+            missionType: mission.missionType,
+            startAt: mission.startAt,
+            dueAt: mission.dueAt,
+          );
+        })
+        .toList(growable: false);
     final activeTemplateIds =
         missions.map((mission) => mission.templateId).whereType<int>().toSet();
-    final templates = _mapRows(results[2], MissionTemplateDto.fromMap)
-        .map((dto) => dto.toDomain())
+    final templates = localizedTemplates
         .where(
           (template) =>
               !activeTemplateIds.contains(template.id) &&

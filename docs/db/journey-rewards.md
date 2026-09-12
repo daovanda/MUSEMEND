@@ -22,6 +22,9 @@ Catalog server-owned:
   `destination_type` phân biệt tỉnh, thành phố, đảo, di sản hoặc vùng đất.
 - `destinations.vietnam_region` chỉ còn là metadata tùy chọn cho ba miền Việt Nam.
 - `destination_checkpoints.asset_path` trỏ tới artwork server-owned.
+- Nội dung hiển thị theo ngôn ngữ nằm trong `destination_translations`,
+  `checkpoint_translations`, `landmark_translations`, `food_translations` và
+  `destination_item_translations`; cột catalog gốc là bản tham chiếu tiếng Việt.
 
 Dữ liệu user-owned:
 
