@@ -23,16 +23,17 @@ void main() {
   });
 
   test('keeps an unset cloud name presentation-neutral', () {
-    final overview = AccountOverviewDto(
-      profile: {'display_name': null, 'account_status': 'active'},
-      settings: {
-        'cloud_name': null,
-        'theme_mode': 'light',
-        'sound_enabled': true,
-        'notification_enabled': true,
-        'language_code': null,
-      },
-    ).toDomain();
+    final overview =
+        AccountOverviewDto(
+          profile: {'display_name': null, 'account_status': 'active'},
+          settings: {
+            'cloud_name': null,
+            'theme_mode': 'light',
+            'sound_enabled': true,
+            'notification_enabled': true,
+            'language_code': null,
+          },
+        ).toDomain();
 
     expect(overview.settings.cloudName, isEmpty);
   });

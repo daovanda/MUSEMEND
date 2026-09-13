@@ -105,7 +105,9 @@ class _OnboardingFlowState extends ConsumerState<_OnboardingFlow> {
               children: [
                 IconButton(
                   tooltip:
-                      _step == 0 ? strings.onboardingBackToSignIn : strings.back,
+                      _step == 0
+                          ? strings.onboardingBackToSignIn
+                          : strings.back,
                   onPressed:
                       operation.isLoading || authOperation.isLoading
                           ? null

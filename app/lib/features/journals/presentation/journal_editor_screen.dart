@@ -384,9 +384,7 @@ class _JournalEditorScreenState extends ConsumerState<JournalEditorScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(strings.futureLetterReminderFailed),
-          ),
+          SnackBar(content: Text(strings.futureLetterReminderFailed)),
         );
       }
     }

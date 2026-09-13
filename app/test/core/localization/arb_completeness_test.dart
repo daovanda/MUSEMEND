@@ -45,9 +45,10 @@ void main() {
 String _languageCode(File file) =>
     RegExp(r'app_([a-z]{2})\.arb$').firstMatch(file.path)!.group(1)!;
 
-Set<String> _placeholders(String message) => RegExp(
-  r'\{[a-zA-Z][a-zA-Z0-9_]*\}',
-).allMatches(message).map((match) => match.group(0)!).toSet();
+Set<String> _placeholders(String message) =>
+    RegExp(
+      r'\{[a-zA-Z][a-zA-Z0-9_]*\}',
+    ).allMatches(message).map((match) => match.group(0)!).toSet();
 
 Map<String, String> _messages(File file) {
   final decoded = jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
