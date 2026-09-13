@@ -18,6 +18,7 @@ quyết định, hệ quả và trạng thái.
 - [Android QA Release](./android-qa-release.md): ký APK, GitHub Release và phân phối QA.
 - [Android QA 1.5](./release-v1-5.md): migration transform ảnh và checklist phát hành bản 1.5.
 - [Android QA 1.6](./release-v1-6.md): đồng bộ giao diện, responsive và nền mây chuyển động.
+- [Android QA 1.8](./release-v1-8.md): giới hạn gợi ý Muse và làm mới nội dung catalog đa ngôn ngữ.
 - [Nghiệm thu Android trên thiết bị thật](./android-device-qa-acceptance.md):
   checklist P0, bảo mật, lỗi mạng và biên bản PASS/FAIL.
 - [Android Internal Testing cũ](./android-internal-testing.md): phương án Google Play đã deprecated.

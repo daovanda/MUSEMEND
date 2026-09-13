@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:musemend/features/checkin/domain/mood.dart';
 import 'package:musemend/features/missions/data/mission_dto.dart';
 import 'package:musemend/features/missions/data/mission_template_dto.dart';
@@ -16,6 +18,7 @@ class SupabaseMissionRepository implements MissionRepository {
 
   final SupabaseClient _client;
   static const _uuid = Uuid();
+  static const _suggestionLimit = 5;
 
   @override
   Future<MissionDashboard> loadDashboard({
@@ -121,12 +124,19 @@ class SupabaseMissionRepository implements MissionRepository {
               (template.targetMood == 'all' ||
                   template.targetMood == todayMood?.databaseValue),
         )
+        .toList(growable: true);
+    // The catalog can contain many approved suggestions. Keep Home calm and
+    // useful by showing a fresh sample of five on each dashboard load while
+    // leaving the complete catalog available to the add-mission flow.
+    templates.shuffle(Random());
+    final visibleSuggestions = templates
+        .take(_suggestionLimit)
         .toList(growable: false);
     final progress = Map<String, dynamic>.from(results[3] as Map);
 
     return MissionDashboard(
       missions: missions,
-      suggestions: templates,
+      suggestions: visibleSuggestions,
       energy: TravelEnergy(
         currentEnergy: (progress['current_energy'] as num).toInt(),
         journeyEnergyUsed: (progress['journey_energy_used'] as num).toInt(),
