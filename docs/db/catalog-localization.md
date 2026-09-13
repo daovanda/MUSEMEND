@@ -1,7 +1,8 @@
 # Đa ngôn ngữ cho catalog
 
-**Trạng thái:** `implemented` ở schema, chờ content pack đa ngôn ngữ  
-**Cập nhật:** 2026-09-12
+**Trạng thái:** `implemented`
+
+**Cập nhật:** 2026-09-13
 
 ## Quy tắc nội dung và fallback
 
@@ -47,6 +48,10 @@ từ Muse lẫn nhiệm vụ đã materialize từ template được overlay b�
 hiển thị; nhiệm vụ user tự viết không bị dịch. RPC `get_daily_quote(text)` nhận
 locale đã resolve từ app và áp dụng fallback tại server. Overload không tham số
 được giữ để tương thích client cũ.
+
+Content pack đầu tiên được nạp bởi
+[`catalog-content-pack.md`](./catalog-content-pack.md), gồm 30 mission template
+và 100 quote với đủ 12 locale.
 
 ## Reset development và triển khai
 
