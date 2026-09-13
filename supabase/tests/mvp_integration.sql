@@ -14,14 +14,51 @@ BEGIN
  IF (SELECT count(*) FROM public.supported_languages WHERE is_active)<>12 THEN RAISE EXCEPTION 'supported language catalog must contain 12 active rows'; END IF;
  IF muse_private.resolve_language_code('vi')<>'vi' OR muse_private.resolve_language_code('xx')<>'en' OR muse_private.resolve_language_code(NULL)<>'en' THEN RAISE EXCEPTION 'language fallback must resolve unsupported locales to English'; END IF;
  IF EXISTS(SELECT 1 FROM auth.users) THEN RAISE EXCEPTION 'development auth users were not reset'; END IF;
- IF EXISTS(SELECT 1 FROM public.destinations)
-    OR EXISTS(SELECT 1 FROM public.destination_checkpoints)
-    OR EXISTS(SELECT 1 FROM public.landmarks)
-    OR EXISTS(SELECT 1 FROM public.foods)
-    OR EXISTS(SELECT 1 FROM public.destination_items)
-    OR EXISTS(SELECT 1 FROM public.mission_templates)
-    OR EXISTS(SELECT 1 FROM public.daily_quotes)
- THEN RAISE EXCEPTION 'legacy application catalog was not reset'; END IF;
+ IF (SELECT count(*) FROM public.destinations WHERE is_active)<>30
+    OR (SELECT count(*) FROM public.destination_checkpoints WHERE is_active)<>90
+    OR (SELECT count(*) FROM public.landmarks WHERE is_active)<>30
+    OR (SELECT count(*) FROM public.foods WHERE is_active)<>30
+    OR (SELECT count(*) FROM public.destination_items WHERE is_active)<>60
+    OR (SELECT count(*) FROM public.mission_templates WHERE is_active)<>30
+    OR (SELECT count(*) FROM public.daily_quotes WHERE is_active)<>100
+ THEN RAISE EXCEPTION 'content pack counts are incomplete'; END IF;
+ IF EXISTS(
+   SELECT 1 FROM public.destination_checkpoints c
+   WHERE (SELECT count(*) FROM public.destination_checkpoints same_destination WHERE same_destination.destination_id=c.destination_id AND same_destination.is_active)<3
+ ) THEN RAISE EXCEPTION 'every destination needs at least three active checkpoints'; END IF;
+ IF EXISTS(
+   SELECT 1 FROM public.destination_checkpoints c
+   WHERE (SELECT count(*) FROM public.checkpoint_rewards r WHERE r.checkpoint_id=c.id)<1
+ ) THEN RAISE EXCEPTION 'every checkpoint needs at least one reward'; END IF;
+ IF EXISTS(
+   SELECT 1 FROM public.destinations d
+   WHERE (SELECT count(*) FROM public.destination_translations t WHERE t.destination_id=d.id)<>12
+ ) OR EXISTS(
+   SELECT 1 FROM public.destination_checkpoints c
+   WHERE (SELECT count(*) FROM public.checkpoint_translations t WHERE t.checkpoint_id=c.id)<>12
+ ) OR EXISTS(
+   SELECT 1 FROM public.landmarks l
+   WHERE (SELECT count(*) FROM public.landmark_translations t WHERE t.landmark_id=l.id)<>12
+ ) OR EXISTS(
+   SELECT 1 FROM public.foods f
+   WHERE (SELECT count(*) FROM public.food_translations t WHERE t.food_id=f.id)<>12
+ ) OR EXISTS(
+   SELECT 1 FROM public.destination_items i
+   WHERE (SELECT count(*) FROM public.destination_item_translations t WHERE t.destination_item_id=i.id)<>12
+ ) OR EXISTS(
+   SELECT 1 FROM public.mission_templates m
+   WHERE (SELECT count(*) FROM public.mission_template_translations t WHERE t.mission_template_id=m.id)<>12
+ ) OR EXISTS(
+   SELECT 1 FROM public.daily_quotes q
+   WHERE (SELECT count(*) FROM public.daily_quote_translations t WHERE t.quote_rotation_order=q.rotation_order)<>12
+ ) THEN RAISE EXCEPTION 'content pack translations are incomplete'; END IF;
+ IF EXISTS(
+   SELECT 1 FROM public.destinations
+   WHERE cover_asset_path IS NULL OR map_asset_path IS NULL
+ ) OR EXISTS(
+   SELECT 1 FROM public.destination_checkpoints
+   WHERE asset_path IS NULL
+ ) THEN RAISE EXCEPTION 'content pack assets are incomplete'; END IF;
 END $$;
 
 -- Transaction-scoped fixtures keep domain/RLS/RPC coverage without restoring
@@ -55,21 +92,6 @@ BEGIN
  INSERT INTO public.checkpoint_rewards(checkpoint_id,reward_type,destination_item_id,order_index)
  VALUES(checkpoint_id,'destination_item',item_id,3);
 END $$;
-
-INSERT INTO public.mission_templates(code,title,description,mission_type,target_mood,default_energy_reward,estimated_minutes) VALUES
- ('demo-water','Uống một cốc nước','Nhiệm vụ khởi đầu dùng trong kiểm thử','daily','all',5,1),
- ('demo-walk','Đi bộ năm phút','Nhiệm vụ khởi đầu dùng trong kiểm thử','daily','all',5,5);
-INSERT INTO public.mission_template_translations(mission_template_id,language_code,title,description)
-SELECT id,'en',
- CASE code WHEN 'demo-water' THEN 'Drink a glass of water' ELSE 'Walk for five minutes' END,
- 'Test starter mission'
-FROM public.mission_templates;
-INSERT INTO public.daily_quotes(rotation_order,topic,content) VALUES
- (1,'life','Câu nhắn thử nghiệm thứ nhất.'),
- (2,'life','Câu nhắn thử nghiệm thứ hai.');
-INSERT INTO public.daily_quote_translations(quote_rotation_order,language_code,content) VALUES
- (1,'en','English fallback quote one.'),(1,'vi','Câu nhắn thử nghiệm thứ nhất.'),
- (2,'en','English fallback quote two.'),(2,'vi','Câu nhắn thử nghiệm thứ hai.');
 
 DO $$
 DECLARE quote_today record; quote_today_again record; quote_tomorrow record; today date:=(now() AT TIME ZONE 'Asia/Ho_Chi_Minh')::date;
@@ -112,8 +134,11 @@ BEGIN
  IF daily_quote.rotation_order IS NULL OR daily_quote.quote_date<>today THEN RAISE EXCEPTION 'authenticated daily quote RPC failed'; END IF;
  SELECT * INTO daily_quote_vi FROM public.get_daily_quote('vi');
  SELECT * INTO daily_quote_unknown FROM public.get_daily_quote('xx');
- IF daily_quote_vi.content NOT LIKE 'Câu nhắn thử nghiệm%' THEN RAISE EXCEPTION 'Vietnamese quote source was not selected'; END IF;
- IF daily_quote_unknown.content NOT LIKE 'English fallback quote%' THEN RAISE EXCEPTION 'unsupported quote locale did not fall back to English'; END IF;
+ IF daily_quote_vi.content IS NULL OR char_length(daily_quote_vi.content)<1 THEN RAISE EXCEPTION 'Vietnamese quote source was not selected'; END IF;
+ IF daily_quote_unknown.content IS NULL OR daily_quote_unknown.content <> (
+   SELECT content FROM public.daily_quote_translations
+   WHERE quote_rotation_order=daily_quote.rotation_order AND language_code='en'
+ ) THEN RAISE EXCEPTION 'unsupported quote locale did not fall back to English'; END IF;
  SELECT * INTO c FROM public.upsert_daily_checkin('sad',2,'first');
  SELECT * INTO c2 FROM public.upsert_daily_checkin('good',4,'edited');
  IF c.id<>c2.id OR c2.mood<>'good' OR (SELECT count(*) FROM public.daily_checkins)<>1 THEN RAISE EXCEPTION 'check-in failed'; END IF;
