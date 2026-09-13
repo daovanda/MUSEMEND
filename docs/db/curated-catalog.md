@@ -1,18 +1,17 @@
 # Curated travel và mission catalog
 
 Trạng thái: `implemented`  
-Cập nhật: 2026-09-12
+Cập nhật: 2026-09-13
 
 ## Phạm vi
 
-Migration `20260908110000_curated_world_catalog.sql` bổ sung một content pack mẫu
-do server quản lý, gồm:
+Migration `20260908110000_curated_world_catalog.sql` là pack nền trước reset.
+Content pack hiện hành do `20260913100000_content_pack_v1.sql` nạp và gồm:
 
-- 10 điểm đến: Hội An, Ninh Bình, Huế, Phú Quốc, Hà Giang, Paris, Kyoto,
-  Santorini, Petra và Machu Picchu;
-- 10 checkpoint, mỗi điểm đến một checkpoint có yêu cầu năng lượng tăng dần;
-- 10 landmark, 10 món ăn, 10 vật phẩm và 30 liên kết reward;
-- 10 mission template về chăm sóc bản thân, quan sát hiện tại và viết phản tư.
+- 30 điểm đến toàn cầu (trong đó có Việt Nam), mỗi điểm có 3 checkpoint;
+- 30 landmark, 30 món ăn, 60 destination item và reward cho từng checkpoint;
+- 30 mission template và 100 daily quote, đủ 12 bản dịch;
+- artwork riêng cho destination/checkpoint/landmark/food/item trong content pack.
 
 Các route curated đứng trước ba route `demo-*` đối với user chưa khởi hành. Việc
 đổi `order_index` không làm chuyển user đang đi dở vì con trỏ hành trình lưu ID
@@ -43,20 +42,22 @@ Metadata địa lý dùng:
 
 `vietnam_region` chỉ dùng cho ba miền Việt Nam và để `NULL` với điểm đến quốc tế.
 `country_code` là bắt buộc; migration backfill ba route demo thành `VN` trước khi
-thêm `NOT NULL`. `destination_checkpoints.asset_path` là đường dẫn artwork do server quyết định; client
-không được ghi cột này.
+thêm `NOT NULL`. `destination_checkpoints.asset_path`,
+`destinations.cover_asset_path` và `foods.asset_path` là đường dẫn artwork do
+server quyết định; client không được ghi các cột này.
 
 ## Seed, idempotency và bảo mật
 
-Các catalog có mã ổn định với prefix `curated-`. Seed dùng batch insert và
+Các catalog có mã ổn định với prefix `content-`. Seed dùng batch insert và
 `ON CONFLICT DO UPDATE`; reward dùng `NOT EXISTS`, nên replay không tạo bản ghi
 trùng. Migration không ghi bảng user-owned, không cấp thêm quyền và không thay đổi
 RLS. Người dùng authenticated chỉ đọc catalog active; tiến độ và unlock vẫn chỉ
 được cập nhật qua RPC hành trình.
 
-Ảnh checkpoint được đóng gói trong Flutter tại
-`assets/illustrations/journey/checkpoints/`. Giá trị DB khớp chính xác với asset
-path; khi thay ảnh phải giữ tên file hoặc cập nhật migration mới cùng app release.
+Artwork content pack được đóng gói trong Flutter tại
+`assets/illustrations/journey/content-pack/v1/`. Giá trị DB khớp chính xác với
+asset path; khi thay ảnh phải giữ tên file hoặc cập nhật migration mới cùng app
+release.
 
 ## Kiểm thử và vận hành
 

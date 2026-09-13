@@ -1,7 +1,7 @@
 # MuseMend assets
 
 Trạng thái: `in-progress`
-Cập nhật: 2026-09-08
+Cập nhật: 2026-09-13
 
 Thư mục này chứa các asset chính thức đã export hoặc tạo riêng cho MuseMend và được đóng gói cùng
 ứng dụng. Không đặt screenshot của frame Figma vào đây. Khi artwork chưa có bản
@@ -45,6 +45,10 @@ Asset đã export:
   không thể suy ra từng item và không khai báo trong `pubspec.yaml`.
 - `illustrations/journey/checkpoints/*.png`: 10 tranh trạm do AI tạo riêng cho
   MuseMend, gồm 5 điểm đến Việt Nam và 5 điểm đến quốc tế.
+- `illustrations/journey/content-pack/v1/*.svg`: 240 minh họa vector nội bộ cho
+  30 điểm đến, 90 checkpoint, landmark, food và destination item. Các file này
+  được tạo deterministic bởi `supabase/seed/generate_content_pack.py` và được
+  bundle để QA offline; có thể thay artwork sau này mà không đổi mã catalog.
 
 Khi thêm thư mục/file, cập nhật `pubspec.yaml`, manifest trong tài liệu frontend
 và kiểm thử màn hình dùng asset đó.

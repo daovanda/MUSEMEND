@@ -16,6 +16,7 @@ schema trước đợt hardening MVP và không đại diện cho trạng thái 
 - [Journey, checkpoints và rewards](./journey-rewards.md)
 - [Curated travel và mission catalog](./curated-catalog.md)
 - [Đa ngôn ngữ cho catalog](./catalog-localization.md)
+- [Content pack catalog v1](./catalog-content-pack.md)
 - [Journals, tags và media](./journals-media.md)
 - [Notifications, cleanup và account deletion](./notifications-cleanup.md)
 - [Migrations, seed và kiểm thử](./migrations-testing.md)
