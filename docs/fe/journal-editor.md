@@ -1,7 +1,7 @@
 # Journal editor
 
 - **Trạng thái:** `in-progress`
-- **Cập nhật:** 2026-09-10
+- **Cập nhật:** 2026-09-13
 
 ## Mục tiêu và phạm vi
 
@@ -40,6 +40,8 @@ Flutter, nhưng decoration trong suốt, không fill, không outline. Divider m�
 chỉ dùng để phân nhịp giữa tiêu đề và nội dung. Tag, danh sách ảnh và tùy chọn
 thư nằm sau nội dung với nhãn nhẹ; không tạo thêm một “form card” cạnh tranh với
 trang viết. Ảnh không được chèn vào giữa các đoạn văn trong lát cắt hiện tại.
+Các nhãn, gợi ý nhập, validation và ngày trình bày lấy từ locale hiện hành;
+nội dung lá thư không được app dịch hoặc biến đổi.
 
 ## Luồng
 

@@ -14,7 +14,7 @@ accessibility, bảo mật dữ liệu trên thiết bị và kiểm thử.
 - [Home Figma inventory](./home-figma-inventory.md) — in-progress
 - [Frontend asset manifest](./assets.md) — in-progress
 - [Application foundation](./application-foundation.md) — implemented
-- [Localization Flutter](./localization.md) — in-progress
+- [Localization Flutter](./localization.md) — implemented
 - [Authentication](./authentication.md) — in-progress
 - [Onboarding tài khoản mới](./new-user-onboarding.md) — implemented
 - [Daily check-in và streak](./daily-checkin.md) — in-progress

@@ -62,6 +62,7 @@ class _MvpShellState extends ConsumerState<MvpShell>
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return Scaffold(
       body: widget.navigationShell,
       bottomNavigationBar: _MuseBottomNavigation(
@@ -75,8 +76,10 @@ class _MvpShellState extends ConsumerState<MvpShell>
             SnackBar(
               content: Text(
                 saved
-                    ? 'Đã ghi nhận ${mood.label.toLowerCase()}.'
-                    : 'Chưa thể ghi nhận cảm xúc. Hãy thử lại.',
+                    ? strings.moodRecorded(
+                      mood.localizedLabel(strings).toLowerCase(),
+                    )
+                    : strings.moodSaveFailed,
               ),
             ),
           );
@@ -204,6 +207,7 @@ class _MoodCloudButtonState extends State<_MoodCloudButton> {
   bool _saving = false;
 
   Future<void> _showMoodPicker() async {
+    final strings = AppLocalizations.of(context);
     final mood = await showModalBottomSheet<Mood>(
       context: context,
       showDragHandle: true,
@@ -219,7 +223,7 @@ class _MoodCloudButtonState extends State<_MoodCloudButton> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Mây hôm nay đang cảm thấy thế nào?',
+                    strings.moodPickerPrompt,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
@@ -253,9 +257,10 @@ class _MoodCloudButtonState extends State<_MoodCloudButton> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return Semantics(
       button: true,
-      label: 'Mây cảm xúc. Chạm để về Bầu trời, nhấn giữ để chọn cảm xúc.',
+      label: strings.moodCloudSemantics,
       child: GestureDetector(
         onTapDown: (_) => setState(() => _pressed = true),
         onTapUp: (_) => setState(() => _pressed = false),
@@ -311,9 +316,10 @@ class _MoodPickerOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final visual = mood.visual;
+    final label = mood.localizedLabel(AppLocalizations.of(context));
     return Semantics(
       button: true,
-      label: visual.label,
+      label: label,
       excludeSemantics: true,
       child: InkWell(
         onTap: onTap,
@@ -333,7 +339,7 @@ class _MoodPickerOption extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                visual.label,
+                label,
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 style: const TextStyle(

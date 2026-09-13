@@ -6,6 +6,7 @@ import 'package:musemend/features/auth/application/auth_providers.dart';
 import 'package:musemend/features/auth/domain/auth_repository.dart';
 import 'package:musemend/features/auth/domain/auth_session.dart';
 import 'package:musemend/features/auth/presentation/sign_in_screen.dart';
+import 'package:musemend/l10n/generated/app_localizations.dart';
 
 void main() {
   testWidgets('switches to sign-up and validates required fields', (
@@ -16,7 +17,12 @@ void main() {
         overrides: [
           authRepositoryProvider.overrideWithValue(_FakeAuthRepository()),
         ],
-        child: const MaterialApp(home: SignInScreen()),
+        child: const MaterialApp(
+          locale: Locale('vi'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: SignInScreen(),
+        ),
       ),
     );
 
@@ -47,6 +53,9 @@ void main() {
           authRepositoryProvider.overrideWithValue(_FakeAuthRepository()),
         ],
         child: MaterialApp(
+          locale: const Locale('vi'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           builder:
               (context, child) => MediaQuery(
                 data: MediaQuery.of(
@@ -76,7 +85,13 @@ void main() {
         overrides: [
           authRepositoryProvider.overrideWithValue(_FakeAuthRepository()),
         ],
-        child: MaterialApp(theme: ThemeData.dark(), home: const SignInScreen()),
+        child: MaterialApp(
+          locale: const Locale('vi'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          theme: ThemeData.dark(),
+          home: const SignInScreen(),
+        ),
       ),
     );
 
@@ -111,6 +126,9 @@ void main() {
           authRepositoryProvider.overrideWithValue(_FakeAuthRepository()),
         ],
         child: MaterialApp(
+          locale: const Locale('vi'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           builder:
               (context, child) => MediaQuery(
                 data: MediaQuery.of(context).copyWith(disableAnimations: true),

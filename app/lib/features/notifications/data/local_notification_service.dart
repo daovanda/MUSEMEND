@@ -75,14 +75,14 @@ class LocalNotificationService implements NotificationService {
     if (!delivery.isAfter(tz.TZDateTime.now(tz.local))) return;
     await _plugin.zonedSchedule(
       _notificationId(reminder.journalId),
-      'Một lá thư đang đợi bạn',
-      'Mở MuseMend khi bạn sẵn sàng.',
+      reminder.title,
+      reminder.body,
       delivery,
-      const NotificationDetails(
+      NotificationDetails(
         android: AndroidNotificationDetails(
           'future_letters',
-          'Thư tương lai',
-          channelDescription: 'Nhắc khi thư gửi tương lai đến ngày mở',
+          reminder.channelName,
+          channelDescription: reminder.channelDescription,
         ),
         iOS: DarwinNotificationDetails(),
       ),

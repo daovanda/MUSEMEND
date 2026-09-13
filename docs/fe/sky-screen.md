@@ -1,7 +1,7 @@
 # Màn Bầu trời (Reflect)
 
 - **Trạng thái:** in-progress
-- **Cập nhật:** 2026-09-12
+- **Cập nhật:** 2026-09-13
 - **Nguồn tham chiếu:** page Home, Figma frame `Bầu trời` (`233:893`) và biến thể mood mở (`57:24`)
 
 ## Phạm vi
@@ -59,6 +59,9 @@ tiến độ vẫn do RPC/database xác định; các con số hiển thị ch�
 - Bottom navigation có bốn route và mây ở giữa. Nút mây `56×56`, màu `#366672`,
   nhô lên `19dp`, icon `#EFFBFF`; chạm về Bầu trời, giữ để mở năm mood. Bốn tab
   dùng icon nét mảnh, không có selected pill lớn như bản cũ.
+- Nhãn check-in, hành trình, quote, chia sẻ, trạng thái lỗi và semantics đều lấy
+  từ ARB. Tên/mô tả catalog do các provider locale-aware tải từ DB; nội dung do
+  user viết không bị dịch ở client.
 
 ## Layer order và chuyển tiếp
 

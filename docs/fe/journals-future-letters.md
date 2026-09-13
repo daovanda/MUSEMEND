@@ -1,7 +1,7 @@
 # Daily Journal và Future Letter
 
 Trạng thái: `in-progress`
-Cập nhật: 2026-09-12
+Cập nhật: 2026-09-13
 
 ## Phạm vi triển khai
 
@@ -40,6 +40,8 @@ Các khả năng hiện có:
 
 Danh sách nhật ký và editor dùng chung nền xanh trời–kem cùng các cụm mây mềm
 trôi chậm; hiệu ứng chỉ thuộc presentation và tự dừng theo Reduce Motion.
+Toàn bộ nhãn, lịch, mood, validation, menu, semantic accessibility và thông báo
+an toàn dùng ARB; tiêu đề/nội dung/tag do user viết luôn giữ nguyên ngôn ngữ gốc.
 
 Yearly journal, tag, audio/video/PDF attachment và tìm kiếm chưa nằm trong lát cắt
 UI này.

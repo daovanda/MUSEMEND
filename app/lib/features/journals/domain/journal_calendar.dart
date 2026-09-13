@@ -18,8 +18,6 @@ class JournalCalendarMonth {
   final int year;
   final int month;
   final List<JournalCalendarDay> days;
-
-  String get label => 'Tháng $month, $year';
 }
 
 class JournalCalendarDay {

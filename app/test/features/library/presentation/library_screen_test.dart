@@ -9,6 +9,7 @@ import 'package:musemend/features/journey/domain/journey_repository.dart';
 import 'package:musemend/features/journey/domain/journey_status.dart';
 import 'package:musemend/features/journey/domain/library_collectible.dart';
 import 'package:musemend/features/library/presentation/library_screen.dart';
+import 'package:musemend/l10n/generated/app_localizations.dart';
 
 void main() {
   testWidgets('shows destination details and filters the collection', (
@@ -23,6 +24,9 @@ void main() {
           journeyRepositoryProvider.overrideWithValue(_FakeJourneyRepository()),
         ],
         child: MaterialApp(
+          locale: const Locale('vi'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
           builder:
               (context, child) => MediaQuery(
                 data: MediaQuery.of(context).copyWith(disableAnimations: true),

@@ -1,7 +1,7 @@
 # Profile overview client
 
 **Trạng thái:** `in-progress`
-**Cập nhật:** 2026-09-10
+**Cập nhật:** 2026-09-13
 
 ## Mục tiêu và phạm vi
 
@@ -20,6 +20,23 @@ loading/error/retry và mutation. Theme controller tải lại mode theo authent
 session để áp dụng `system`/`light`/`dark` sau restart.
 Language controller dùng `NULL` cho tự động theo thiết bị và lưu mã locale khi
 user chọn thủ công; locale ngoài 12 ngôn ngữ hỗ trợ fallback về tiếng Anh.
+Mọi nhãn, dialog, inbox, privacy/terms tóm tắt và trạng thái lỗi lấy từ ARB. Tên
+ngôn ngữ trong selector luôn dùng tên bản địa; tên hiển thị và tên Mây do user đặt
+được giữ nguyên. Tên Mây rỗng chỉ hiển thị fallback đã dịch, không ghi đè dữ liệu.
+
+`Chỉnh sửa hồ sơ và cài đặt` là một accordion nằm ngay cuối card tài khoản. Chạm
+vào dòng này mở form xuống dưới trong cùng card; Hủy thu gọn form và Lưu gọi
+controller hiện có, không dùng dialog/bottom sheet. Nhãn của ô nhập nằm riêng phía
+trên thay vì dùng floating label trên đường viền, tránh chồng chữ với nền kính.
+Ngôn ngữ và giao diện dùng popup neo ngay dưới ô chọn, có kích thước giới hạn,
+dấu chọn cho giá trị hiện tại và cuộn riêng khi danh sách dài; popup không chiếm
+toàn màn hình như dialog hoặc bottom sheet. Hai nút hành động nằm trong
+`Expanded` để nhận chiều rộng hữu hạn: theme MuseMend đặt button rộng toàn phần,
+nên button đặt trực tiếp trong `Row` không ràng buộc sẽ gây lỗi
+`BoxConstraints(w=Infinity)` trên Flutter Web. `Quyền riêng tư` và `Điều khoản và
+giới hạn` cũng mở nội dung ngay dưới dòng tương ứng trong cùng card và cho phép
+hai mục cùng mở khi người dùng muốn đối chiếu. Dialog chỉ còn dùng cho thao tác
+xóa tài khoản có tính phá hủy và cần xác nhận rõ ràng.
 
 Update dùng hai statement chỉ chứa các cột client được grant. Settings được lưu
 trước profile; nếu request thứ hai lỗi, provider reload để không giả định cả hai
@@ -34,8 +51,9 @@ account status nội bộ, token hay ID. Form giới hạn tên hiển thị 80,
 tự. Tắt notification hủy local schedules; bật lại chỉ xin quyền khi user lưu thư.
 
 Xóa tài khoản là thao tác không thể khôi phục trong contract hiện tại, vì vậy dialog
-yêu cầu nhập chính xác `XÓA`. Sau khi RPC chấp nhận, app hủy reminder cục bộ và
-sign-out; worker xử lý Storage/Auth idempotently ở backend.
+yêu cầu nhập chính xác từ xác nhận được dịch theo locale (tiếng Việt là `XÓA`). Sau
+khi RPC chấp nhận, app hủy reminder cục bộ và sign-out; worker xử lý Storage/Auth
+idempotently ở backend.
 
 ## Kiểm thử và nghiệm thu
 
@@ -51,6 +69,10 @@ Không đổi schema. Privacy/terms trong app hiện là bản tóm tắt MVP, c
 bản pháp lý được review và URL công khai cần cho store. Biometric lock và avatar
 vẫn ngoài lát cắt hiện tại. iOS theme/notification/account UI cần nghiệm thu trên
 thiết bị thật.
+Widget test dùng chính `buildMuseTheme()` và xác nhận ba mục trên mở inline, không
+tạo `AlertDialog`, card tài khoản bao trọn nút Lưu và Quyền riêng tư/Điều khoản có
+thể cùng mở. Test cũng mở menu ngôn ngữ/giao diện, đổi lựa chọn và xác nhận các ô
+nhập không còn sử dụng floating label.
 
 ## Liên quan
 

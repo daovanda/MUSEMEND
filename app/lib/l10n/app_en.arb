@@ -20,5 +20,445 @@
   "cancel": "Cancel",
   "save": "Save",
   "settingsUpdated": "Settings updated.",
-  "settingsUpdateFailed": "Could not update settings."
+  "settingsUpdateFailed": "Could not update settings.",
+  "email": "Email",
+  "password": "Password",
+  "back": "Back",
+  "skip": "Skip",
+  "continueLabel": "Continue",
+  "retry": "Try again",
+  "authAccountCreated": "Your account has been created. Please check your email if confirmation is required.",
+  "authMascotSemantics": "MuseMend cloud mascot",
+  "authWelcomeHeadline": "A sky of your own\nfor days that need a little softness.",
+  "authWelcomeBody": "Notice your feelings, complete small acts of care, and keep moving along your own journey.",
+  "authSignUpTitle": "Create your own sky",
+  "authSignInTitle": "Welcome back",
+  "authSignUpSubtitle": "Begin with just a few simple details.",
+  "authSignInSubtitle": "Let’s slow down together for a moment today.",
+  "authDisplayNameLength": "Your name must be between 2 and 60 characters.",
+  "authEmailInvalid": "Please enter a valid email address.",
+  "authShowPassword": "Show password",
+  "authHidePassword": "Hide password",
+  "authPasswordMinLength": "Your password must be at least 8 characters.",
+  "authCreateAccount": "Create account",
+  "authSignIn": "Sign in",
+  "authSwitchToSignIn": "Already have an account? Sign in",
+  "authSwitchToSignUp": "New here? Create an account",
+  "authNetworkError": "We can’t connect right now. Please try again.",
+  "authInvalidCredentials": "That email or password doesn’t look right.",
+  "authEmailAlreadyRegistered": "An account already uses this email.",
+  "authEmailNotConfirmed": "Please confirm your email before signing in.",
+  "authWeakPassword": "This password does not meet the security requirements.",
+  "onboardingBackToSignIn": "Back to sign in",
+  "onboardingNameLength": "Your name must be between 2 and 80 characters.",
+  "onboardingFallbackName": "Muse’s friend",
+  "onboardingSaveFailed": "We couldn’t save this. Check your connection and try again.",
+  "onboardingStartWithMuse": "Begin with Muse",
+  "onboardingWelcomeHeadline": "A place to listen to yourself,\nwith a little more gentleness.",
+  "onboardingEmotionTitle": "Name what you feel",
+  "onboardingEmotionDescription": "Notice how you are feeling today.",
+  "onboardingPrivateWritingTitle": "Write just for you",
+  "onboardingPrivateWritingDescription": "A quiet page for the things that are hard to say aloud.",
+  "onboardingSmallStepsTitle": "Care through small steps",
+  "onboardingSmallStepsDescription": "Gentle, manageable acts that can make today feel a little lighter.",
+  "onboardingPrivacyHeadline": "What is private to you\nshould remain yours.",
+  "onboardingPrivacyBody": "MuseMend is being built around privacy and your choices.",
+  "onboardingDeviceJournalTitle": "Journal kept on your device",
+  "onboardingDeviceJournalDescription": "Your private thoughts stay safely here with you.",
+  "onboardingOfflineTitle": "Available offline",
+  "onboardingOfflineDescription": "Even without a connection, Muse is still here.",
+  "onboardingOptionalBackupTitle": "Backup is optional",
+  "onboardingOptionalBackupDescription": "Sync only when you truly want to.",
+  "onboardingNamePrompt": "What should Muse call you?",
+  "onboardingNameCanChange": "You can change this anytime from your Profile.",
+  "onboardingDisplayNameLabel": "Name you’d like to show",
+  "onboardingNameHint": "Enter a name or leave this blank",
+  "onboardingAddressLabel": "How Muse should address you",
+  "onboardingGreeting": "Hello {name}, it’s lovely to be here with you!",
+  "@onboardingGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingLoadFailed": "Muse couldn’t prepare your welcome just yet.",
+  "preferredAddressCauMinh": "close friends",
+  "preferredAddressBanMinh": "you / me",
+  "preferredAddressAnhEm": "older brother / younger sibling",
+  "preferredAddressChiEm": "older sister / younger sibling",
+  "preferredAddressNameOnly": "name only",
+  "profileTagline": "A quiet corner for your account and privacy.",
+  "profileLoadFailed": "We couldn't load your profile",
+  "profileMuseFriend": "Muse's friend",
+  "profileProtectedEmail": "Protected email",
+  "profileCloudNameTitle": "Your cloud's name",
+  "profileFutureLetterReminder": "Remind me about future letters on this device",
+  "profileEditSettings": "Edit profile and settings",
+  "profileInboxTitle": "In-app notifications",
+  "profileInboxLoadFailed": "We couldn't load your notifications",
+  "profileInboxEmpty": "No new notifications",
+  "profileInboxEmptyDescription": "Letters that are ready to open will appear here.",
+  "profilePrivacyTitle": "Privacy",
+  "profilePrivacyBody": "Your journals are stored privately on Supabase and protected by row-level security so only your account can read them. MuseMend never includes letter content in lock-screen notifications. The MVP does not yet provide end-to-end encryption or data export.",
+  "profileTermsTitle": "Terms and limitations",
+  "profileTermsBody": "MuseMend is a reflection aid, not a diagnostic tool or a substitute for medical or mental-health care. If you are in immediate danger, contact emergency services or someone you trust.",
+  "profileSignOut": "Sign out",
+  "profileRequestDeletion": "Request account deletion",
+  "profileDeletionRequestFailed": "We couldn't submit your account deletion request.",
+  "profileDeleteTitle": "Delete your account permanently?",
+  "profileDeleteBody": "This request locks your account immediately, hides your journals, and queues private files for deletion. It cannot currently be undone.",
+  "profileDeleteConfirmationPrompt": "Type {keyword} to confirm:",
+  "@profileDeleteConfirmationPrompt": {
+    "placeholders": {
+      "keyword": {
+        "type": "String"
+      }
+    }
+  },
+  "profileDeleteConfirmationKeyword": "DELETE",
+  "profileDeleteAccount": "Delete account",
+  "profileFutureLetterDue": "Your future letter is ready",
+  "profileFutureLetterScheduled": "Scheduled for {date}",
+  "@profileFutureLetterScheduled": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "moodAwful": "ANGRY",
+  "moodSad": "EMPTY",
+  "moodOkay": "OKAY",
+  "moodGood": "RELAXED",
+  "moodGreat": "HEALING",
+  "moodRecorded": "Feeling {mood} has been noted.",
+  "@moodRecorded": {
+    "placeholders": {
+      "mood": {
+        "type": "String"
+      }
+    }
+  },
+  "moodSaveFailed": "We couldn't save how you feel. Please try again.",
+  "moodPickerPrompt": "How is your cloud feeling today?",
+  "moodCloudSemantics": "Mood cloud. Tap to return to Sky, or press and hold to choose a feeling.",
+  "checkinSaved": "Today's check-in has been saved.",
+  "checkinSaveFailed": "We couldn't save this yet. Please try again.",
+  "skyStatusSemantics": "{energy} energy, {streak}-day streak",
+  "@skyStatusSemantics": {
+    "placeholders": {
+      "energy": {
+        "type": "int"
+      },
+      "streak": {
+        "type": "int"
+      }
+    }
+  },
+  "checkinMoodPrompt": "Has today been gentle with you?",
+  "checkinQuickSave": "QUICK SAVE",
+  "checkinUpdateToday": "Update today's check-in",
+  "checkinSaveToday": "Quick-save today's check-in",
+  "checkinSaveAndWrite": "SAVE AND WRITE",
+  "skyMascotSemantics": "MuseMend cloud companion",
+  "skyCompanionSemantics": "Your cloud companion",
+  "journeyProgressSemantics": "Journey {name}, stop {current} of {total}",
+  "@journeyProgressSemantics": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "journeyWaiting": "waiting",
+  "journeyDefaultTitle": "JOURNEY",
+  "checkpointLabel": "Stop",
+  "journeyDataWaiting": "Your journey will appear when its stops are ready.",
+  "quoteLoadFailed": "Today's gentle note couldn't be loaded.",
+  "shareMoments": "Share a moment",
+  "shareWeekTitle": "A nourishing week",
+  "shareWeekSubtitle": "7-day template",
+  "shareMonthTitle": "Your month in moments",
+  "shareMonthSubtitle": "A collage of 6 photos",
+  "shareYearTitle": "A gentle year",
+  "shareYearSubtitle": "Moments worth remembering",
+  "shareTemplateComingSoon": "The “{title}” sharing template will be ready in a future update.",
+  "@shareTemplateComingSoon": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "shareAction": "Share",
+  "userDataLoadFailed": "We couldn't load your data.",
+  "missionLoadFailed": "We couldn't load your missions.",
+  "missionToday": "Today's missions",
+  "missionTaskCount": "{count} tasks",
+  "@missionTaskCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "missionCreateNew": "Create your own mission",
+  "missionMuseSuggestions": "Suggestions from Muse",
+  "missionSuggestionsDescription": "Small steps that fit how you feel today.",
+  "missionSuggestionsEmpty": "You've added all of today's fitting suggestions.",
+  "missionCompleteFailed": "We couldn't complete this mission. Please try again.",
+  "missionAlreadyCompleted": "This mission was already completed.",
+  "missionRewardReceived": "You received {reward} energy.",
+  "@missionRewardReceived": {
+    "placeholders": {
+      "reward": {
+        "type": "int"
+      }
+    }
+  },
+  "missionSkipped": "Mission skipped. No energy was deducted.",
+  "missionSkipFailed": "We couldn't skip this mission.",
+  "missionAdded": "Mission added.",
+  "missionAddFailed": "We couldn't add this mission.",
+  "missionCustomAdded": "Your mission was added with a reward of 5 energy.",
+  "missionCreateFailed": "We couldn't create this mission.",
+  "missionCareToday": "Care for\ntoday",
+  "missionGentleStep": "Be gentle with yourself through one small step.",
+  "missionTypeDaily": "Daily",
+  "missionTypeWeekly": "Weekly",
+  "missionTypeMonthly": "Monthly",
+  "missionTypeYearly": "Yearly",
+  "missionTypeCustom": "Custom",
+  "missionGroupType": "{type} missions",
+  "@missionGroupType": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "missionSuggestionMeta": "{type} · {minutes} min · +{energy} energy",
+  "@missionSuggestionMeta": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "int"
+      },
+      "energy": {
+        "type": "int"
+      }
+    }
+  },
+  "missionAddTemplate": "Add suggested mission",
+  "missionPeriodMorning": "Morning",
+  "missionPeriodAfternoon": "Afternoon",
+  "missionPeriodEvening": "Evening",
+  "missionPeriodAnytime": "Anytime",
+  "missionCurrentLandmarkSemantics": "Illustration of the current stop's landmark",
+  "missionAddToGroup": "Add a mission to {group}",
+  "@missionAddToGroup": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "missionComplete": "Complete",
+  "missionOptions": "Mission options",
+  "missionSkip": "Skip mission",
+  "missionEnergyAccumulated": "Accumulated energy",
+  "missionEnergySummary": "{current} total · {available} ready for your journey",
+  "@missionEnergySummary": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "available": {
+        "type": "int"
+      }
+    }
+  },
+  "missionEnergyReward": "+{energy} energy",
+  "@missionEnergyReward": {
+    "placeholders": {
+      "energy": {
+        "type": "int"
+      }
+    }
+  },
+  "missionEmpty": "No missions yet. Choose one gentle little step.",
+  "missionCustomSheetTitle": "Your mission",
+  "missionSuggestionSheetTitle": "Add a Muse suggestion",
+  "close": "Close",
+  "missionCustomRewardDescription": "Your own missions always reward 5 energy.",
+  "missionSuggestionPrepared": "Muse has prepared this suggestion for you.",
+  "missionName": "Mission name",
+  "missionNameHint": "Enter a mission name",
+  "missionNameValidation": "Mission name must be between 1 and 200 characters.",
+  "missionNoteOptional": "Note (optional)",
+  "missionNoteHint": "Add a gentle reminder",
+  "missionSchedule": "Schedule",
+  "missionAddAction": "Add mission",
+  "missionStart": "Start",
+  "missionEnd": "End",
+  "missionDailyRenewal": "Placed in {period} and refreshed every day.",
+  "@missionDailyRenewal": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "missionWeeklyEnd": "Ends at 00:00 at the start of next week.",
+  "missionMonthlyEnd": "Ends at 00:00 on the first day of next month.",
+  "missionYearlyEnd": "Ends at 00:00 on the first day of next year.",
+  "missionEndTimeAfterStart": "The end time must be later than the start time on the same day.",
+  "missionEndTimeFuture": "The end time must be in the future.",
+  "missionEndDateFuture": "The end must be in the future and later than the start.",
+  "missionTimeFormat": "Enter time as HH:mm.",
+  "missionDateFormat": "Enter date as dd/MM/yyyy.",
+  "missionDateNotPast": "Choose today or a future date.",
+  "missionDateField": "{label} · date",
+  "@missionDateField": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "missionTimeField": "{label} · time",
+  "@missionTimeField": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "missionType": "Mission type",
+  "missionDue": "Due {date}",
+  "@missionDue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "journalTagline": "A small page each day to find your way back to yourself.",
+  "futureLetters": "Letters to the future",
+  "futureLetterWriteNew": "Write a new letter",
+  "futureLettersDescription": "Messages you want to send to a day ahead.",
+  "journalEntryNotFound": "This journal entry couldn't be found.",
+  "journalMoodRequired": "Choose today's mood before writing. You can change it anytime.",
+  "journalChooseMood": "Choose mood",
+  "journalDeleteTitle": "Delete this entry?",
+  "journalDeleteBody": "The entry will be hidden now. Related files follow the soft-deletion policy.",
+  "keep": "Keep",
+  "delete": "Delete",
+  "journalDeleted": "Journal entry deleted.",
+  "saveFailed": "We couldn't save this yet. Please try again.",
+  "futureLetterOpenFailed": "We couldn't open this letter. Please try again.",
+  "dailyJournal": "Daily journal",
+  "journalChooseMoodFirst": "Choose a mood first",
+  "journalEditToday": "Edit today",
+  "journalWriteToday": "Write today",
+  "journalPastHint": "Scroll down through earlier months to revisit what you've written.",
+  "journalViewing": "Viewing",
+  "journalDaySemantics": "Day {day}, month {month}{mood}{written}",
+  "journalMoodSemantics": ", {mood}",
+  "journalWrittenSemantics": ", journal written",
+  "futureLettersEmpty": "No letters yet. Would you like to leave a note for your future self?",
+  "futureLetterWriteFirst": "Write your first letter",
+  "journalMyDay": "A day of mine",
+  "futureLetterScheduleState": "For {date} · {state}",
+  "futureLetterUnopened": "unopened",
+  "futureLetterOpened": "opened",
+  "futureLetterOptions": "Letter options",
+  "futureLetterDelete": "Delete letter",
+  "journalNoContent": "No content yet",
+  "journalLoadFailed": "Your journal couldn't be loaded right now.",
+  "futureLetterCreateTitle": "Letter to the future",
+  "futureLetterEditTitle": "Edit letter",
+  "journalWriteTitle": "Write for today",
+  "journalEditTitle": "Edit journal",
+  "futureLetterTitleHint": "A note for the days ahead",
+  "journalTitleHint": "Title",
+  "journalContentHint": "What would you like to tell yourself today?",
+  "journalTags": "Tags",
+  "journalTagsHint": "family, learning, gratitude",
+  "futureLetterDeviceReminder": "Remind me on this device",
+  "futureLetterReminderPrivate": "Notifications contain only a general reminder, never your private words.",
+  "futureLetterReminderDisabled": "Turn on notifications in Profile first.",
+  "futureLetterDeliveryDate": "Delivery date",
+  "futureLetterCanOpenEarly": "You can still open this letter before then",
+  "journalContentValidation": "Write a few lines and check your tags.",
+  "futureLetterReminderFailed": "Your letter was saved, but the device reminder couldn't be enabled.",
+  "journalSaveBeforeImage": "Save this page before adding an image to your note.",
+  "journalImageSaved": "Your image was saved privately.",
+  "journalImageTooLarge": "The image is larger than 10 MiB.",
+  "journalImageUnsupported": "Only JPG, PNG, WebP, or HEIC images are supported.",
+  "journalImageUploadFailed": "The image couldn't be uploaded. Please try again.",
+  "journalWritingDate": "Written · {date}",
+  "journalFullDate": "{day}/{month}/{year}",
+  "journalImageAttach": "Attach images",
+  "journalImagesInEntry": "Images in this entry",
+  "journalImageAdd": "Add image",
+  "journalImageSwipeHint": "Swipe or drag left and right to view images.",
+  "journalImageAddLater": "Save first, then add images whenever you like.",
+  "journalFilmStripSemantics": "Film strip with {count} attached images. Scroll horizontally to view them.",
+  "journalImageSemantics": "Attached image {index}",
+  "exploreTagline": "Turn the small things you complete into a gentle journey.",
+  "journeyCollection": "Journey collection",
+  "journeyUnlockedCount": "{count} memories unlocked",
+  "journeyCompletedMetric": "completed",
+  "journeyEnergyReady": "energy ready",
+  "journeySync": "Sync progress",
+  "journeyWaitingStops": "Stops ahead",
+  "journeyNextDestination": "Continue to the next stop",
+  "journeyStart": "Begin journey",
+  "journeyAllCompleted": "You've completed every available destination. A new journey will open soon.",
+  "journeyReady": "Your journey is ready.",
+  "journeyStartFailed": "We couldn't begin the journey. Please try again.",
+  "journeySyncFailed": "We couldn't sync your progress. Please try again.",
+  "destinationSemantics": "Destination {name}, {description}",
+  "destinationImageSemantics": "Image of {name}",
+  "destinationProvince": "Province",
+  "destinationCity": "City",
+  "destinationIsland": "Island",
+  "destinationHeritage": "Heritage site",
+  "destinationRegion": "Region",
+  "destinationDefault": "Destination",
+  "checkpointTitle": "Stop {number} · {title}",
+  "checkpointEnergy": "{earned}/{required} energy",
+  "journeyStartDescription": "Set out to reveal your first destination. Each stop uses accumulated energy, with rewards chosen by Muse.",
+  "journeyStatusNotStarted": "The world is waiting for you",
+  "journeyStatusInProgress": "Exploring",
+  "journeyStatusPaused": "Ready to continue",
+  "journeyStatusCompleted": "Journey completed",
+  "filterAll": "All",
+  "collectibleLandmark": "Landmarks",
+  "collectibleFood": "Food",
+  "collectibleItem": "Items",
+  "newLabel": "New",
+  "rarityCommon": "Common",
+  "rarityUncommon": "Uncommon",
+  "rarityRare": "Rare",
+  "rarityEpic": "Epic",
+  "rarityLegendary": "Legendary",
+  "collectionFilteredEmpty": "You haven't unlocked any {kind} on this journey yet.",
+  "collectionEmpty": "Complete a stop to unlock your first landmark, food, and item.",
+  "journeyLoadFailed": "Your journey couldn't be loaded right now.",
+  "futureLetterNotificationTitle": "A letter is waiting for you",
+  "futureLetterNotificationBody": "Open MuseMend whenever you feel ready.",
+  "futureLetterNotificationChannel": "Future letters",
+  "futureLetterNotificationChannelDescription": "Reminders when a future letter is ready to open",
+  "defaultCloudName": "Cloud"
 }

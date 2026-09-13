@@ -1,7 +1,7 @@
 # Onboarding tài khoản mới
 
 **Trạng thái:** `implemented`
-**Cập nhật:** 2026-09-12
+**Cập nhật:** 2026-09-13
 
 ## Mục tiêu và phạm vi
 
@@ -20,10 +20,17 @@ thẳng tới app. Ba bước gồm:
 2. Riêng tư: giới thiệu nhật ký trên thiết bị, dùng ngoại tuyến và sao lưu tùy chọn.
 3. Cá nhân hóa: tên hiển thị tùy chọn và một trong năm cách xưng hô.
 
+Ở bước đầu, nút quay lại thực hiện `AuthController.signOut()` rồi để auth router
+đưa người dùng về `/sign-in`; không điều hướng thẳng khi session vẫn còn vì router
+sẽ đưa tài khoản chưa onboarding quay trở lại. Từ bước hai trở đi, cùng nút đó chỉ
+quay về bước onboarding trước. Trong lúc sign-out/lưu đang chạy, nút bị khóa để
+tránh gửi thao tác lặp.
+
 Tên từ đăng ký được điền sẵn. Tên người dùng nhập ở bước cuối được ưu tiên; bỏ
 qua giữ tên hiện có. Nếu không có tên, các màn hình tiếp tục dùng fallback
-`Bạn của Muse`. Cách xưng hô được lưu cho cá nhân hóa nội dung về sau; chuỗi trong
-toàn app chưa được thay đổi trong lát cắt này.
+được dịch tương ứng với locale (tiếng Việt là `Bạn của Muse`). Cách xưng hô được
+lưu cho cá nhân hóa nội dung về sau; nội dung onboarding và nhãn năm lựa chọn đều
+lấy từ ARB, còn giá trị ghi DB vẫn là mã enum ổn định, không phải câu đã dịch.
 
 Ở bước cá nhân hóa, nhãn tên hiển thị nằm thành một dòng riêng phía trên ô nhập,
 không dùng floating label. Cách này tránh nhãn chồng lên viền ô khi màn hình hẹp
@@ -51,7 +58,8 @@ hay E2EE; hai năng lực đó phải được hoàn thiện trước khi phát 
 Migration backfill tài khoản hiện có thành đã hoàn tất để không thay đổi trải
 nghiệm đăng nhập của họ; tài khoản tạo sau migration có giá trị null và thấy flow.
 Integration test kiểm tra trạng thái ban đầu và RPC hoàn tất. Widget/DTO test kiểm
-tra mapping, nội dung ba bước và hành vi bỏ qua/lưu tên.
+tra mapping, nội dung ba bước, hành vi bỏ qua/lưu tên và nút quay về đăng nhập có
+gọi sign-out ở bước đầu.
 
 Rollback ứng dụng vẫn tương thích với hai cột mới. Sau khi migration đã deploy,
 không xóa cột/RPC trong rollback nóng; dùng forward migration nếu cần sửa. Offline,

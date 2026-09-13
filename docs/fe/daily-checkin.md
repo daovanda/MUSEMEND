@@ -1,7 +1,7 @@
 # Daily check-in và streak client
 
 **Trạng thái:** `in-progress`
-**Cập nhật:** 2026-09-07
+**Cập nhật:** 2026-09-13
 
 ## Mục tiêu và phạm vi
 
@@ -18,10 +18,11 @@ cầu. Khi app resume, shell gọi lại RPC; DB đảm bảo idempotent trong c
 Adapter ánh xạ trường domain `note` sang cột DB `note_short`; presentation không
 phụ thuộc trực tiếp vào tên cột Postgres.
 
-Page Home dùng artwork tĩnh cho năm mức: `awful → QUẠO`, `sad → TRỐNG RỖNG`,
-`okay → ỔN ÁP`, `good → THƯ GIÃN`, `great → CHỮA LÀNH`. Mapping nằm tại
-`features/checkin/presentation/mood_visuals.dart`; nhãn và ảnh chỉ thuộc
-presentation, enum gửi xuống repository vẫn là năm giá trị chuẩn.
+Page Home dùng artwork tĩnh cho năm mức `awful/sad/okay/good/great`. Mapping ảnh
+nằm tại `features/checkin/presentation/mood_visuals.dart`; nhãn mood lấy từ ARB
+(tiếng Việt lần lượt là `QUẠO`, `TRỐNG RỖNG`, `ỔN ÁP`, `THƯ GIÃN`, `CHỮA LÀNH`).
+Domain chỉ giữ năm giá trị DB cùng score, không chứa nhãn hoặc biểu tượng theo một
+ngôn ngữ cố định.
 
 ## Quy tắc dữ liệu và lỗi
 

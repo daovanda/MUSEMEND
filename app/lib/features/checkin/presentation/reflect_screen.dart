@@ -17,6 +17,7 @@ import 'package:musemend/features/journey/domain/journey_checkpoint.dart';
 import 'package:musemend/features/journey/domain/journey_dashboard.dart';
 import 'package:musemend/features/missions/presentation/missions_section.dart';
 import 'package:musemend/features/quotes/application/daily_quote_providers.dart';
+import 'package:musemend/l10n/generated/app_localizations.dart';
 
 class ReflectScreen extends ConsumerStatefulWidget {
   const ReflectScreen({super.key});
@@ -62,12 +63,11 @@ class _ReflectScreenState extends ConsumerState<ReflectScreen> {
           note: _noteController.text,
         );
     if (!mounted) return succeeded;
+    final strings = AppLocalizations.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          succeeded
-              ? 'Đã lưu check-in hôm nay.'
-              : 'Chưa thể lưu. Vui lòng thử lại.',
+          succeeded ? strings.checkinSaved : strings.checkinSaveFailed,
         ),
       ),
     );
@@ -247,8 +247,9 @@ class _SkyStatus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return Semantics(
-      label: '${energy ?? 0} năng lượng, streak $streak ngày',
+      label: strings.skyStatusSemantics(energy ?? 0, streak),
       child: Container(
         height: 36,
         padding: const EdgeInsets.symmetric(horizontal: 11),
@@ -301,6 +302,7 @@ class _MoodCheckinCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return ClipRRect(
       borderRadius: BorderRadius.circular(48),
       child: BackdropFilter(
@@ -317,14 +319,14 @@ class _MoodCheckinCard extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const SizedBox(
+              SizedBox(
                 height: 18,
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
-                    'Ngày hôm nay có dịu dàng với cậu không?',
+                    strings.checkinMoodPrompt,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Color(0xFF565C5E),
                       fontSize: 11,
                       height: 1.25,
@@ -362,11 +364,11 @@ class _MoodCheckinCard extends StatelessWidget {
                   Expanded(
                     flex: 2,
                     child: _MoodActionButton(
-                      label: 'LƯU NHANH',
+                      label: strings.checkinQuickSave,
                       semanticLabel:
                           hasExistingCheckin
-                              ? 'Cập nhật check-in hôm nay'
-                              : 'Lưu nhanh check-in hôm nay',
+                              ? strings.checkinUpdateToday
+                              : strings.checkinSaveToday,
                       onPressed: onSave,
                     ),
                   ),
@@ -374,7 +376,7 @@ class _MoodCheckinCard extends StatelessWidget {
                   Expanded(
                     flex: 3,
                     child: _MoodActionButton(
-                      label: 'LƯU VÀ VIẾT TÂM TƯ',
+                      label: strings.checkinSaveAndWrite,
                       onPressed: onSaveAndWrite,
                     ),
                   ),
@@ -404,6 +406,7 @@ class _MoodOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final visual = mood.visual;
+    final label = mood.localizedLabel(AppLocalizations.of(context));
     final top = (93 - visual.height) / 2;
     return Positioned(
       left: visual.left,
@@ -415,7 +418,7 @@ class _MoodOption extends StatelessWidget {
         child: Semantics(
           button: true,
           selected: selected,
-          label: visual.label,
+          label: label,
           excludeSemantics: true,
           child: Material(
             color: Colors.transparent,
@@ -459,7 +462,7 @@ class _MoodOption extends StatelessWidget {
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       child: Text(
-                        visual.label,
+                        label,
                         maxLines: 1,
                         style: const TextStyle(
                           color: Color(0xFF5B6163),
@@ -555,6 +558,7 @@ class _JourneyOverview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     final destination = journey?.destination;
     final checkpoints = destination?.checkpoints ?? const [];
     var currentNumber =
@@ -567,8 +571,11 @@ class _JourneyOverview extends StatelessWidget {
       }
     }
     return Semantics(
-      label:
-          'Hành trình ${destination?.name ?? 'đang chờ'}, trạm $currentNumber trên ${checkpoints.length}',
+      label: strings.journeyProgressSemantics(
+        destination?.name ?? strings.journeyWaiting,
+        currentNumber,
+        checkpoints.length,
+      ),
       child: SizedBox(
         height: 142,
         child: Column(
@@ -577,7 +584,8 @@ class _JourneyOverview extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  (destination?.name ?? 'HÀNH TRÌNH').toUpperCase(),
+                  (destination?.name ?? strings.journeyDefaultTitle)
+                      .toUpperCase(),
                   style: const TextStyle(
                     color: Color(0xFF343B3D),
                     fontSize: 16,
@@ -590,9 +598,9 @@ class _JourneyOverview extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    const Text(
-                      'Trạm',
-                      style: TextStyle(
+                    Text(
+                      strings.checkpointLabel,
+                      style: const TextStyle(
                         color: Color(0xFF697173),
                         fontSize: 9,
                         height: 1,
@@ -615,12 +623,15 @@ class _JourneyOverview extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             if (checkpoints.isEmpty)
-              const Expanded(
+              Expanded(
                 child: Center(
                   child: Text(
-                    'Hành trình sẽ xuất hiện khi dữ liệu trạm sẵn sàng.',
+                    strings.journeyDataWaiting,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 11, color: Color(0xFF697173)),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFF697173),
+                    ),
                   ),
                 ),
               )
@@ -787,13 +798,13 @@ class _SkyQuoteCard extends ConsumerWidget {
                   (_, _) => Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text(
-                        'Chưa thể tải lời nhắn hôm nay.',
+                      Text(
+                        AppLocalizations.of(context).quoteLoadFailed,
                         textAlign: TextAlign.center,
                       ),
                       TextButton(
                         onPressed: () => ref.invalidate(dailyQuoteProvider),
-                        child: const Text('Thử lại'),
+                        child: Text(AppLocalizations.of(context).retry),
                       ),
                     ],
                   ),
@@ -810,20 +821,21 @@ class _ShareMoments extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Row(
+        Row(
           children: [
-            Icon(
+            const Icon(
               Icons.auto_awesome_outlined,
               size: 18,
               color: Color(0xFF366672),
             ),
-            SizedBox(width: 7),
+            const SizedBox(width: 7),
             Text(
-              'Chia sẻ khoảnh khắc',
-              style: TextStyle(
+              strings.shareMoments,
+              style: const TextStyle(
                 color: Color(0xFF4F666A),
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -836,20 +848,20 @@ class _ShareMoments extends StatelessWidget {
           height: 244,
           child: ListView(
             scrollDirection: Axis.horizontal,
-            children: const [
+            children: [
               _MomentCard(
-                title: 'Tuần sống lành',
-                subtitle: 'Template 7 ngày',
+                title: strings.shareWeekTitle,
+                subtitle: strings.shareWeekSubtitle,
                 preview: _MomentPreview.lines,
               ),
               _MomentCard(
-                title: 'Tháng qua của bạn',
-                subtitle: 'Tổng hợp 6 ảnh',
+                title: strings.shareMonthTitle,
+                subtitle: strings.shareMonthSubtitle,
                 preview: _MomentPreview.grid,
               ),
               _MomentCard(
-                title: 'Một năm dịu dàng',
-                subtitle: 'Những điều đáng nhớ',
+                title: strings.shareYearTitle,
+                subtitle: strings.shareYearSubtitle,
                 preview: _MomentPreview.sparkles,
               ),
             ],
@@ -925,13 +937,15 @@ class _MomentCard extends StatelessWidget {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      'Mẫu chia sẻ “$title” sẽ được hoàn thiện ở vòng tiếp theo.',
+                      AppLocalizations.of(
+                        context,
+                      ).shareTemplateComingSoon(title),
                     ),
                   ),
                 );
               },
               icon: const Icon(Icons.share_outlined, size: 15),
-              label: const Text('Chia sẻ'),
+              label: Text(AppLocalizations.of(context).shareAction),
               style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFF366672),
                 backgroundColor: const Color(0xFFF3F2ED),
@@ -1061,9 +1075,12 @@ class _ErrorView extends StatelessWidget {
           children: [
             const Icon(Icons.cloud_off_rounded, size: 48),
             const SizedBox(height: 12),
-            const Text('Chưa thể tải dữ liệu của bạn.'),
+            Text(AppLocalizations.of(context).userDataLoadFailed),
             const SizedBox(height: 12),
-            OutlinedButton(onPressed: onRetry, child: const Text('Thử lại')),
+            OutlinedButton(
+              onPressed: onRetry,
+              child: Text(AppLocalizations.of(context).retry),
+            ),
           ],
         ),
       ),

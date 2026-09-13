@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:musemend/app/theme/muse_colors.dart';
 import 'package:musemend/core/presentation/muse_ui.dart';
+import 'package:musemend/features/auth/application/auth_providers.dart';
 import 'package:musemend/features/onboarding/application/onboarding_providers.dart';
 import 'package:musemend/features/onboarding/domain/onboarding_profile.dart';
+import 'package:musemend/l10n/generated/app_localizations.dart';
 
 class OnboardingScreen extends ConsumerWidget {
   const OnboardingScreen({super.key});
@@ -62,12 +64,13 @@ class _OnboardingFlowState extends ConsumerState<_OnboardingFlow> {
   }
 
   Future<void> _finish({required bool skip}) async {
+    final strings = AppLocalizations.of(context);
     FocusManager.instance.primaryFocus?.unfocus();
     final name = _nameController.text.trim();
     if (!skip && name.isNotEmpty && (name.length < 2 || name.length > 80)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tên cần từ 2 đến 80 ký tự.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(strings.onboardingNameLength)));
       return;
     }
     await ref
@@ -78,9 +81,21 @@ class _OnboardingFlowState extends ConsumerState<_OnboardingFlow> {
         );
   }
 
+  Future<void> _returnToSignIn() async {
+    FocusManager.instance.primaryFocus?.unfocus();
+    final signedOut = await ref.read(authControllerProvider.notifier).signOut();
+    if (!signedOut && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context).authNetworkError)),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     final operation = ref.watch(onboardingControllerProvider);
+    final authOperation = ref.watch(authControllerProvider);
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 12, 0, 20),
       child: MuseContentFrame(
@@ -88,22 +103,22 @@ class _OnboardingFlowState extends ConsumerState<_OnboardingFlow> {
           children: [
             Row(
               children: [
-                if (_step > 0)
-                  IconButton(
-                    tooltip: 'Quay lại',
-                    onPressed:
-                        operation.isLoading
-                            ? null
-                            : () => setState(() => _step--),
-                    icon: const Icon(Icons.arrow_back_rounded),
-                  )
-                else
-                  const SizedBox(width: 48),
+                IconButton(
+                  tooltip:
+                      _step == 0 ? strings.onboardingBackToSignIn : strings.back,
+                  onPressed:
+                      operation.isLoading || authOperation.isLoading
+                          ? null
+                          : _step == 0
+                          ? _returnToSignIn
+                          : () => setState(() => _step--),
+                  icon: const Icon(Icons.arrow_back_rounded),
+                ),
                 const Expanded(child: MuseTopBar()),
                 TextButton(
                   onPressed:
                       operation.isLoading ? null : () => _finish(skip: true),
-                  child: const Text('Bỏ qua'),
+                  child: Text(strings.skip),
                 ),
               ],
             ),
@@ -127,7 +142,8 @@ class _OnboardingFlowState extends ConsumerState<_OnboardingFlow> {
                       controller: _nameController,
                       selected: _preferredAddress,
                       fallbackName:
-                          widget.profile.displayName ?? 'Bạn của Muse',
+                          widget.profile.displayName ??
+                          strings.onboardingFallbackName,
                       onSelected:
                           (value) => setState(() => _preferredAddress = value),
                     ),
@@ -137,8 +153,8 @@ class _OnboardingFlowState extends ConsumerState<_OnboardingFlow> {
             ),
             if (operation.hasError) ...[
               const SizedBox(height: 8),
-              const Text(
-                'Chưa thể lưu. Hãy kiểm tra kết nối rồi thử lại.',
+              Text(
+                strings.onboardingSaveFailed,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Color(0xFF9A473D)),
               ),
@@ -177,7 +193,11 @@ class _OnboardingFlowState extends ConsumerState<_OnboardingFlow> {
                             ? Icons.cloud_done_outlined
                             : Icons.arrow_forward_rounded,
                       ),
-              label: Text(_step == 2 ? 'Bắt đầu cùng Muse' : 'Tiếp tục'),
+              label: Text(
+                _step == 2
+                    ? strings.onboardingStartWithMuse
+                    : strings.continueLabel,
+              ),
             ),
           ],
         ),
@@ -191,12 +211,13 @@ class _WelcomeStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return Column(
       children: [
         const _CloudEmblem(icon: Icons.waving_hand_rounded),
         const SizedBox(height: 24),
         Text(
-          'Một nơi để bạn lắng nghe mình,\ntheo cách nhẹ nhàng hơn.',
+          strings.onboardingWelcomeHeadline,
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
             color: MuseColors.ink,
@@ -205,26 +226,25 @@ class _WelcomeStep extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 24),
-        const _OnboardingCard(
+        _OnboardingCard(
           icon: Icons.sentiment_satisfied_alt_rounded,
           tint: MuseColors.sky,
-          title: 'Gọi tên cảm xúc',
-          description: 'Nhận ra hôm nay bạn đang cảm thấy thế nào.',
+          title: strings.onboardingEmotionTitle,
+          description: strings.onboardingEmotionDescription,
         ),
         const SizedBox(height: 12),
-        const _OnboardingCard(
+        _OnboardingCard(
           icon: Icons.lock_outline_rounded,
           tint: MuseColors.mint,
-          title: 'Viết cho riêng mình',
-          description: 'Một trang nhỏ để cất những điều khó nói thành lời.',
+          title: strings.onboardingPrivateWritingTitle,
+          description: strings.onboardingPrivateWritingDescription,
         ),
         const SizedBox(height: 12),
-        const _OnboardingCard(
+        _OnboardingCard(
           icon: Icons.spa_outlined,
           tint: Color(0xFFF8E6DC),
-          title: 'Chăm sóc bằng bước nhỏ',
-          description:
-              'Những việc vừa sức, đủ để ngày hôm nay dịu hơn một chút.',
+          title: strings.onboardingSmallStepsTitle,
+          description: strings.onboardingSmallStepsDescription,
         ),
       ],
     );
@@ -236,12 +256,13 @@ class _PrivacyStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return Column(
       children: [
         const _CloudEmblem(icon: Icons.shield_outlined),
         const SizedBox(height: 24),
         Text(
-          'Những điều riêng tư của bạn\nnên thuộc về bạn.',
+          strings.onboardingPrivacyHeadline,
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
             color: MuseColors.ink,
@@ -251,7 +272,7 @@ class _PrivacyStep extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          'MuseMend đang được xây dựng theo hướng riêng tư và chủ động.',
+          strings.onboardingPrivacyBody,
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
             color: MuseColors.mutedInk,
@@ -259,25 +280,25 @@ class _PrivacyStep extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 24),
-        const _OnboardingCard(
+        _OnboardingCard(
           icon: Icons.lock_rounded,
           tint: MuseColors.mint,
-          title: 'Nhật ký lưu trên thiết bị',
-          description: 'Mọi tâm sự của bạn được giữ an toàn ngay tại đây.',
+          title: strings.onboardingDeviceJournalTitle,
+          description: strings.onboardingDeviceJournalDescription,
         ),
         const SizedBox(height: 12),
-        const _OnboardingCard(
+        _OnboardingCard(
           icon: Icons.wifi_off_rounded,
           tint: MuseColors.sky,
-          title: 'Dùng được khi ngoại tuyến',
-          description: 'Không cần mạng, Mây vẫn luôn ở bên.',
+          title: strings.onboardingOfflineTitle,
+          description: strings.onboardingOfflineDescription,
         ),
         const SizedBox(height: 12),
-        const _OnboardingCard(
+        _OnboardingCard(
           icon: Icons.cloud_sync_outlined,
           tint: MuseColors.lavender,
-          title: 'Sao lưu là tùy chọn',
-          description: 'Chỉ đồng bộ khi bạn thực sự muốn.',
+          title: strings.onboardingOptionalBackupTitle,
+          description: strings.onboardingOptionalBackupDescription,
         ),
       ],
     );
@@ -319,6 +340,7 @@ class _NameStepState extends State<_NameStep> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     final typedName = widget.controller.text.trim();
     final previewName = typedName.isEmpty ? widget.fallbackName : typedName;
     return Column(
@@ -327,7 +349,7 @@ class _NameStepState extends State<_NameStep> {
         const _CloudEmblem(icon: Icons.cloud_outlined),
         const SizedBox(height: 20),
         Text(
-          'Mây nên gọi bạn là gì?',
+          strings.onboardingNamePrompt,
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
             color: MuseColors.ink,
@@ -335,8 +357,8 @@ class _NameStepState extends State<_NameStep> {
           ),
         ),
         const SizedBox(height: 8),
-        const Text(
-          'Bạn có thể đổi lại bất kỳ lúc nào trong trang Cá nhân.',
+        Text(
+          strings.onboardingNameCanChange,
           textAlign: TextAlign.center,
           style: TextStyle(color: MuseColors.mutedInk),
         ),
@@ -346,7 +368,7 @@ class _NameStepState extends State<_NameStep> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Tên bạn muốn hiển thị',
+                strings.onboardingDisplayNameLabel,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: MuseColors.teal,
                   fontWeight: FontWeight.w800,
@@ -358,16 +380,16 @@ class _NameStepState extends State<_NameStep> {
                 maxLength: 80,
                 textCapitalization: TextCapitalization.words,
                 textInputAction: TextInputAction.done,
-                decoration: const InputDecoration(
-                  hintText: 'Nhập tên hoặc để trống',
-                  prefixIcon: Icon(Icons.person_outline_rounded),
+                decoration: InputDecoration(
+                  hintText: strings.onboardingNameHint,
+                  prefixIcon: const Icon(Icons.person_outline_rounded),
                 ),
               ),
             ],
           ),
         ),
         const SizedBox(height: 18),
-        const MuseSectionLabel('Cách xưng hô'),
+        MuseSectionLabel(strings.onboardingAddressLabel),
         const SizedBox(height: 10),
         Wrap(
           spacing: 8,
@@ -375,7 +397,7 @@ class _NameStepState extends State<_NameStep> {
           children: [
             for (final address in PreferredAddress.values)
               MusePill(
-                label: address.label,
+                label: _preferredAddressLabel(strings, address),
                 selected: widget.selected == address,
                 onTap: () => widget.onSelected(address),
               ),
@@ -389,7 +411,7 @@ class _NameStepState extends State<_NameStep> {
               const Icon(Icons.waving_hand_outlined, color: MuseColors.teal),
               const SizedBox(height: 10),
               Text(
-                'Chào $previewName, rất vui được đồng hành cùng bạn!',
+                strings.onboardingGreeting(previewName),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: MuseColors.ink,
@@ -531,6 +553,7 @@ class _OnboardingError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return Center(
       child: MuseContentFrame(
         child: MuseGlassCard(
@@ -539,12 +562,12 @@ class _OnboardingError extends StatelessWidget {
             children: [
               const Icon(Icons.cloud_off_rounded, size: 40),
               const SizedBox(height: 12),
-              const Text('Chưa thể chuẩn bị lời chào của Muse.'),
+              Text(strings.onboardingLoadFailed),
               const SizedBox(height: 12),
               FilledButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh_rounded),
-                label: const Text('Thử lại'),
+                label: Text(strings.retry),
               ),
             ],
           ),
@@ -553,3 +576,14 @@ class _OnboardingError extends StatelessWidget {
     );
   }
 }
+
+String _preferredAddressLabel(
+  AppLocalizations strings,
+  PreferredAddress address,
+) => switch (address) {
+  PreferredAddress.cauMinh => strings.preferredAddressCauMinh,
+  PreferredAddress.banMinh => strings.preferredAddressBanMinh,
+  PreferredAddress.anhEm => strings.preferredAddressAnhEm,
+  PreferredAddress.chiEm => strings.preferredAddressChiEm,
+  PreferredAddress.tenRieng => strings.preferredAddressNameOnly,
+};

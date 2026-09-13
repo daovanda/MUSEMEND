@@ -53,7 +53,6 @@ void main() {
       final visual = mood.visual;
       final data = await rootBundle.load(visual.assetPath);
 
-      expect(visual.label, isNotEmpty, reason: mood.databaseValue);
       expect(data.lengthInBytes, greaterThan(0), reason: visual.assetPath);
     }
   });

@@ -1,14 +1,13 @@
 enum MissionType {
-  daily('daily', 'Ngày'),
-  weekly('weekly', 'Tuần'),
-  monthly('monthly', 'Tháng'),
-  yearly('yearly', 'Năm'),
-  custom('custom', 'Tùy chỉnh');
+  daily('daily'),
+  weekly('weekly'),
+  monthly('monthly'),
+  yearly('yearly'),
+  custom('custom');
 
-  const MissionType(this.databaseValue, this.label);
+  const MissionType(this.databaseValue);
 
   final String databaseValue;
-  final String label;
 
   static MissionType fromDatabase(String value) {
     if (value == 'one_time') return MissionType.custom;

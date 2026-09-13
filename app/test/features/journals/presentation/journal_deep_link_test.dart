@@ -6,6 +6,7 @@ import 'package:musemend/features/journals/domain/journal_entry.dart';
 import 'package:musemend/features/journals/domain/journal_media.dart';
 import 'package:musemend/features/journals/domain/journal_repository.dart';
 import 'package:musemend/features/journals/presentation/journal_screen.dart';
+import 'package:musemend/l10n/generated/app_localizations.dart';
 
 void main() {
   testWidgets('opens the journal entry selected by a deep link', (
@@ -29,6 +30,9 @@ void main() {
           ),
         ],
         child: MaterialApp(
+          locale: const Locale('vi'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
           builder:
               (context, child) => MediaQuery(
                 data: MediaQuery.of(context).copyWith(disableAnimations: true),
@@ -68,6 +72,9 @@ void main() {
           ),
         ],
         child: MaterialApp(
+          locale: const Locale('vi'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
           builder:
               (context, child) => MediaQuery(
                 data: MediaQuery.of(context).copyWith(disableAnimations: true),

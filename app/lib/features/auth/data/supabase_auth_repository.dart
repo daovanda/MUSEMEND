@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:musemend/features/auth/domain/auth_repository.dart';
 import 'package:musemend/features/auth/domain/auth_failure.dart';
 import 'package:musemend/features/auth/domain/auth_session.dart';
@@ -13,7 +14,27 @@ class SupabaseAuthRepository implements AuthRepository {
 
   @override
   Stream<AuthSession?> watchSession() async* {
-    yield currentSession;
+    final restoredSession = _client.auth.currentSession;
+    if (restoredSession == null) {
+      yield null;
+    } else {
+      try {
+        final response = await _client.auth.getUser(
+          restoredSession.accessToken,
+        );
+        final remoteUser = response.user;
+        if (remoteUser == null || remoteUser.id != restoredSession.user.id) {
+          await _client.auth.signOut();
+          yield null;
+        } else {
+          yield _mapSession(restoredSession);
+        }
+      } on AuthException catch (error) {
+        if (!shouldClearRestoredSession(error)) rethrow;
+        await _client.auth.signOut();
+        yield null;
+      }
+    }
     yield* _client.auth.onAuthStateChange.map(
       (event) => _mapSession(event.session),
     );
@@ -72,4 +93,17 @@ class SupabaseAuthRepository implements AuthRepository {
     }
     return const AuthFailure(AuthFailureCode.unknown);
   }
+}
+
+@visibleForTesting
+bool shouldClearRestoredSession(AuthException error) {
+  if (error is AuthRetryableFetchException) return false;
+  if (const {'401', '403', '404'}.contains(error.statusCode)) return true;
+  return const {
+    'bad_jwt',
+    'user_not_found',
+    'session_not_found',
+    'session_expired',
+    'session_missing',
+  }.contains(error.code);
 }

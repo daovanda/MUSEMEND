@@ -8,6 +8,7 @@ import 'package:musemend/features/journals/domain/journal_media.dart';
 import 'package:musemend/features/notifications/application/notification_providers.dart';
 import 'package:musemend/features/notifications/domain/future_letter_reminder.dart';
 import 'package:musemend/features/profile/application/profile_providers.dart';
+import 'package:musemend/l10n/generated/app_localizations.dart';
 
 /// Full-page writing experience. Unlike mission/settings forms, writing is not
 /// constrained to a dialog: the keyboard, text and private attachments get
@@ -64,6 +65,7 @@ class _JournalEditorScreenState extends ConsumerState<JournalEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     final existingMedia = _media;
     final letterTitleStyle = TextStyle(
       fontFamily: 'serif',
@@ -105,11 +107,11 @@ class _JournalEditorScreenState extends ConsumerState<JournalEditorScreen> {
                 title:
                     _isLetter
                         ? (widget.entry == null
-                            ? 'Thư gửi tương lai'
-                            : 'Sửa lá thư')
+                            ? strings.futureLetterCreateTitle
+                            : strings.futureLetterEditTitle)
                         : (widget.entry == null
-                            ? 'Viết cho hôm nay'
-                            : 'Sửa nhật ký'),
+                            ? strings.journalWriteTitle
+                            : strings.journalEditTitle),
                 onBack: () => Navigator.of(context).maybePop(),
                 onSave: _saving ? null : _save,
               ),
@@ -156,7 +158,9 @@ class _JournalEditorScreenState extends ConsumerState<JournalEditorScreen> {
                       textCapitalization: TextCapitalization.sentences,
                       decoration: inputDecoration.copyWith(
                         hintText:
-                            _isLetter ? 'Một lời nhắn cho mai sau' : 'Tiêu đề',
+                            _isLetter
+                                ? strings.futureLetterTitleHint
+                                : strings.journalTitleHint,
                         hintStyle: letterTitleStyle.copyWith(
                           color: MuseColors.mutedInk.withValues(alpha: .55),
                           fontStyle: FontStyle.italic,
@@ -174,7 +178,7 @@ class _JournalEditorScreenState extends ConsumerState<JournalEditorScreen> {
                       maxLines: null,
                       textCapitalization: TextCapitalization.sentences,
                       decoration: inputDecoration.copyWith(
-                        hintText: 'Hôm nay bạn muốn kể điều gì với chính mình?',
+                        hintText: strings.journalContentHint,
                         hintStyle: letterHintStyle,
                       ),
                       style: letterBodyStyle,
@@ -189,7 +193,7 @@ class _JournalEditorScreenState extends ConsumerState<JournalEditorScreen> {
                     Row(
                       children: [
                         Text(
-                          'Gắn nhãn',
+                          strings.journalTags,
                           style: TextStyle(
                             fontFamily: 'serif',
                             fontSize: 15,
@@ -211,7 +215,7 @@ class _JournalEditorScreenState extends ConsumerState<JournalEditorScreen> {
                       onChanged: (_) => setState(() {}),
                       maxLength: 320,
                       decoration: inputDecoration.copyWith(
-                        hintText: 'gia đình, học tập, biết ơn',
+                        hintText: strings.journalTagsHint,
                         hintStyle: TextStyle(
                           fontFamily: 'serif',
                           fontSize: 15,
@@ -242,7 +246,7 @@ class _JournalEditorScreenState extends ConsumerState<JournalEditorScreen> {
                                 ? (value) =>
                                     setState(() => _notifyOnDevice = value)
                                 : null,
-                        title: const Text('Nhắc tôi trên thiết bị'),
+                        title: Text(strings.futureLetterDeviceReminder),
                         subtitle: Text(
                           ref
                                       .watch(accountOverviewProvider)
@@ -250,8 +254,8 @@ class _JournalEditorScreenState extends ConsumerState<JournalEditorScreen> {
                                       ?.settings
                                       .notificationEnabled ==
                                   true
-                              ? 'Thông báo chỉ chứa lời nhắc chung, không hiển thị nội dung riêng tư.'
-                              : 'Bật thông báo trong Cá nhân trước khi dùng.',
+                              ? strings.futureLetterReminderPrivate
+                              : strings.futureLetterReminderDisabled,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -267,7 +271,7 @@ class _JournalEditorScreenState extends ConsumerState<JournalEditorScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   Text(
-                                    'Ngày thư đến',
+                                    strings.futureLetterDeliveryDate,
                                     style: TextStyle(
                                       fontFamily: 'serif',
                                       fontSize: 15,
@@ -288,7 +292,7 @@ class _JournalEditorScreenState extends ConsumerState<JournalEditorScreen> {
                                   ),
                                   const SizedBox(height: 3),
                                   Text(
-                                    'Bạn vẫn có thể mở thư trước ngày này',
+                                    strings.futureLetterCanOpenEarly,
                                     style:
                                         Theme.of(context).textTheme.bodySmall,
                                   ),
@@ -319,10 +323,11 @@ class _JournalEditorScreenState extends ConsumerState<JournalEditorScreen> {
   }
 
   Future<void> _save() async {
+    final strings = AppLocalizations.of(context);
     if (_content.text.trim().isEmpty || !_validTags(_tags.text)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Hãy viết vài dòng và kiểm tra lại tag.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(strings.journalContentValidation)));
       return;
     }
     setState(() => _saving = true);
@@ -345,9 +350,9 @@ class _JournalEditorScreenState extends ConsumerState<JournalEditorScreen> {
     if (!mounted) return;
     if (id == null) {
       setState(() => _saving = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Chưa thể lưu. Hãy thử lại.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(strings.saveFailed)));
       return;
     }
     _savedId = id;
@@ -358,6 +363,15 @@ class _JournalEditorScreenState extends ConsumerState<JournalEditorScreen> {
   }
 
   Future<void> _syncReminder(String id) async {
+    final strings = AppLocalizations.of(context);
+    final reminder = FutureLetterReminder(
+      journalId: id,
+      deliverAt: _delivery,
+      title: strings.futureLetterNotificationTitle,
+      body: strings.futureLetterNotificationBody,
+      channelName: strings.futureLetterNotificationChannel,
+      channelDescription: strings.futureLetterNotificationChannelDescription,
+    );
     try {
       final service = ref.read(notificationServiceProvider);
       if (!_notifyOnDevice) {
@@ -365,17 +379,13 @@ class _JournalEditorScreenState extends ConsumerState<JournalEditorScreen> {
         return;
       }
       if (await service.requestPermission()) {
-        await service.scheduleFutureLetter(
-          FutureLetterReminder(journalId: id, deliverAt: _delivery),
-        );
+        await service.scheduleFutureLetter(reminder);
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Đã lưu thư, nhưng chưa bật được nhắc trên thiết bị.',
-            ),
+          SnackBar(
+            content: Text(strings.futureLetterReminderFailed),
           ),
         );
       }
@@ -386,8 +396,8 @@ class _JournalEditorScreenState extends ConsumerState<JournalEditorScreen> {
     final id = _savedId;
     if (id == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Hãy lưu trang trước, rồi thêm ảnh vào phần ghi chú.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).journalSaveBeforeImage),
         ),
       );
       return;
@@ -406,10 +416,14 @@ class _JournalEditorScreenState extends ConsumerState<JournalEditorScreen> {
       }
     }
     final message = switch (result) {
-      JournalImageResult.success => 'Ảnh đã được lưu riêng tư.',
-      JournalImageResult.tooLarge => 'Ảnh vượt quá giới hạn 10 MiB.',
-      JournalImageResult.unsupported => 'Chỉ hỗ trợ JPG, PNG, WebP hoặc HEIC.',
-      JournalImageResult.failed => 'Chưa thể tải ảnh lên. Hãy thử lại.',
+      JournalImageResult.success =>
+        AppLocalizations.of(context).journalImageSaved,
+      JournalImageResult.tooLarge =>
+        AppLocalizations.of(context).journalImageTooLarge,
+      JournalImageResult.unsupported =>
+        AppLocalizations.of(context).journalImageUnsupported,
+      JournalImageResult.failed =>
+        AppLocalizations.of(context).journalImageUploadFailed,
       JournalImageResult.canceled => '',
     };
     ScaffoldMessenger.of(
@@ -443,12 +457,16 @@ class _JournalEditorScreenState extends ConsumerState<JournalEditorScreen> {
       _fullDateLabel(widget.entry?.entryDate?.toLocal() ?? _vietnamToday());
 
   String get _writingDateLabel =>
-      'Ngày viết · ${_fullDateLabel(widget.entry?.createdAt.toLocal() ?? DateTime.now())}';
+      AppLocalizations.of(context).journalWritingDate(
+        _fullDateLabel(widget.entry?.createdAt.toLocal() ?? DateTime.now()),
+      );
 
   String _fullDateLabel(DateTime value) =>
-      'Ngày ${value.day.toString().padLeft(2, '0')} '
-      'tháng ${value.month.toString().padLeft(2, '0')} '
-      'năm ${value.year}';
+      AppLocalizations.of(context).journalFullDate(
+        value.day.toString().padLeft(2, '0'),
+        value.month.toString().padLeft(2, '0'),
+        value.year,
+      );
 
   DateTime _vietnamToday() {
     final now = DateTime.now().toUtc().add(const Duration(hours: 7));
@@ -472,6 +490,7 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 4, 14, 8),
       child: Row(
@@ -479,7 +498,7 @@ class _TopBar extends StatelessWidget {
           IconButton(
             onPressed: onBack,
             icon: const Icon(Icons.arrow_back_rounded),
-            tooltip: 'Quay lại',
+            tooltip: strings.back,
           ),
           Expanded(
             child: Text(title, style: Theme.of(context).textTheme.titleLarge),
@@ -487,7 +506,7 @@ class _TopBar extends StatelessWidget {
           TextButton.icon(
             onPressed: onSave,
             icon: const Icon(Icons.check_rounded),
-            label: const Text('Lưu'),
+            label: Text(strings.save),
           ),
         ],
       ),
@@ -508,6 +527,7 @@ class _AttachmentTray extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -516,14 +536,16 @@ class _AttachmentTray extends StatelessWidget {
             const Icon(Icons.image_outlined, size: 18, color: MuseColors.teal),
             const SizedBox(width: 7),
             Text(
-              media.isEmpty ? 'Đính kèm ảnh' : 'Ảnh trong trang viết',
+              media.isEmpty
+                  ? strings.journalImageAttach
+                  : strings.journalImagesInEntry,
               style: Theme.of(context).textTheme.labelLarge,
             ),
             const Spacer(),
             TextButton.icon(
               onPressed: enabled ? onAdd : null,
               icon: const Icon(Icons.add_photo_alternate_outlined, size: 18),
-              label: const Text('Thêm ảnh'),
+              label: Text(strings.journalImageAdd),
             ),
           ],
         ),
@@ -532,7 +554,7 @@ class _AttachmentTray extends StatelessWidget {
           _FilmStrip(media: media),
           const SizedBox(height: 8),
           Text(
-            'Vuốt hoặc kéo sang trái/phải để xem ảnh.',
+            strings.journalImageSwipeHint,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: MuseColors.mutedInk,
               fontStyle: FontStyle.italic,
@@ -540,7 +562,7 @@ class _AttachmentTray extends StatelessWidget {
           ),
         ] else
           Text(
-            'Bạn có thể lưu trước rồi thêm ảnh vào bất kỳ lúc nào.',
+            strings.journalImageAddLater,
             style: Theme.of(context).textTheme.bodySmall,
           ),
       ],
@@ -556,8 +578,9 @@ class _FilmStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label:
-          'Dải ảnh đính kèm gồm ${media.length} ảnh. Có thể kéo ngang để xem.',
+      label: AppLocalizations.of(
+        context,
+      ).journalFilmStripSemantics(media.length),
       child: Container(
         height: 178,
         decoration: BoxDecoration(
@@ -600,7 +623,7 @@ class _FilmFrame extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final signedUrl = ref.watch(journalMediaUrlProvider(media.storagePath));
     return Semantics(
-      label: 'Ảnh đính kèm ${index + 1}',
+      label: AppLocalizations.of(context).journalImageSemantics(index + 1),
       image: true,
       child: SizedBox(
         width: 148,

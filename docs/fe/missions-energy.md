@@ -64,6 +64,11 @@ placeholder code-native vì landmark/food thuộc catalog động; không crop c
 Figma vào nhiệm vụ. Toàn nhóm nằm trên panel gradient xanh nhạt sang tím nhạt,
 bo góc và viền white nhẹ đúng layer Home.
 
+Mọi nhãn, loại nhiệm vụ, validation, lịch và trạng thái rỗng/lỗi của client lấy
+từ ARB. Tên/mô tả gợi ý Muse vẫn là catalog động từ
+`mission_template_translations`; nhiệm vụ do user tự viết không bị dịch. Icon của
+gợi ý dùng ký hiệu trung tính thay vì đoán theo từ khóa tiếng Việt trong nội dung.
+
 ## RPC và mapping
 
 - `create_scheduled_mission`: template hoặc user-created với loại/lịch; UUID v4

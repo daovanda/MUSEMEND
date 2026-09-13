@@ -1,7 +1,7 @@
 # Authentication client
 
 **Trạng thái:** `in-progress`
-**Cập nhật:** 2026-09-10
+**Cập nhật:** 2026-09-13
 
 ## Mục tiêu và phạm vi
 
@@ -16,6 +16,13 @@ gọi Supabase Auth. `AuthController` điều phối thao tác và trạng thái
 `/splash` → `/sign-in`; sau khi có session, router đọc trạng thái onboarding để
 đưa tài khoản mới tới `/onboarding` và tài khoản đã hoàn tất tới `/reflect`.
 
+Khi khởi động, session khôi phục từ bộ nhớ thiết bị chưa được coi là đăng nhập
+chỉ vì token còn tồn tại cục bộ. Adapter gọi Supabase Auth để xác thực user trước
+khi phát session cho router. Nếu user/session đã bị thu hồi, hết hạn hoặc không
+còn tồn tại, adapter xóa session cục bộ và router trở về `/sign-in`. Lỗi mạng tạm
+thời và lỗi máy chủ không tự động đăng xuất người dùng. Vì vậy chỉ tài khoản hợp
+lệ có profile chưa hoàn tất mới được chuyển tới `/onboarding`.
+
 Màn auth dùng cùng ngôn ngữ thị giác với Bầu trời: artwork phong cảnh và mascot
 cục bộ, nền chuyển từ xanh trời sang kem/tím pastel, logo gradient và form kính
 sáng. Ở điện thoại, thương hiệu nằm trên form; từ 820dp, màn hình tách thành vùng
@@ -23,6 +30,9 @@ chào đón và form để tận dụng chiều ngang. Form cố định palette
 đủ trên cả theme hệ thống tối, tránh trường hợp nền tối kết hợp với surface kính
 sáng làm chữ và input bị xám/mờ. Chuyển đăng nhập/đăng ký dùng animation 220ms và
 tự bỏ focus bàn phím nhưng không thay đổi repository hay flow xác thực.
+Toàn bộ tiêu đề, form, validation, lỗi an toàn và accessibility semantics lấy từ
+ARB theo locale hiện hành; adapter Auth không tự tạo thông báo theo một ngôn ngữ
+cố định.
 
 Phong cảnh và hai vùng sương pastel trôi ngược chiều nhau với biên độ 4–15dp,
 chu kỳ 18 giây và đường cong `easeInOutSine`. Ảnh nền được phóng nhẹ 1.035 lần để
@@ -53,6 +63,8 @@ Widget test cũng kiểm tra màn auth ở dark theme vẫn giữ nền kem và 
 `MuseColors.ink`, đồng thời artwork nền/mascot lấy từ asset bundle nội bộ.
 Test Reduce Motion xác nhận transform nền không đổi theo thời gian khi animation
 bị vô hiệu hóa.
+Unit test session policy xác nhận lỗi `user_not_found`/session hết hạn làm sạch
+session khôi phục, còn lỗi kết nối có thể retry không làm mất đăng nhập cục bộ.
 Android QA đã xác nhận đăng nhập, session restore và sign-out. Database integration
 kiểm tra bootstrap cùng cách ly hai tài khoản. Còn phải nghiệm thu account/session
 token hết hạn cưỡng bức và luồng sign-up có email confirmation trên cấu hình thật.

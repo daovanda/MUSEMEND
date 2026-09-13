@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:musemend/features/checkin/domain/mood.dart';
+import 'package:musemend/l10n/generated/app_localizations.dart';
 
 @immutable
 class MoodVisualSpec {
   const MoodVisualSpec({
-    required this.label,
     required this.assetPath,
     required this.backgroundColor,
     required this.left,
@@ -14,7 +14,6 @@ class MoodVisualSpec {
     required this.imageSize,
   });
 
-  final String label;
   final String assetPath;
   final Color backgroundColor;
   final double left;
@@ -24,10 +23,9 @@ class MoodVisualSpec {
   final double imageSize;
 }
 
-/// Visual tokens measured from Figma page Home, frame Bầu trời.
+/// Visual tokens measured from the Sky frame on Figma's Home page.
 const moodVisualSpecs = <Mood, MoodVisualSpec>{
   Mood.awful: MoodVisualSpec(
-    label: 'QUẠO',
     assetPath: 'assets/illustrations/clouds/moods/awful.png',
     backgroundColor: Color(0x33FFCDD2),
     left: -18,
@@ -37,7 +35,6 @@ const moodVisualSpecs = <Mood, MoodVisualSpec>{
     imageSize: 30,
   ),
   Mood.sad: MoodVisualSpec(
-    label: 'TRỐNG RỖNG',
     assetPath: 'assets/illustrations/clouds/moods/sad.png',
     backgroundColor: Color(0x339CB4D8),
     left: 40,
@@ -47,7 +44,6 @@ const moodVisualSpecs = <Mood, MoodVisualSpec>{
     imageSize: 36,
   ),
   Mood.okay: MoodVisualSpec(
-    label: 'ỔN ÁP',
     assetPath: 'assets/illustrations/clouds/moods/okay.png',
     backgroundColor: Color(0x33FFFFFF),
     left: 102,
@@ -57,7 +53,6 @@ const moodVisualSpecs = <Mood, MoodVisualSpec>{
     imageSize: 54,
   ),
   Mood.good: MoodVisualSpec(
-    label: 'THƯ GIÃN',
     assetPath: 'assets/illustrations/clouds/moods/good.png',
     backgroundColor: Color(0x33FFF9C4),
     left: 174,
@@ -67,7 +62,6 @@ const moodVisualSpecs = <Mood, MoodVisualSpec>{
     imageSize: 36,
   ),
   Mood.great: MoodVisualSpec(
-    label: 'CHỮA LÀNH',
     assetPath: 'assets/illustrations/clouds/moods/great.png',
     backgroundColor: Color(0x33DCEDC8),
     left: 236,
@@ -80,4 +74,12 @@ const moodVisualSpecs = <Mood, MoodVisualSpec>{
 
 extension MoodVisuals on Mood {
   MoodVisualSpec get visual => moodVisualSpecs[this]!;
+
+  String localizedLabel(AppLocalizations strings) => switch (this) {
+    Mood.awful => strings.moodAwful,
+    Mood.sad => strings.moodSad,
+    Mood.okay => strings.moodOkay,
+    Mood.good => strings.moodGood,
+    Mood.great => strings.moodGreat,
+  };
 }
