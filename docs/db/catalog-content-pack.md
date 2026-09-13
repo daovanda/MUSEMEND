@@ -7,6 +7,8 @@ Migration `20260913100000_content_pack_v1.sql` nạp catalog server-owned sau
 development reset. Migration được sinh bởi
 [`supabase/seed/generate_content_pack.py`](../../supabase/seed/generate_content_pack.py)
 để có thể kiểm tra và tái tạo nhất quán; không sửa trực tiếp migration đã chạy.
+Migration `20260913120000_catalog_story_refresh.sql` là bước cập nhật nội dung
+độc lập, không sửa migration pack đã chạy.
 
 ## Phạm vi dữ liệu
 
@@ -23,6 +25,9 @@ development reset. Migration được sinh bởi
 - Mỗi entity catalog có đủ 12 bản dịch (`vi`, `en`, `ja`, `fr`, `es`, `it`,
   `de`, `ko`, `pt`, `ms`, `id`, `th`). Tiếng Việt là bản tham chiếu; client và
   RPC dùng tiếng Anh làm fallback khi thiếu locale.
+- Nội dung sau pack được biên tập theo mạch kể chuyện: điểm đến là lời giới thiệu,
+  checkpoint nối tiếp nhau, còn landmark/food/item có câu chuyện riêng. Chi tiết
+  nằm trong [Catalog story refresh](./catalog-story-refresh.md).
 
 ## Asset
 

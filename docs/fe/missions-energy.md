@@ -68,6 +68,9 @@ Mọi nhãn, loại nhiệm vụ, validation, lịch và trạng thái rỗng/l�
 từ ARB. Tên/mô tả gợi ý Muse vẫn là catalog động từ
 `mission_template_translations`; nhiệm vụ do user tự viết không bị dịch. Icon của
 gợi ý dùng ký hiệu trung tính thay vì đoán theo từ khóa tiếng Việt trong nội dung.
+Home chỉ hiển thị tối đa năm gợi ý Muse được chọn ngẫu nhiên từ các template phù
+hợp locale/mood và chưa được dùng trong ngày. Toàn bộ catalog vẫn nằm ở DB; giới
+hạn năm chỉ là chính sách trình bày để màn hình không quá dài.
 
 ## RPC và mapping
 
