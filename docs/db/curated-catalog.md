@@ -55,7 +55,7 @@ RLS. Người dùng authenticated chỉ đọc catalog active; tiến độ và 
 được cập nhật qua RPC hành trình.
 
 Artwork content pack được đóng gói trong Flutter tại
-`assets/illustrations/journey/content-pack/v1/`. Giá trị DB khớp chính xác với
+`assets/illustrations/journey/content-pack/v1-generated/`. Giá trị DB khớp chính xác với
 asset path; khi thay ảnh phải giữ tên file hoặc cập nhật migration mới cùng app
 release.
 

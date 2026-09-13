@@ -45,10 +45,10 @@ Asset đã export:
   không thể suy ra từng item và không khai báo trong `pubspec.yaml`.
 - `illustrations/journey/checkpoints/*.png`: 10 tranh trạm do AI tạo riêng cho
   MuseMend, gồm 5 điểm đến Việt Nam và 5 điểm đến quốc tế.
-- `illustrations/journey/content-pack/v1/*.svg`: 240 minh họa vector nội bộ cho
-  30 điểm đến, 90 checkpoint, landmark, food và destination item. Các file này
-  được tạo deterministic bởi `supabase/seed/generate_content_pack.py` và được
-  bundle để QA offline; có thể thay artwork sau này mà không đổi mã catalog.
+- `illustrations/journey/content-pack/v1-generated/*.png`: 240 minh họa raster
+  được tạo bằng công cụ tạo ảnh cho 30 điểm đến, 90 checkpoint, landmark, food
+  và destination item. Các file được commit cùng app và migration tham chiếu
+  đường dẫn ổn định; có thể thay artwork sau này mà không đổi mã catalog.
 
 Khi thêm thư mục/file, cập nhật `pubspec.yaml`, manifest trong tài liệu frontend
 và kiểm thử màn hình dùng asset đó.

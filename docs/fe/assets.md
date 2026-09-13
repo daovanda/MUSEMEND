@@ -25,8 +25,8 @@ thế mà không sửa nghiệp vụ. Frame screenshot chỉ là tài liệu tha
 | Mood CHỮA LÀNH | `85:595`, source `1024×1024` | `app/assets/illustrations/clouds/moods/great.png` | integrated |
 | Journey decoration sprite | Home mission/weather source, `2400×1309` | `app/assets/illustrations/journey/sky-collection-sprite.png` | reference only; excluded from app bundle |
 | Destination/landmark/food/item | Catalog Supabase (`asset_path`) | repository map vào domain model | implemented; content pack v1 có asset path cho từng nhóm |
-| 10 checkpoint curated | MuseMend generated artwork | `app/assets/illustrations/journey/checkpoints/*.png` | legacy integrated; content pack v1 dùng SVG riêng cho 90 checkpoint |
-| Content pack v1 | Project-native vector illustrations | `app/assets/illustrations/journey/content-pack/v1/*.svg` | 240 assets bundled; replaceable without changing catalog IDs |
+| 10 checkpoint curated | MuseMend generated artwork | `app/assets/illustrations/journey/checkpoints/*.png` | legacy integrated; content pack v1 dùng PNG riêng cho 90 checkpoint |
+| Content pack v1 | AI-generated raster illustrations | `app/assets/illustrations/journey/content-pack/v1-generated/*.png` | 240 PNG assets bundled; replaceable without changing catalog IDs |
 | Quote card | Figma `Quote` | Flutter card, plain text từ daily quote RPC | implemented |
 
 ## Quy trình thêm asset chính thức
@@ -51,9 +51,9 @@ Catalog path là dữ liệu server-owned; không nhận URL tuỳ ý từ ngư�
 page Home. Mười ảnh checkpoint được tạo riêng cho MuseMend, không sao chép asset
 thương hiệu và được đóng gói cùng app để MVP hoạt động ổn định. Sprite trang trí
 không được gán vào một dòng catalog vì nó chứa nhiều object đã crop. Content pack
-v1 có SVG minh họa riêng cho destination, checkpoint, landmark, food và item; đây
-là artwork nội bộ để QA offline và có thể thay bằng artwork đã duyệt mà không đổi
-asset path contract.
+v1 có PNG minh họa sinh bằng công cụ tạo ảnh riêng cho destination, checkpoint,
+landmark, food và item; đây là artwork nội bộ được bundle để QA offline và có thể
+thay bằng artwork đã duyệt mà không đổi asset path contract.
 
 ## Liên quan
 

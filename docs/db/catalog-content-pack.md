@@ -26,11 +26,10 @@ development reset. Migration được sinh bởi
 
 ## Asset
 
-240 SVG minh họa deterministic nằm trong
-`app/assets/illustrations/journey/content-pack/v1/`: cover/checkpoint,
-landmark, food và item. Đây là artwork vector nội bộ để QA offline khi chưa có
-image-generation connector; asset path trong DB luôn trỏ tới đường dẫn `assets/`
-được bundle bởi Flutter. Có thể thay SVG bằng artwork đã duyệt mà không đổi code
+240 PNG minh họa được tạo bằng công cụ tạo ảnh nằm trong
+`app/assets/illustrations/journey/content-pack/v1-generated/`: cover/checkpoint,
+landmark, food và item. Asset path trong DB luôn trỏ tới đường dẫn `assets/`
+được bundle bởi Flutter. Có thể thay PNG bằng artwork đã duyệt mà không đổi code
 hay khóa catalog.
 
 Asset không chứa dữ liệu người dùng, URL do người dùng cung cấp hoặc secret.
