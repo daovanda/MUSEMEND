@@ -148,17 +148,52 @@ def parse_quotes() -> list[tuple[int, str, str]]:
     return [(int(n), topic, content.replace("''", "'")) for n, topic, content in rows]
 
 
-def asset_svg(index: int, kind: str) -> str:
+MOTIFS = {
+    "kyoto": '<path d="M260 230h120M280 230V145m80 85V145M250 145h140l-20-24H270z" fill="none" stroke="#a24b46" stroke-width="13" stroke-linejoin="round"/><path d="M285 112h70" stroke="#a24b46" stroke-width="13" stroke-linecap="round"/>',
+    "paris": '<path d="M300 244L340 82l40 162M315 180h50M324 145h32M305 244h70" fill="none" stroke="#6d778c" stroke-width="10" stroke-linejoin="round"/>',
+    "rome": '<path d="M270 240V155q70-75 140 0v85M290 240v-62M320 240v-62M350 240v-62M380 240v-62" fill="none" stroke="#b46b4d" stroke-width="12"/>',
+    "santorini": '<path d="M260 240V155q0-45 42-45t42 45v85M344 240V165q0-38 38-38t38 38v75" fill="none" stroke="#4f8792" stroke-width="13"/><path d="M250 155h104M336 165h92" stroke="#4f8792" stroke-width="9"/>',
+    "petra": '<path d="M270 242V150l70-70 70 70v92z" fill="#c77b5b" opacity=".55"/><path d="M300 242v-64h80v64M320 170v-38h40v38" fill="none" stroke="#8f5848" stroke-width="11"/>',
+    "machu-picchu": '<path d="M245 238h190M265 210h150M285 182h120M305 154h80" stroke="#6e8c76" stroke-width="16" stroke-linecap="round"/><path d="M335 154V105" stroke="#6e8c76" stroke-width="10"/>',
+    "bali": '<path d="M285 240l55-105 55 105M300 210h80M320 172h40" fill="none" stroke="#8a6e55" stroke-width="13"/><path d="M340 135V90M312 118l28-28 28 28" fill="none" stroke="#8a6e55" stroke-width="10"/>',
+    "seoul": '<path d="M260 240h160M280 240v-65h120v65M265 175h150l-75-45z" fill="none" stroke="#536f82" stroke-width="12"/><path d="M310 240v-38M350 240v-38" stroke="#536f82" stroke-width="10"/>',
+    "bangkok": '<path d="M270 240h140M290 240V150l50-66 50 66v90M315 150h50" fill="none" stroke="#b06a50" stroke-width="12"/><path d="M340 84V55" stroke="#b06a50" stroke-width="9"/>',
+    "singapore": '<path d="M270 240V145h35v95M320 240V105h40v135M375 240V130h35v110" fill="none" stroke="#5f8f90" stroke-width="14"/><path d="M250 240h185" stroke="#5f8f90" stroke-width="10"/>',
+    "istanbul": '<path d="M270 240V160q70-70 140 0v80M305 160V112M375 160V112" fill="none" stroke="#7a718f" stroke-width="12"/><path d="M290 125q50-55 100 0" fill="none" stroke="#7a718f" stroke-width="13"/>',
+    "new-york": '<path d="M260 240V130h38v110M315 240V88h45v152M378 240V115h36v125" fill="none" stroke="#647f95" stroke-width="14"/><path d="M338 88V55M328 66h20" stroke="#647f95" stroke-width="8"/>',
+    "vancouver": '<path d="M245 240l75-125 40 60 38-52 70 117" fill="none" stroke="#5f8b68" stroke-width="15" stroke-linejoin="round"/>',
+    "sydney": '<path d="M250 240q40-100 90 0q40-100 90 0q40-100 80 0" fill="none" stroke="#6a8298" stroke-width="14"/>',
+    "cape-town": '<path d="M245 240l85-95 35 40 45-60 80 115" fill="none" stroke="#7d806f" stroke-width="16" stroke-linejoin="round"/>',
+    "cairo": '<path d="M255 240l70-125 70 125zM350 240l60-92 60 92z" fill="none" stroke="#b9834f" stroke-width="12"/>',
+    "marrakech": '<path d="M265 240V145q75-80 150 0v95M300 240v-55h80v55" fill="none" stroke="#aa725c" stroke-width="13"/><path d="M340 145V94" stroke="#aa725c" stroke-width="10"/>',
+    "barcelona": '<path d="M260 240V155q80-105 160 0v85M290 240v-48M340 240v-90M390 240v-48" fill="none" stroke="#a46e70" stroke-width="13"/>',
+    "lisbon": '<path d="M275 240h130M295 240V145h90v95M290 145h100l-50-42z" fill="none" stroke="#c18b58" stroke-width="12"/><circle cx="315" cy="210" r="12" fill="none" stroke="#c18b58" stroke-width="8"/><circle cx="365" cy="210" r="12" fill="none" stroke="#c18b58" stroke-width="8"/>',
+    "amsterdam": '<path d="M260 240V140h55v100M330 240V115h55v125M400 240V150h45v90" fill="none" stroke="#6f8992" stroke-width="13"/><path d="M250 240h205" stroke="#6f8992" stroke-width="10"/>',
+    "prague": '<path d="M265 240V150l35-55 35 55v90M370 240V130l35-55 35 55v110" fill="none" stroke="#80748d" stroke-width="12"/><path d="M250 240h190" stroke="#80748d" stroke-width="10"/>',
+    "reykjavik": '<path d="M255 240l85-130 85 130M292 188h96M310 160h70" fill="none" stroke="#6a8f98" stroke-width="13"/><path d="M275 95q65-55 130 0" fill="none" stroke="#8e7eaa" stroke-width="10"/>',
+    "queenstown": '<path d="M245 240l80-115 45 62 38-50 75 103" fill="none" stroke="#5e8192" stroke-width="15"/><path d="M240 244h215" stroke="#5e8192" stroke-width="8"/>',
+    "swiss-alps": '<path d="M240 240l85-128 35 54 45-78 90 152" fill="none" stroke="#708a8d" stroke-width="15"/>',
+    "serengeti": '<path d="M340 240V145M340 165l-42-36M340 177l45-48M340 190l-30 40M340 190l30 50" fill="none" stroke="#8b7653" stroke-width="11" stroke-linecap="round"/><path d="M260 240q80-35 160 0" fill="none" stroke="#8b7653" stroke-width="12"/>',
+    "maldives": '<path d="M245 240q95-60 190 0M300 240V135M300 160l-45-35M300 175l52-42M300 195l-32-38" fill="none" stroke="#5a9495" stroke-width="13" stroke-linecap="round"/>',
+    "hoi-an": '<path d="M270 240V160h140v80M260 160h160M300 160v-45h80v45" fill="none" stroke="#b27657" stroke-width="13"/><circle cx="300" cy="126" r="13" fill="#f1bb65"/><circle cx="380" cy="126" r="13" fill="#f1bb65"/>',
+    "ha-long-bay": '<path d="M235 240q45-110 90-25q45-135 90 0q45-90 90 25" fill="none" stroke="#5b8c91" stroke-width="16"/><path d="M230 245h275" stroke="#5b8c91" stroke-width="9"/>',
+    "ninh-binh": '<path d="M240 240q55-135 110 0q55-170 110 0" fill="none" stroke="#63866d" stroke-width="16"/><path d="M250 244h210" stroke="#63866d" stroke-width="9"/>',
+    "da-lat": '<path d="M245 240l75-120 55 80 45-105 75 145" fill="none" stroke="#64866c" stroke-width="15"/><circle cx="365" cy="104" r="20" fill="#e4a3a5" opacity=".8"/>',
+}
+
+
+def asset_svg(index: int, kind: str, slug: str) -> str:
     palettes = [("#dceff2", "#4f7b86", "#f5dca6"), ("#e6e0f4", "#776a9e", "#f2b7a0"), ("#e0f0df", "#5f8b68", "#f3d58b"), ("#f6e5dc", "#a46e5d", "#b6dce1")]
     sky, accent, sun = palettes[index % len(palettes)]
     offset = (index * 13) % 34
+    motif = MOTIFS.get(slug, '<path d="M240 240l90-120 90 120" fill="none" stroke="#607f8a" stroke-width="14"/>')
     return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
   <defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop stop-color="{sky}"/><stop offset="1" stop-color="#fffaf4"/></linearGradient></defs>
   <rect width="640" height="360" rx="42" fill="url(#g)"/>
   <circle cx="500" cy="78" r="46" fill="{sun}" opacity=".88"/>
   <path d="M0 250 Q120 {205-offset} 250 250 T500 240 T700 250 V360 H0Z" fill="{accent}" opacity=".38"/>
   <path d="M0 286 Q120 230 250 286 T500 274 T700 286 V360 H0Z" fill="{accent}" opacity=".68"/>
-  <path d="M{120+offset} 250 l62-104 45 62 44-40 74 82z" fill="{accent}" opacity=".86"/>
+  {motif}
   <circle cx="{150+offset}" cy="112" r="28" fill="#ffffff" opacity=".72"/>
   <path d="M110 110 q18-32 48 0 q18-26 40 0" fill="none" stroke="#ffffff" stroke-width="12" stroke-linecap="round" opacity=".8"/>
   <text x="36" y="326" font-family="Arial,sans-serif" font-size="18" fill="#324b55" opacity=".7">MuseMend • {kind}</text>
@@ -172,9 +207,9 @@ def write_assets() -> dict[str, dict[str, str]]:
         base = f"assets/illustrations/journey/content-pack/v1/{slug}"
         paths[slug] = {"cover": base + ".svg", "map": base + ".svg", "landmark": base + "-landmark.svg", "food": base + "-food.svg", "item_a": base + "-item-a.svg", "item_b": base + "-item-b.svg"}
         for kind, suffix in (("cover", ""), ("landmark", "-landmark"), ("food", "-food"), ("item-a", "-item-a"), ("item-b", "-item-b")):
-            (ASSET_DIR / f"{slug}{suffix}.svg").write_text(asset_svg(index, kind), encoding="utf-8")
+            (ASSET_DIR / f"{slug}{suffix}.svg").write_text(asset_svg(index, kind, slug), encoding="utf-8")
         for checkpoint in range(1, 4):
-            (ASSET_DIR / f"{slug}-checkpoint-{checkpoint}.svg").write_text(asset_svg(index + checkpoint, f"checkpoint {checkpoint}"), encoding="utf-8")
+            (ASSET_DIR / f"{slug}-checkpoint-{checkpoint}.svg").write_text(asset_svg(index + checkpoint, f"checkpoint {checkpoint}", slug), encoding="utf-8")
         paths[slug]["checkpoint_1"] = base + "-checkpoint-1.svg"
         paths[slug]["checkpoint_2"] = base + "-checkpoint-2.svg"
         paths[slug]["checkpoint_3"] = base + "-checkpoint-3.svg"

@@ -4,7 +4,7 @@
   <circle cx="500" cy="78" r="46" fill="#f5dca6" opacity=".88"/>
   <path d="M0 250 Q120 181 250 250 T500 240 T700 250 V360 H0Z" fill="#4f7b86" opacity=".38"/>
   <path d="M0 286 Q120 230 250 286 T500 274 T700 286 V360 H0Z" fill="#4f7b86" opacity=".68"/>
-  <path d="M144 250 l62-104 45 62 44-40 74 82z" fill="#4f7b86" opacity=".86"/>
+  <path d="M235 240q45-110 90-25q45-135 90 0q45-90 90 25" fill="none" stroke="#5b8c91" stroke-width="16"/><path d="M230 245h275" stroke="#5b8c91" stroke-width="9"/>
   <circle cx="174" cy="112" r="28" fill="#ffffff" opacity=".72"/>
   <path d="M110 110 q18-32 48 0 q18-26 40 0" fill="none" stroke="#ffffff" stroke-width="12" stroke-linecap="round" opacity=".8"/>
   <text x="36" y="326" font-family="Arial,sans-serif" font-size="18" fill="#324b55" opacity=".7">MuseMend • cover</text>
