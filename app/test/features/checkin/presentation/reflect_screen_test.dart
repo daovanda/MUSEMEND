@@ -9,6 +9,7 @@ import 'package:musemend/features/checkin/domain/checkin_repository.dart';
 import 'package:musemend/features/checkin/domain/daily_checkin.dart';
 import 'package:musemend/features/checkin/domain/mood.dart';
 import 'package:musemend/features/checkin/presentation/reflect_screen.dart';
+import 'package:musemend/l10n/generated/app_localizations.dart';
 
 void main() {
   testWidgets('shows a retry state when initial network requests fail', (
@@ -22,6 +23,9 @@ void main() {
           ),
         ],
         child: MaterialApp(
+          locale: const Locale('vi'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
           builder:
               (context, child) => MediaQuery(
                 data: MediaQuery.of(context).copyWith(disableAnimations: true),

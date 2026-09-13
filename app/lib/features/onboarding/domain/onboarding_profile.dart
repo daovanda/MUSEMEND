@@ -1,14 +1,13 @@
 enum PreferredAddress {
-  cauMinh('cau_minh', 'cậu / mình'),
-  banMinh('ban_minh', 'bạn / mình'),
-  anhEm('anh_em', 'anh / em'),
-  chiEm('chi_em', 'chị / em'),
-  tenRieng('ten_rieng', 'tên riêng');
+  cauMinh('cau_minh'),
+  banMinh('ban_minh'),
+  anhEm('anh_em'),
+  chiEm('chi_em'),
+  tenRieng('ten_rieng');
 
-  const PreferredAddress(this.databaseValue, this.label);
+  const PreferredAddress(this.databaseValue);
 
   final String databaseValue;
-  final String label;
 
   static PreferredAddress? fromDatabase(String? value) {
     for (final address in values) {

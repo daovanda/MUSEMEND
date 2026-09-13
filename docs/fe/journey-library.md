@@ -1,7 +1,7 @@
 # Journey và Library
 
 Trạng thái: `implemented`
-Cập nhật: 2026-09-12
+Cập nhật: 2026-09-13
 
 ## Phạm vi hiện đã triển khai
 
@@ -32,6 +32,8 @@ tương đối chưa được tự ghép thành URL khi chưa chốt bucket/cata
 `JourneyRepository`. Adapter đọc kèm năm relation translation cho điểm đến, trạm,
 địa danh, món ăn và vật phẩm. Mapper chọn locale yêu cầu → English → cột gốc tiếng
 Việt, nên màn Khám phá thay đổi cùng ngôn ngữ app mà không dịch nội dung user.
+Mọi nhãn cố định, trạng thái hành trình, độ hiếm, bộ lọc, lỗi và accessibility
+semantics lấy từ ARB; chỉ dữ liệu catalog kể trên lấy từ DB.
 
 Miền `features/journey/` tách theo:
 

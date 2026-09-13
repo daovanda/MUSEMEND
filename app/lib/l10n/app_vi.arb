@@ -20,5 +20,445 @@
   "cancel": "Hủy",
   "save": "Lưu",
   "settingsUpdated": "Đã cập nhật cài đặt.",
-  "settingsUpdateFailed": "Chưa thể cập nhật cài đặt."
+  "settingsUpdateFailed": "Chưa thể cập nhật cài đặt.",
+  "email": "Email",
+  "password": "Mật khẩu",
+  "back": "Quay lại",
+  "skip": "Bỏ qua",
+  "continueLabel": "Tiếp tục",
+  "retry": "Thử lại",
+  "authAccountCreated": "Đã tạo tài khoản. Hãy kiểm tra email nếu cần xác nhận.",
+  "authMascotSemantics": "Linh vật mây MuseMend",
+  "authWelcomeHeadline": "Một khoảng trời riêng\ncho những ngày cần dịu lại.",
+  "authWelcomeBody": "Ghi lại cảm xúc, hoàn thành những điều nhỏ bé và đi tiếp trên hành trình của riêng bạn.",
+  "authSignUpTitle": "Tạo khoảng trời của bạn",
+  "authSignInTitle": "Chào bạn trở lại",
+  "authSignUpSubtitle": "Bắt đầu bằng vài thông tin thật đơn giản.",
+  "authSignInSubtitle": "Hôm nay mình cùng chậm lại một chút nhé.",
+  "authDisplayNameLength": "Tên cần từ 2 đến 60 ký tự.",
+  "authEmailInvalid": "Email chưa đúng định dạng.",
+  "authShowPassword": "Hiện mật khẩu",
+  "authHidePassword": "Ẩn mật khẩu",
+  "authPasswordMinLength": "Mật khẩu cần ít nhất 8 ký tự.",
+  "authCreateAccount": "Tạo tài khoản",
+  "authSignIn": "Đăng nhập",
+  "authSwitchToSignIn": "Đã có tài khoản? Đăng nhập",
+  "authSwitchToSignUp": "Chưa có tài khoản? Đăng ký",
+  "authNetworkError": "Không thể kết nối lúc này. Vui lòng thử lại.",
+  "authInvalidCredentials": "Email hoặc mật khẩu chưa đúng.",
+  "authEmailAlreadyRegistered": "Email này đã được đăng ký.",
+  "authEmailNotConfirmed": "Vui lòng xác nhận email trước khi đăng nhập.",
+  "authWeakPassword": "Mật khẩu chưa đáp ứng yêu cầu bảo mật.",
+  "onboardingBackToSignIn": "Quay lại màn đăng nhập",
+  "onboardingNameLength": "Tên cần từ 2 đến 80 ký tự.",
+  "onboardingFallbackName": "Bạn của Muse",
+  "onboardingSaveFailed": "Chưa thể lưu. Hãy kiểm tra kết nối rồi thử lại.",
+  "onboardingStartWithMuse": "Bắt đầu cùng Muse",
+  "onboardingWelcomeHeadline": "Một nơi để bạn lắng nghe mình,\ntheo cách nhẹ nhàng hơn.",
+  "onboardingEmotionTitle": "Gọi tên cảm xúc",
+  "onboardingEmotionDescription": "Nhận ra hôm nay bạn đang cảm thấy thế nào.",
+  "onboardingPrivateWritingTitle": "Viết cho riêng mình",
+  "onboardingPrivateWritingDescription": "Một trang nhỏ để cất những điều khó nói thành lời.",
+  "onboardingSmallStepsTitle": "Chăm sóc bằng bước nhỏ",
+  "onboardingSmallStepsDescription": "Những việc vừa sức, đủ để ngày hôm nay dịu hơn một chút.",
+  "onboardingPrivacyHeadline": "Những điều riêng tư của bạn\nnên thuộc về bạn.",
+  "onboardingPrivacyBody": "MuseMend đang được xây dựng theo hướng riêng tư và chủ động.",
+  "onboardingDeviceJournalTitle": "Nhật ký lưu trên thiết bị",
+  "onboardingDeviceJournalDescription": "Mọi tâm sự của bạn được giữ an toàn ngay tại đây.",
+  "onboardingOfflineTitle": "Dùng được khi ngoại tuyến",
+  "onboardingOfflineDescription": "Không cần mạng, Mây vẫn luôn ở bên.",
+  "onboardingOptionalBackupTitle": "Sao lưu là tùy chọn",
+  "onboardingOptionalBackupDescription": "Chỉ đồng bộ khi bạn thực sự muốn.",
+  "onboardingNamePrompt": "Mây nên gọi bạn là gì?",
+  "onboardingNameCanChange": "Bạn có thể đổi lại bất kỳ lúc nào trong trang Cá nhân.",
+  "onboardingDisplayNameLabel": "Tên bạn muốn hiển thị",
+  "onboardingNameHint": "Nhập tên hoặc để trống",
+  "onboardingAddressLabel": "Cách xưng hô",
+  "onboardingGreeting": "Chào {name}, rất vui được đồng hành cùng bạn!",
+  "@onboardingGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingLoadFailed": "Chưa thể chuẩn bị lời chào của Muse.",
+  "preferredAddressCauMinh": "cậu / mình",
+  "preferredAddressBanMinh": "bạn / mình",
+  "preferredAddressAnhEm": "anh / em",
+  "preferredAddressChiEm": "chị / em",
+  "preferredAddressNameOnly": "tên riêng",
+  "profileTagline": "Một góc nhỏ để chăm sóc tài khoản và sự riêng tư của bạn.",
+  "profileLoadFailed": "Chưa thể tải hồ sơ",
+  "profileMuseFriend": "Bạn của Muse",
+  "profileProtectedEmail": "Email được bảo vệ",
+  "profileCloudNameTitle": "Tên của Mây",
+  "profileFutureLetterReminder": "Nhắc thư tương lai trên thiết bị",
+  "profileEditSettings": "Chỉnh sửa hồ sơ và cài đặt",
+  "profileInboxTitle": "Thông báo trong ứng dụng",
+  "profileInboxLoadFailed": "Chưa thể tải thông báo",
+  "profileInboxEmpty": "Chưa có thông báo mới",
+  "profileInboxEmptyDescription": "Thư đến hạn sẽ xuất hiện tại đây.",
+  "profilePrivacyTitle": "Quyền riêng tư",
+  "profilePrivacyBody": "Nhật ký được lưu riêng tư trên Supabase và chỉ tài khoản của bạn được đọc qua RLS. MuseMend không đưa nội dung thư lên thông báo màn hình khóa. Bản MVP chưa mã hóa đầu-cuối và chưa cung cấp xuất dữ liệu.",
+  "profileTermsTitle": "Điều khoản và giới hạn",
+  "profileTermsBody": "MuseMend là công cụ hỗ trợ phản tư, không chẩn đoán và không thay thế chuyên gia y tế hoặc sức khỏe tâm thần. Nếu bạn đang gặp nguy hiểm tức thời, hãy liên hệ dịch vụ khẩn cấp hoặc một người đáng tin cậy.",
+  "profileSignOut": "Đăng xuất",
+  "profileRequestDeletion": "Yêu cầu xóa tài khoản",
+  "profileDeletionRequestFailed": "Chưa thể gửi yêu cầu xóa tài khoản.",
+  "profileDeleteTitle": "Xóa tài khoản vĩnh viễn?",
+  "profileDeleteBody": "Yêu cầu này khóa tài khoản ngay, ẩn nhật ký và đưa tệp riêng tư vào hàng đợi xóa. Thao tác hiện không thể hoàn tác.",
+  "profileDeleteConfirmationPrompt": "Nhập {keyword} để xác nhận:",
+  "@profileDeleteConfirmationPrompt": {
+    "placeholders": {
+      "keyword": {
+        "type": "String"
+      }
+    }
+  },
+  "profileDeleteConfirmationKeyword": "XÓA",
+  "profileDeleteAccount": "Xóa tài khoản",
+  "profileFutureLetterDue": "Lá thư tương lai đã đến hạn",
+  "profileFutureLetterScheduled": "Hẹn mở ngày {date}",
+  "@profileFutureLetterScheduled": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "moodAwful": "QUẠO",
+  "moodSad": "TRỐNG RỖNG",
+  "moodOkay": "ỔN ÁP",
+  "moodGood": "THƯ GIÃN",
+  "moodGreat": "CHỮA LÀNH",
+  "moodRecorded": "Đã ghi nhận {mood}.",
+  "@moodRecorded": {
+    "placeholders": {
+      "mood": {
+        "type": "String"
+      }
+    }
+  },
+  "moodSaveFailed": "Chưa thể ghi nhận cảm xúc. Hãy thử lại.",
+  "moodPickerPrompt": "Mây hôm nay đang cảm thấy thế nào?",
+  "moodCloudSemantics": "Mây cảm xúc. Chạm để về Bầu trời, nhấn giữ để chọn cảm xúc.",
+  "checkinSaved": "Đã lưu check-in hôm nay.",
+  "checkinSaveFailed": "Chưa thể lưu. Vui lòng thử lại.",
+  "skyStatusSemantics": "{energy} năng lượng, chuỗi {streak} ngày",
+  "@skyStatusSemantics": {
+    "placeholders": {
+      "energy": {
+        "type": "int"
+      },
+      "streak": {
+        "type": "int"
+      }
+    }
+  },
+  "checkinMoodPrompt": "Ngày hôm nay có dịu dàng với cậu không?",
+  "checkinQuickSave": "LƯU NHANH",
+  "checkinUpdateToday": "Cập nhật check-in hôm nay",
+  "checkinSaveToday": "Lưu nhanh check-in hôm nay",
+  "checkinSaveAndWrite": "LƯU VÀ VIẾT TÂM TƯ",
+  "skyMascotSemantics": "Linh vật mây của MuseMend",
+  "skyCompanionSemantics": "Mây đang đồng hành",
+  "journeyProgressSemantics": "Hành trình {name}, trạm {current} trên {total}",
+  "@journeyProgressSemantics": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "journeyWaiting": "đang chờ",
+  "journeyDefaultTitle": "HÀNH TRÌNH",
+  "checkpointLabel": "Trạm",
+  "journeyDataWaiting": "Hành trình sẽ xuất hiện khi dữ liệu trạm sẵn sàng.",
+  "quoteLoadFailed": "Chưa thể tải lời nhắn hôm nay.",
+  "shareMoments": "Chia sẻ khoảnh khắc",
+  "shareWeekTitle": "Tuần sống lành",
+  "shareWeekSubtitle": "Template 7 ngày",
+  "shareMonthTitle": "Tháng qua của bạn",
+  "shareMonthSubtitle": "Tổng hợp 6 ảnh",
+  "shareYearTitle": "Một năm dịu dàng",
+  "shareYearSubtitle": "Những điều đáng nhớ",
+  "shareTemplateComingSoon": "Mẫu chia sẻ “{title}” sẽ được hoàn thiện ở vòng tiếp theo.",
+  "@shareTemplateComingSoon": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "shareAction": "Chia sẻ",
+  "userDataLoadFailed": "Chưa thể tải dữ liệu của bạn.",
+  "missionLoadFailed": "Chưa thể tải nhiệm vụ.",
+  "missionToday": "Nhiệm vụ hôm nay",
+  "missionTaskCount": "{count} việc",
+  "@missionTaskCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "missionCreateNew": "Tự tạo nhiệm vụ mới",
+  "missionMuseSuggestions": "Gợi ý từ Muse",
+  "missionSuggestionsDescription": "Những bước nhỏ phù hợp với cảm xúc hôm nay.",
+  "missionSuggestionsEmpty": "Bạn đã thêm hết gợi ý phù hợp hôm nay.",
+  "missionCompleteFailed": "Chưa thể hoàn thành nhiệm vụ. Hãy thử lại.",
+  "missionAlreadyCompleted": "Nhiệm vụ này đã được ghi nhận trước đó.",
+  "missionRewardReceived": "Bạn đã nhận {reward} năng lượng.",
+  "@missionRewardReceived": {
+    "placeholders": {
+      "reward": {
+        "type": "int"
+      }
+    }
+  },
+  "missionSkipped": "Đã bỏ qua nhiệm vụ, không trừ năng lượng.",
+  "missionSkipFailed": "Chưa thể bỏ qua nhiệm vụ.",
+  "missionAdded": "Đã thêm nhiệm vụ.",
+  "missionAddFailed": "Chưa thể thêm nhiệm vụ.",
+  "missionCustomAdded": "Đã thêm nhiệm vụ riêng với phần thưởng 5 năng lượng.",
+  "missionCreateFailed": "Chưa thể tạo nhiệm vụ.",
+  "missionCareToday": "Chăm sóc\nhôm nay",
+  "missionGentleStep": "Hãy dịu dàng với chính mình bằng một việc thật nhỏ.",
+  "missionTypeDaily": "Ngày",
+  "missionTypeWeekly": "Tuần",
+  "missionTypeMonthly": "Tháng",
+  "missionTypeYearly": "Năm",
+  "missionTypeCustom": "Tùy chỉnh",
+  "missionGroupType": "Nhiệm vụ {type}",
+  "@missionGroupType": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "missionSuggestionMeta": "{type} · {minutes} phút · +{energy} năng lượng",
+  "@missionSuggestionMeta": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "int"
+      },
+      "energy": {
+        "type": "int"
+      }
+    }
+  },
+  "missionAddTemplate": "Thêm nhiệm vụ mẫu",
+  "missionPeriodMorning": "Buổi sáng",
+  "missionPeriodAfternoon": "Buổi chiều",
+  "missionPeriodEvening": "Buổi tối",
+  "missionPeriodAnytime": "Bất kỳ lúc nào",
+  "missionCurrentLandmarkSemantics": "Minh họa địa danh của trạm hiện tại",
+  "missionAddToGroup": "Thêm nhiệm vụ vào {group}",
+  "@missionAddToGroup": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "missionComplete": "Hoàn thành",
+  "missionOptions": "Tùy chọn nhiệm vụ",
+  "missionSkip": "Bỏ qua nhiệm vụ",
+  "missionEnergyAccumulated": "Năng lượng tích lũy",
+  "missionEnergySummary": "{current} tổng cộng · {available} sẵn sàng cho hành trình",
+  "@missionEnergySummary": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "available": {
+        "type": "int"
+      }
+    }
+  },
+  "missionEnergyReward": "+{energy} năng lượng",
+  "@missionEnergyReward": {
+    "placeholders": {
+      "energy": {
+        "type": "int"
+      }
+    }
+  },
+  "missionEmpty": "Chưa có nhiệm vụ nào. Hãy chọn một bước thật nhẹ nhàng.",
+  "missionCustomSheetTitle": "Nhiệm vụ của bạn",
+  "missionSuggestionSheetTitle": "Thêm gợi ý từ Muse",
+  "close": "Đóng",
+  "missionCustomRewardDescription": "Tự tạo nhiệm vụ được thưởng cố định 5 năng lượng.",
+  "missionSuggestionPrepared": "Gợi ý đã được Muse chuẩn bị sẵn cho bạn.",
+  "missionName": "Tên nhiệm vụ",
+  "missionNameHint": "Nhập tên nhiệm vụ",
+  "missionNameValidation": "Tên nhiệm vụ cần từ 1 đến 200 ký tự.",
+  "missionNoteOptional": "Ghi chú (không bắt buộc)",
+  "missionNoteHint": "Thêm một lời nhắc nhẹ nhàng",
+  "missionSchedule": "Thời gian thực hiện",
+  "missionAddAction": "Thêm nhiệm vụ",
+  "missionStart": "Bắt đầu",
+  "missionEnd": "Kết thúc",
+  "missionDailyRenewal": "Được xếp vào {period} và tự làm mới mỗi ngày.",
+  "@missionDailyRenewal": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "missionWeeklyEnd": "Kết thúc lúc 00:00 đầu tuần kế tiếp.",
+  "missionMonthlyEnd": "Kết thúc lúc 00:00 ngày đầu tháng kế tiếp.",
+  "missionYearlyEnd": "Kết thúc lúc 00:00 ngày đầu năm kế tiếp.",
+  "missionEndTimeAfterStart": "Giờ kết thúc phải sau giờ bắt đầu trong cùng ngày.",
+  "missionEndTimeFuture": "Giờ kết thúc phải ở sau thời điểm hiện tại.",
+  "missionEndDateFuture": "Thời gian kết thúc phải ở tương lai và sau lúc bắt đầu.",
+  "missionTimeFormat": "Nhập giờ dạng HH:mm.",
+  "missionDateFormat": "Nhập ngày dạng dd/MM/yyyy.",
+  "missionDateNotPast": "Không chọn ngày quá khứ.",
+  "missionDateField": "{label} · ngày",
+  "@missionDateField": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "missionTimeField": "{label} · giờ",
+  "@missionTimeField": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "missionType": "Loại nhiệm vụ",
+  "missionDue": "Hạn {date}",
+  "@missionDue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "journalTagline": "Mỗi ngày một trang nhỏ để trở về chính mình.",
+  "futureLetters": "Thư gửi tương lai",
+  "futureLetterWriteNew": "Viết thư mới",
+  "futureLettersDescription": "Những lời nhắn bạn muốn gửi cho một ngày phía trước.",
+  "journalEntryNotFound": "Không tìm thấy mục nhật ký này.",
+  "journalMoodRequired": "Hãy chọn mood hôm nay trước khi viết. Bạn có thể thay đổi mood bất kỳ lúc nào.",
+  "journalChooseMood": "Chọn mood",
+  "journalDeleteTitle": "Xóa mục này?",
+  "journalDeleteBody": "Mục sẽ được ẩn ngay. Tệp liên quan được dọn theo chính sách xóa mềm.",
+  "keep": "Giữ lại",
+  "delete": "Xóa",
+  "journalDeleted": "Đã xóa mục nhật ký.",
+  "saveFailed": "Chưa thể lưu. Hãy thử lại.",
+  "futureLetterOpenFailed": "Chưa thể mở thư. Hãy thử lại.",
+  "dailyJournal": "Nhật ký hàng ngày",
+  "journalChooseMoodFirst": "Chọn mood trước",
+  "journalEditToday": "Sửa hôm nay",
+  "journalWriteToday": "Viết hôm nay",
+  "journalPastHint": "Kéo xuống trong những tháng sau để xem lại các trang đã viết.",
+  "journalViewing": "Đang xem",
+  "journalDaySemantics": "Ngày {day} tháng {month}{mood}{written}",
+  "journalMoodSemantics": ", {mood}",
+  "journalWrittenSemantics": ", đã viết nhật ký",
+  "futureLettersEmpty": "Chưa có lá thư nào. Bạn có muốn gửi một lời nhắn cho tương lai không?",
+  "futureLetterWriteFirst": "Viết lá thư đầu tiên",
+  "journalMyDay": "Một ngày của tôi",
+  "futureLetterScheduleState": "Hẹn {date} · {state}",
+  "futureLetterUnopened": "chưa mở",
+  "futureLetterOpened": "đã mở",
+  "futureLetterOptions": "Tùy chọn thư",
+  "futureLetterDelete": "Xóa thư",
+  "journalNoContent": "Chưa có nội dung",
+  "journalLoadFailed": "Chưa thể tải nhật ký lúc này.",
+  "futureLetterCreateTitle": "Thư gửi tương lai",
+  "futureLetterEditTitle": "Sửa lá thư",
+  "journalWriteTitle": "Viết cho hôm nay",
+  "journalEditTitle": "Sửa nhật ký",
+  "futureLetterTitleHint": "Một lời nhắn cho mai sau",
+  "journalTitleHint": "Tiêu đề",
+  "journalContentHint": "Hôm nay bạn muốn kể điều gì với chính mình?",
+  "journalTags": "Gắn nhãn",
+  "journalTagsHint": "gia đình, học tập, biết ơn",
+  "futureLetterDeviceReminder": "Nhắc tôi trên thiết bị",
+  "futureLetterReminderPrivate": "Thông báo chỉ chứa lời nhắc chung, không hiển thị nội dung riêng tư.",
+  "futureLetterReminderDisabled": "Bật thông báo trong Cá nhân trước khi dùng.",
+  "futureLetterDeliveryDate": "Ngày thư đến",
+  "futureLetterCanOpenEarly": "Bạn vẫn có thể mở thư trước ngày này",
+  "journalContentValidation": "Hãy viết vài dòng và kiểm tra lại tag.",
+  "futureLetterReminderFailed": "Đã lưu thư, nhưng chưa bật được nhắc trên thiết bị.",
+  "journalSaveBeforeImage": "Hãy lưu trang trước, rồi thêm ảnh vào phần ghi chú.",
+  "journalImageSaved": "Ảnh đã được lưu riêng tư.",
+  "journalImageTooLarge": "Ảnh vượt quá giới hạn 10 MiB.",
+  "journalImageUnsupported": "Chỉ hỗ trợ JPG, PNG, WebP hoặc HEIC.",
+  "journalImageUploadFailed": "Chưa thể tải ảnh lên. Hãy thử lại.",
+  "journalWritingDate": "Ngày viết · {date}",
+  "journalFullDate": "Ngày {day} tháng {month} năm {year}",
+  "journalImageAttach": "Đính kèm ảnh",
+  "journalImagesInEntry": "Ảnh trong trang viết",
+  "journalImageAdd": "Thêm ảnh",
+  "journalImageSwipeHint": "Vuốt hoặc kéo sang trái/phải để xem ảnh.",
+  "journalImageAddLater": "Bạn có thể lưu trước rồi thêm ảnh vào bất kỳ lúc nào.",
+  "journalFilmStripSemantics": "Dải ảnh đính kèm gồm {count} ảnh. Có thể kéo ngang để xem.",
+  "journalImageSemantics": "Ảnh đính kèm {index}",
+  "exploreTagline": "Biến những điều nhỏ bạn hoàn thành thành một chuyến đi dịu dàng.",
+  "journeyCollection": "Bộ sưu tập hành trình",
+  "journeyUnlockedCount": "{count} kỷ niệm đã mở khóa",
+  "journeyCompletedMetric": "đã hoàn thành",
+  "journeyEnergyReady": "năng lượng sẵn sàng",
+  "journeySync": "Đồng bộ tiến độ",
+  "journeyWaitingStops": "Các trạm đang chờ",
+  "journeyNextDestination": "Đến điểm tiếp theo",
+  "journeyStart": "Bắt đầu hành trình",
+  "journeyAllCompleted": "Bạn đã hoàn thành những điểm đến hiện có. Một hành trình mới sẽ sớm mở ra.",
+  "journeyReady": "Hành trình đã sẵn sàng.",
+  "journeyStartFailed": "Chưa thể bắt đầu hành trình. Hãy thử lại.",
+  "journeySyncFailed": "Chưa thể đồng bộ tiến độ. Hãy thử lại.",
+  "destinationSemantics": "Điểm đến {name}, {description}",
+  "destinationImageSemantics": "Ảnh {name}",
+  "destinationProvince": "Tỉnh",
+  "destinationCity": "Thành phố",
+  "destinationIsland": "Hòn đảo",
+  "destinationHeritage": "Di sản",
+  "destinationRegion": "Vùng đất",
+  "destinationDefault": "Điểm đến",
+  "checkpointTitle": "Trạm {number} · {title}",
+  "checkpointEnergy": "{earned}/{required} năng lượng",
+  "journeyStartDescription": "Khởi hành để mở điểm đến đầu tiên. Mỗi trạm dùng năng lượng tích lũy và phần thưởng do Muse xác định.",
+  "journeyStatusNotStarted": "Thế giới đang chờ bạn",
+  "journeyStatusInProgress": "Đang khám phá",
+  "journeyStatusPaused": "Sẵn sàng đi tiếp",
+  "journeyStatusCompleted": "Đã hoàn thành hành trình",
+  "filterAll": "Tất cả",
+  "collectibleLandmark": "Địa danh",
+  "collectibleFood": "Món ăn",
+  "collectibleItem": "Vật phẩm",
+  "newLabel": "Mới",
+  "rarityCommon": "Phổ biến",
+  "rarityUncommon": "Đặc biệt",
+  "rarityRare": "Quý hiếm",
+  "rarityEpic": "Sử thi",
+  "rarityLegendary": "Huyền thoại",
+  "collectionFilteredEmpty": "Bạn chưa mở khóa {kind} nào trong hành trình.",
+  "collectionEmpty": "Hoàn thành một trạm để mở khóa địa danh, món ăn và vật phẩm đầu tiên.",
+  "journeyLoadFailed": "Chưa thể tải hành trình lúc này.",
+  "futureLetterNotificationTitle": "Một lá thư đang đợi bạn",
+  "futureLetterNotificationBody": "Mở MuseMend khi bạn sẵn sàng.",
+  "futureLetterNotificationChannel": "Thư tương lai",
+  "futureLetterNotificationChannelDescription": "Nhắc khi thư gửi tương lai đến ngày mở",
+  "defaultCloudName": "Mây"
 }

@@ -15,7 +15,7 @@ class AccountOverviewDto {
         accountStatus: profile['account_status'] as String,
       ),
       settings: AccountSettings(
-        cloudName: settings['cloud_name'] as String? ?? 'Mây',
+        cloudName: settings['cloud_name'] as String? ?? '',
         themeMode: settings['theme_mode'] as String,
         soundEnabled: settings['sound_enabled'] as bool,
         notificationEnabled: settings['notification_enabled'] as bool,

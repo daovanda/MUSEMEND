@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:musemend/features/auth/application/auth_providers.dart';
+import 'package:musemend/features/auth/domain/auth_repository.dart';
+import 'package:musemend/features/auth/domain/auth_session.dart';
 import 'package:musemend/features/onboarding/application/onboarding_providers.dart';
 import 'package:musemend/features/onboarding/domain/onboarding_profile.dart';
 import 'package:musemend/features/onboarding/domain/onboarding_repository.dart';
 import 'package:musemend/features/onboarding/presentation/onboarding_screen.dart';
+import 'package:musemend/l10n/generated/app_localizations.dart';
 
 void main() {
   testWidgets('shows all onboarding messages and saves personalization', (
@@ -30,7 +34,12 @@ void main() {
             (ref) async => repository.profile,
           ),
         ],
-        child: const MaterialApp(home: OnboardingScreen()),
+        child: const MaterialApp(
+          locale: Locale('vi'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: OnboardingScreen(),
+        ),
       ),
     );
     await _pumpUi(tester);
@@ -79,7 +88,12 @@ void main() {
             (ref) async => repository.profile,
           ),
         ],
-        child: const MaterialApp(home: OnboardingScreen()),
+        child: const MaterialApp(
+          locale: Locale('vi'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: OnboardingScreen(),
+        ),
       ),
     );
     await _pumpUi(tester);
@@ -89,6 +103,41 @@ void main() {
 
     expect(repository.savedDisplayName, isNull);
     expect(repository.savedAddress, isNull);
+  });
+
+  testWidgets('first step can return to sign in', (tester) async {
+    final onboardingRepository = _FakeOnboardingRepository(
+      const OnboardingProfile(
+        displayName: 'Tên đăng ký',
+        preferredAddress: null,
+        completedAt: null,
+      ),
+    );
+    final authRepository = _FakeAuthRepository();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(authRepository),
+          onboardingRepositoryProvider.overrideWithValue(onboardingRepository),
+          onboardingProfileProvider.overrideWith(
+            (ref) async => onboardingRepository.profile,
+          ),
+        ],
+        child: const MaterialApp(
+          locale: Locale('vi'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: OnboardingScreen(),
+        ),
+      ),
+    );
+    await _pumpUi(tester);
+
+    await tester.tap(find.byTooltip('Quay lại màn đăng nhập'));
+    await _pumpUi(tester);
+
+    expect(authRepository.didSignOut, isTrue);
   });
 }
 
@@ -120,4 +169,30 @@ class _FakeOnboardingRepository implements OnboardingRepository {
       completedAt: DateTime.now(),
     );
   }
+}
+
+class _FakeAuthRepository implements AuthRepository {
+  bool didSignOut = false;
+
+  @override
+  AuthSession? get currentSession => null;
+
+  @override
+  Future<void> signIn({
+    required String email,
+    required String password,
+  }) async {}
+
+  @override
+  Future<void> signOut() async => didSignOut = true;
+
+  @override
+  Future<void> signUp({
+    required String displayName,
+    required String email,
+    required String password,
+  }) async {}
+
+  @override
+  Stream<AuthSession?> watchSession() => Stream.value(null);
 }

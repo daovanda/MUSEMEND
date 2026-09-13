@@ -1,7 +1,7 @@
 # Localization Flutter
 
-**Trạng thái:** `in-progress`  
-**Cập nhật:** 2026-09-12
+**Trạng thái:** `implemented`
+**Cập nhật:** 2026-09-13
 
 ## Hành vi
 
@@ -23,10 +23,16 @@ User có thể chọn ngôn ngữ tại Cá nhân → Hồ sơ và cài đặt; 
 - màn Khám phá overlay `destination/checkpoint/landmark/food/item` translations;
 - catalog DB áp dụng requested → English → Vietnamese base.
 
-Bottom navigation và form cài đặt đã dùng chuỗi sinh từ ARB. Catalog động của
-quote, gợi ý Muse và Khám phá đã dùng bảng translation. Các chuỗi feature
-còn hard-code tiếng Việt sẽ được chuyển dần theo module; vì vậy trạng thái tài
-liệu vẫn là `in-progress`, không tuyên bố toàn bộ UI đã được dịch.
+Toàn bộ nội dung giao diện cố định trong Auth, Onboarding, Bầu trời/check-in,
+Missions, Journal/editor, Khám phá/Library, Profile, navigation, trạng thái lỗi,
+accessibility semantics và local notification đều lấy từ `AppLocalizations`.
+Tên ngôn ngữ trong menu được cố ý hiển thị bằng tên bản địa để người dùng luôn
+nhận ra lựa chọn của mình. `MuseMend`, email và mẫu nhập ngày/giờ là tên/định
+dạng kỹ thuật, không phải bản dịch nội dung.
+
+Catalog động của quote, gợi ý Muse, điểm đến, checkpoint, landmark, food và item
+không nằm trong ARB: repository lấy bản dịch DB theo locale đã resolve. Nội dung
+do người dùng tạo (nhật ký, nhiệm vụ riêng, tên mây) luôn được giữ nguyên.
 
 ## Quy tắc dịch
 
@@ -34,9 +40,15 @@ Mọi key mới phải được viết/chốt bằng tiếng Việt trước. B�
 văn chữa lành, tự nhiên trong ngôn ngữ đích. Không đưa text UI vào DB; chỉ catalog
 động như điểm đến, checkpoint, phần thưởng, nhiệm vụ Muse và quote dùng bảng
 translation. PR thiếu key hoặc dùng tiếng Anh giả cho locale khác không đạt DoD.
+Test `arb_completeness_test.dart` bắt buộc đúng 12 locale được hỗ trợ, mọi file
+ARB có cùng tập key với bản tham chiếu tiếng Việt, không có giá trị rỗng và giữ
+nguyên tập placeholder. Nhờ vậy một màn hình không thể âm thầm trộn tiếng Anh do
+thiếu key hoặc làm hỏng câu động vì thiếu/thừa placeholder.
 
 ## Kiểm thử
 
-Unit test bảo vệ locale hợp lệ và fallback `ru`/`zh` về `en`, DTO settings và
-fallback mission translation. QA cần kiểm tra device locale ngoài danh sách,
-chọn thủ công, đăng xuất/đăng nhập lại và thay đổi locale khi app đang mở.
+Unit test bảo vệ tính đầy đủ của ARB, locale hợp lệ và fallback `ru`/`zh` về
+`en`, DTO settings và fallback mission translation. Widget test luôn khai báo
+delegate và locale rõ ràng để không vô tình kiểm tra bằng locale của máy CI. QA
+cần kiểm tra device locale ngoài danh sách, chọn thủ công, đăng xuất/đăng nhập
+lại, đổi locale khi app đang mở và rà text overflow cho tiếng Đức/Pháp.

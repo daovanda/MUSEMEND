@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:musemend/app/theme/muse_colors.dart';
 import 'package:musemend/features/auth/application/auth_providers.dart';
 import 'package:musemend/features/auth/presentation/auth_error_message.dart';
+import 'package:musemend/l10n/generated/app_localizations.dart';
 
 class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key});
@@ -44,11 +45,10 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
               password: _passwordController.text,
             );
     if (!mounted || !succeeded || !_isSignUp) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Đã tạo tài khoản. Hãy kiểm tra email nếu cần xác nhận.'),
-      ),
-    );
+    final strings = AppLocalizations.of(context);
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(strings.authAccountCreated)));
   }
 
   void _toggleMode() {
@@ -296,6 +296,7 @@ class _CompactBrand extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return Column(
       children: [
         Image.asset(
@@ -303,7 +304,7 @@ class _CompactBrand extends StatelessWidget {
           width: 116,
           height: 78,
           fit: BoxFit.contain,
-          semanticLabel: 'Linh vật mây MuseMend',
+          semanticLabel: strings.authMascotSemantics,
         ),
         const SizedBox(height: 2),
         const _MuseMendWordmark(fontSize: 29),
@@ -317,6 +318,7 @@ class _WelcomePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 18),
       child: Column(
@@ -328,14 +330,14 @@ class _WelcomePanel extends StatelessWidget {
             width: 190,
             height: 126,
             fit: BoxFit.contain,
-            semanticLabel: 'Linh vật mây MuseMend',
+            semanticLabel: strings.authMascotSemantics,
           ),
           const SizedBox(height: 8),
           const _MuseMendWordmark(fontSize: 42),
           const SizedBox(height: 16),
-          const Text(
-            'Một khoảng trời riêng\ncho những ngày cần dịu lại.',
-            style: TextStyle(
+          Text(
+            strings.authWelcomeHeadline,
+            style: const TextStyle(
               color: MuseColors.ink,
               fontSize: 28,
               height: 1.25,
@@ -345,7 +347,7 @@ class _WelcomePanel extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Ghi lại cảm xúc, hoàn thành những điều nhỏ bé và đi tiếp trên hành trình của riêng bạn.',
+            strings.authWelcomeBody,
             style: TextStyle(
               color: MuseColors.ink.withValues(alpha: .72),
               fontSize: 16,
@@ -365,6 +367,7 @@ class _MuseMendWordmark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return ShaderMask(
       blendMode: BlendMode.srcIn,
       shaderCallback:
@@ -372,7 +375,7 @@ class _MuseMendWordmark extends StatelessWidget {
             colors: [Color(0xFF4D858D), Color(0xFF9BC27C)],
           ).createShader(bounds),
       child: Text(
-        'MuseMend',
+        strings.appTitle,
         style: TextStyle(
           color: Colors.white,
           fontSize: fontSize,
@@ -411,6 +414,7 @@ class _AuthCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     final fieldDecoration = InputDecorationTheme(
       filled: true,
       fillColor: Colors.white.withValues(alpha: .68),
@@ -473,8 +477,8 @@ class _AuthCard extends StatelessWidget {
                     children: [
                       Text(
                         isSignUp
-                            ? 'Tạo khoảng trời của bạn'
-                            : 'Chào bạn trở lại',
+                            ? strings.authSignUpTitle
+                            : strings.authSignInTitle,
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           color: MuseColors.ink,
@@ -486,8 +490,8 @@ class _AuthCard extends StatelessWidget {
                       const SizedBox(height: 7),
                       Text(
                         isSignUp
-                            ? 'Bắt đầu bằng vài thông tin thật đơn giản.'
-                            : 'Hôm nay mình cùng chậm lại một chút nhé.',
+                            ? strings.authSignUpSubtitle
+                            : strings.authSignInSubtitle,
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           color: MuseColors.mutedInk,
@@ -518,9 +522,9 @@ class _AuthCard extends StatelessWidget {
                                       style: const TextStyle(
                                         color: MuseColors.ink,
                                       ),
-                                      decoration: const InputDecoration(
-                                        labelText: 'Tên hiển thị',
-                                        prefixIcon: Icon(
+                                      decoration: InputDecoration(
+                                        labelText: strings.displayName,
+                                        prefixIcon: const Icon(
                                           Icons.person_outline_rounded,
                                         ),
                                       ),
@@ -528,7 +532,7 @@ class _AuthCard extends StatelessWidget {
                                         final length =
                                             value?.trim().length ?? 0;
                                         if (length < 2 || length > 60) {
-                                          return 'Tên cần từ 2 đến 60 ký tự.';
+                                          return strings.authDisplayNameLength;
                                         }
                                         return null;
                                       },
@@ -545,16 +549,16 @@ class _AuthCard extends StatelessWidget {
                         autofillHints: const [AutofillHints.email],
                         autocorrect: false,
                         style: const TextStyle(color: MuseColors.ink),
-                        decoration: const InputDecoration(
-                          labelText: 'Email',
-                          prefixIcon: Icon(Icons.alternate_email_rounded),
+                        decoration: InputDecoration(
+                          labelText: strings.email,
+                          prefixIcon: const Icon(Icons.alternate_email_rounded),
                         ),
                         validator: (value) {
                           final email = value?.trim() ?? '';
                           if (!RegExp(
                             r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
                           ).hasMatch(email)) {
-                            return 'Email chưa đúng định dạng.';
+                            return strings.authEmailInvalid;
                           }
                           return null;
                         },
@@ -575,13 +579,13 @@ class _AuthCard extends StatelessWidget {
                         onFieldSubmitted:
                             (_) => operation.isLoading ? null : onSubmit(),
                         decoration: InputDecoration(
-                          labelText: 'Mật khẩu',
+                          labelText: strings.password,
                           prefixIcon: const Icon(Icons.lock_outline_rounded),
                           suffixIcon: IconButton(
                             tooltip:
                                 obscurePassword
-                                    ? 'Hiện mật khẩu'
-                                    : 'Ẩn mật khẩu',
+                                    ? strings.authShowPassword
+                                    : strings.authHidePassword,
                             onPressed: onTogglePassword,
                             icon: Icon(
                               obscurePassword
@@ -592,7 +596,7 @@ class _AuthCard extends StatelessWidget {
                         ),
                         validator: (value) {
                           if ((value?.length ?? 0) < 8) {
-                            return 'Mật khẩu cần ít nhất 8 ký tự.';
+                            return strings.authPasswordMinLength;
                           }
                           return null;
                         },
@@ -606,7 +610,7 @@ class _AuthCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(14),
                           ),
                           child: Text(
-                            authErrorMessage(operation.error!),
+                            authErrorMessage(strings, operation.error!),
                             style: const TextStyle(color: Color(0xFF9A473D)),
                           ),
                         ),
@@ -635,7 +639,9 @@ class _AuthCard extends StatelessWidget {
                                   ),
                                 )
                                 : Text(
-                                  isSignUp ? 'Tạo tài khoản' : 'Đăng nhập',
+                                  isSignUp
+                                      ? strings.authCreateAccount
+                                      : strings.authSignIn,
                                   style: const TextStyle(
                                     fontWeight: FontWeight.w800,
                                   ),
@@ -653,8 +659,8 @@ class _AuthCard extends StatelessWidget {
                   onPressed: operation.isLoading ? null : onToggleMode,
                   child: Text(
                     isSignUp
-                        ? 'Đã có tài khoản? Đăng nhập'
-                        : 'Chưa có tài khoản? Đăng ký',
+                        ? strings.authSwitchToSignIn
+                        : strings.authSwitchToSignUp,
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontWeight: FontWeight.w700),
                   ),

@@ -1,7 +1,7 @@
 # Notification cục bộ và inbox
 
 Trạng thái: `in-progress`
-Cập nhật: 2026-09-06
+Cập nhật: 2026-09-13
 
 ## Phạm vi MVP
 
@@ -42,6 +42,9 @@ notification và không thể tự tạo sự kiện đến hạn.
 Notification trên lock screen dùng title/body chung, không có tiêu đề hoặc nội dung
 thư. Payload chỉ là `journal:<uuid>`. Local initialization lỗi không được chặn app
 khởi động hoặc làm rollback bản thư đã lưu thành công trên server.
+Title, body, tên channel và mô tả channel được lấy từ locale đang dùng khi lịch
+nhắc được tạo; không còn chuỗi tiếng Việt cố định trong platform adapter. Lịch đã
+tạo giữ nguyên ngôn ngữ tại thời điểm tạo cho đến khi user lưu lại thư.
 
 ## Platform
 

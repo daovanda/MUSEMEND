@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:musemend/l10n/generated/app_localizations.dart';
 
 /// The fixed sky artwork used by the Reflect screen.
 ///
@@ -73,11 +74,12 @@ class _CloudMascotState extends State<CloudMascot>
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return Semantics(
       label:
           widget.mood == null
-              ? 'Linh vật mây của MuseMend'
-              : 'Mây đang đồng hành',
+              ? strings.skyMascotSemantics
+              : strings.skyCompanionSemantics,
       image: true,
       child: AnimatedBuilder(
         animation: _float,

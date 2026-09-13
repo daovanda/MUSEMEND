@@ -9,12 +9,14 @@ import 'package:musemend/features/journey/domain/journey_dashboard.dart';
 import 'package:musemend/features/journey/domain/journey_destination.dart';
 import 'package:musemend/features/journey/domain/journey_status.dart';
 import 'package:musemend/features/journey/domain/library_collectible.dart';
+import 'package:musemend/l10n/generated/app_localizations.dart';
 
 class LibraryScreen extends ConsumerWidget {
   const LibraryScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final strings = AppLocalizations.of(context);
     final dashboard = ref.watch(journeyControllerProvider);
     return MusePageBackground(
       accent: MuseColors.lavender,
@@ -25,11 +27,9 @@ class LibraryScreen extends ConsumerWidget {
             top: 20,
             physics: const AlwaysScrollableScrollPhysics(),
             children: [
-              const MuseTopBar(trailing: MusePageBadge(label: 'Khám phá')),
+              MuseTopBar(trailing: MusePageBadge(label: strings.navExplore)),
               const SizedBox(height: 4),
-              const MusePageTagline(
-                'Biến những điều nhỏ bạn hoàn thành thành một chuyến đi dịu dàng.',
-              ),
+              MusePageTagline(strings.exploreTagline),
               const SizedBox(height: 24),
               dashboard.when(
                 loading: () => const _LoadingCard(),
@@ -62,6 +62,7 @@ class _DashboardContentState extends State<_DashboardContent> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     final items =
         _filter == null
             ? widget.dashboard.collectibles
@@ -82,12 +83,14 @@ class _DashboardContentState extends State<_DashboardContent> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Bộ sưu tập hành trình',
+                    strings.journeyCollection,
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    '${widget.dashboard.collectibles.length} kỷ niệm đã mở khóa',
+                    strings.journeyUnlockedCount(
+                      widget.dashboard.collectibles.length,
+                    ),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -121,6 +124,7 @@ class _JourneyCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final strings = AppLocalizations.of(context);
     final destination = dashboard.destination;
     if (destination == null) {
       return _EmptyJourneyCard(
@@ -146,7 +150,7 @@ class _JourneyCard extends ConsumerWidget {
                     child: _ProgressMetric(
                       icon: Icons.route_rounded,
                       value: '${destination.completionPercent}%',
-                      label: 'đã hoàn thành',
+                      label: strings.journeyCompletedMetric,
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -154,11 +158,11 @@ class _JourneyCard extends ConsumerWidget {
                     child: _ProgressMetric(
                       icon: Icons.bolt_rounded,
                       value: '${dashboard.availableEnergy}',
-                      label: 'năng lượng sẵn sàng',
+                      label: strings.journeyEnergyReady,
                     ),
                   ),
                   IconButton(
-                    tooltip: 'Đồng bộ tiến độ',
+                    tooltip: strings.journeySync,
                     onPressed:
                         dashboard.status == JourneyStatus.inProgress
                             ? () => _advance(context, ref)
@@ -176,7 +180,7 @@ class _JourneyCard extends ConsumerWidget {
               ),
               const SizedBox(height: 22),
               Text(
-                'Các trạm đang chờ',
+                strings.journeyWaitingStops,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 12),
@@ -194,17 +198,17 @@ class _JourneyCard extends ConsumerWidget {
                   icon: const Icon(Icons.directions_walk_rounded),
                   label: Text(
                     dashboard.status == JourneyStatus.paused
-                        ? 'Đến điểm tiếp theo'
-                        : 'Bắt đầu hành trình',
+                        ? strings.journeyNextDestination
+                        : strings.journeyStart,
                   ),
                 ),
                 const SizedBox(height: 10),
               ],
               if (dashboard.status == JourneyStatus.completed)
-                const Padding(
+                Padding(
                   padding: EdgeInsets.fromLTRB(4, 8, 4, 14),
                   child: Text(
-                    'Bạn đã hoàn thành những điểm đến hiện có. Một hành trình mới sẽ sớm mở ra.',
+                    strings.journeyAllCompleted,
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -216,14 +220,13 @@ class _JourneyCard extends ConsumerWidget {
   }
 
   Future<void> _start(BuildContext context, WidgetRef ref) async {
+    final strings = AppLocalizations.of(context);
     final success = await ref.read(journeyControllerProvider.notifier).start();
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          success
-              ? 'Hành trình đã sẵn sàng.'
-              : 'Chưa thể bắt đầu hành trình. Hãy thử lại.',
+          success ? strings.journeyReady : strings.journeyStartFailed,
         ),
       ),
     );
@@ -234,7 +237,7 @@ class _JourneyCard extends ConsumerWidget {
         await ref.read(journeyControllerProvider.notifier).refreshProgress();
     if (!context.mounted || success) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Chưa thể đồng bộ tiến độ. Hãy thử lại.')),
+      SnackBar(content: Text(AppLocalizations.of(context).journeySyncFailed)),
     );
   }
 }
@@ -246,8 +249,12 @@ class _DestinationHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return Semantics(
-      label: 'Điểm đến ${destination.name}, ${destination.description ?? ''}',
+      label: strings.destinationSemantics(
+        destination.name,
+        destination.description ?? '',
+      ),
       child: Container(
         height: 260,
         decoration: BoxDecoration(
@@ -276,7 +283,9 @@ class _DestinationHero extends StatelessWidget {
                 child: CatalogArtwork(
                   assetPath: destination.heroAssetPath,
                   fit: BoxFit.cover,
-                  semanticLabel: 'Ảnh ${destination.name}',
+                  semanticLabel: strings.destinationImageSemantics(
+                    destination.name,
+                  ),
                   placeholder: const Icon(
                     Icons.landscape_rounded,
                     size: 72,
@@ -307,6 +316,7 @@ class _DestinationHero extends StatelessWidget {
                           _HeroPill(label: destination.countryCode!),
                         _HeroPill(
                           label: _destinationTypeLabel(
+                            strings,
                             destination.destinationType,
                           ),
                         ),
@@ -344,14 +354,15 @@ class _DestinationHero extends StatelessWidget {
     );
   }
 
-  String _destinationTypeLabel(String value) => switch (value) {
-    'province' => 'Tỉnh',
-    'city' => 'Thành phố',
-    'island' => 'Hòn đảo',
-    'heritage' => 'Di sản',
-    'region' => 'Vùng đất',
-    _ => 'Điểm đến',
-  };
+  String _destinationTypeLabel(AppLocalizations strings, String value) =>
+      switch (value) {
+        'province' => strings.destinationProvince,
+        'city' => strings.destinationCity,
+        'island' => strings.destinationIsland,
+        'heritage' => strings.destinationHeritage,
+        'region' => strings.destinationRegion,
+        _ => strings.destinationDefault,
+      };
 }
 
 class _HeroPill extends StatelessWidget {
@@ -430,6 +441,7 @@ class _CheckpointCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     final color =
         checkpoint.isCompleted
             ? const Color(0xFF6E987F)
@@ -483,7 +495,10 @@ class _CheckpointCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          'Trạm ${checkpoint.number} · ${checkpoint.title}',
+                          strings.checkpointTitle(
+                            checkpoint.number,
+                            checkpoint.title,
+                          ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(
@@ -523,7 +538,10 @@ class _CheckpointCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${checkpoint.earnedEnergy}/${checkpoint.requiredEnergy} năng lượng',
+                    strings.checkpointEnergy(
+                      checkpoint.earnedEnergy,
+                      checkpoint.requiredEnergy,
+                    ),
                     style: Theme.of(context).textTheme.labelSmall,
                   ),
                 ],
@@ -544,6 +562,7 @@ class _EmptyJourneyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return MuseGlassCard(
       tint: MuseColors.sky,
       padding: const EdgeInsets.all(24),
@@ -556,22 +575,19 @@ class _EmptyJourneyCard extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           Text(
-            _journeyTitle(dashboard.status),
+            _journeyTitle(strings, dashboard.status),
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Khởi hành để mở điểm đến đầu tiên. Mỗi trạm dùng năng lượng tích lũy và phần thưởng do Muse xác định.',
-            textAlign: TextAlign.center,
-          ),
+          Text(strings.journeyStartDescription, textAlign: TextAlign.center),
           if (dashboard.canStart &&
               dashboard.status != JourneyStatus.completed) ...[
             const SizedBox(height: 18),
             FilledButton.icon(
               onPressed: onStart,
               icon: const Icon(Icons.directions_walk_rounded),
-              label: const Text('Bắt đầu hành trình'),
+              label: Text(strings.journeyStart),
             ),
           ],
         ],
@@ -579,12 +595,13 @@ class _EmptyJourneyCard extends StatelessWidget {
     );
   }
 
-  String _journeyTitle(JourneyStatus status) => switch (status) {
-    JourneyStatus.notStarted => 'Thế giới đang chờ bạn',
-    JourneyStatus.inProgress => 'Đang khám phá',
-    JourneyStatus.paused => 'Sẵn sàng đi tiếp',
-    JourneyStatus.completed => 'Đã hoàn thành hành trình',
-  };
+  String _journeyTitle(AppLocalizations strings, JourneyStatus status) =>
+      switch (status) {
+        JourneyStatus.notStarted => strings.journeyStatusNotStarted,
+        JourneyStatus.inProgress => strings.journeyStatusInProgress,
+        JourneyStatus.paused => strings.journeyStatusPaused,
+        JourneyStatus.completed => strings.journeyStatusCompleted,
+      };
 }
 
 class _CollectionFilters extends StatelessWidget {
@@ -600,6 +617,7 @@ class _CollectionFilters extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     int count(CollectibleKind kind) =>
         items.where((item) => item.kind == kind).length;
     return SingleChildScrollView(
@@ -607,28 +625,28 @@ class _CollectionFilters extends StatelessWidget {
       child: Row(
         children: [
           _FilterPill(
-            label: 'Tất cả',
+            label: strings.filterAll,
             count: items.length,
             icon: Icons.auto_awesome_mosaic_outlined,
             selected: selected == null,
             onTap: () => onSelected(null),
           ),
           _FilterPill(
-            label: 'Địa danh',
+            label: strings.collectibleLandmark,
             count: count(CollectibleKind.landmark),
             icon: Icons.account_balance_outlined,
             selected: selected == CollectibleKind.landmark,
             onTap: () => onSelected(CollectibleKind.landmark),
           ),
           _FilterPill(
-            label: 'Món ăn',
+            label: strings.collectibleFood,
             count: count(CollectibleKind.food),
             icon: Icons.restaurant_outlined,
             selected: selected == CollectibleKind.food,
             onTap: () => onSelected(CollectibleKind.food),
           ),
           _FilterPill(
-            label: 'Vật phẩm',
+            label: strings.collectibleItem,
             count: count(CollectibleKind.item),
             icon: Icons.backpack_outlined,
             selected: selected == CollectibleKind.item,
@@ -677,6 +695,7 @@ class _CollectibleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: MuseGlassCard(
@@ -716,14 +735,14 @@ class _CollectibleCard extends StatelessWidget {
                         ),
                       ),
                       if (!item.isViewed)
-                        const Badge(label: Text('Mới'))
+                        Badge(label: Text(strings.newLabel))
                       else if (item.isEquipped)
                         const Icon(Icons.checkroom_rounded, size: 20),
                     ],
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    '${_kindLabel(item.kind)} · ${_rarityLabel(item.rarity)}',
+                    '${_kindLabel(strings, item.kind)} · ${_rarityLabel(strings, item.rarity)}',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: const Color(0xFF6E7181),
                     ),
@@ -758,20 +777,22 @@ class _CollectibleCard extends StatelessWidget {
     CollectibleKind.item => Icons.backpack_outlined,
   };
 
-  String _kindLabel(CollectibleKind kind) => switch (kind) {
-    CollectibleKind.landmark => 'Địa danh',
-    CollectibleKind.food => 'Món ăn',
-    CollectibleKind.item => 'Vật phẩm',
-  };
+  String _kindLabel(AppLocalizations strings, CollectibleKind kind) =>
+      switch (kind) {
+        CollectibleKind.landmark => strings.collectibleLandmark,
+        CollectibleKind.food => strings.collectibleFood,
+        CollectibleKind.item => strings.collectibleItem,
+      };
 
-  String _rarityLabel(String rarity) => switch (rarity) {
-    'common' => 'Phổ biến',
-    'uncommon' => 'Đặc biệt',
-    'rare' => 'Quý hiếm',
-    'epic' => 'Sử thi',
-    'legendary' => 'Huyền thoại',
-    _ => rarity,
-  };
+  String _rarityLabel(AppLocalizations strings, String rarity) =>
+      switch (rarity) {
+        'common' => strings.rarityCommon,
+        'uncommon' => strings.rarityUncommon,
+        'rare' => strings.rarityRare,
+        'epic' => strings.rarityEpic,
+        'legendary' => strings.rarityLegendary,
+        _ => rarity,
+      };
 }
 
 class _EmptyFilteredCollection extends StatelessWidget {
@@ -781,16 +802,17 @@ class _EmptyFilteredCollection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     final label = switch (filter) {
-      CollectibleKind.landmark => 'địa danh',
-      CollectibleKind.food => 'món ăn',
-      CollectibleKind.item => 'vật phẩm',
+      CollectibleKind.landmark => strings.collectibleLandmark.toLowerCase(),
+      CollectibleKind.food => strings.collectibleFood.toLowerCase(),
+      CollectibleKind.item => strings.collectibleItem.toLowerCase(),
     };
     return MuseGlassCard(
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Text(
-          'Bạn chưa mở khóa $label nào trong hành trình.',
+          strings.collectionFilteredEmpty(label),
           textAlign: TextAlign.center,
         ),
       ),
@@ -803,11 +825,11 @@ class _EmptyCollection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MuseGlassCard(
+    return MuseGlassCard(
       child: Padding(
         padding: EdgeInsets.all(20),
         child: Text(
-          'Hoàn thành một trạm để mở khóa địa danh, món ăn và vật phẩm đầu tiên.',
+          AppLocalizations.of(context).collectionEmpty,
           textAlign: TextAlign.center,
         ),
       ),
@@ -841,9 +863,12 @@ class _ErrorCard extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            const Text('Chưa thể tải hành trình lúc này.'),
+            Text(AppLocalizations.of(context).journeyLoadFailed),
             const SizedBox(height: 12),
-            OutlinedButton(onPressed: onRetry, child: const Text('Thử lại')),
+            OutlinedButton(
+              onPressed: onRetry,
+              child: Text(AppLocalizations.of(context).retry),
+            ),
           ],
         ),
       ),

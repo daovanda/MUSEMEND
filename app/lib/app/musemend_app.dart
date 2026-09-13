@@ -14,7 +14,7 @@ class MuseMendApp extends ConsumerWidget {
     final themeMode = ref.watch(appThemeModeProvider).value ?? ThemeMode.light;
     final languageCode = ref.watch(appLanguageCodeProvider).value;
     return MaterialApp.router(
-      title: 'MuseMend',
+      onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       debugShowCheckedModeBanner: false,
       theme: buildMuseTheme(),
       darkTheme: buildMuseTheme(Brightness.dark),

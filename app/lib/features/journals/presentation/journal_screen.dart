@@ -12,6 +12,7 @@ import 'package:musemend/features/journals/domain/journal_calendar.dart';
 import 'package:musemend/features/journals/presentation/journal_editor_screen.dart';
 import 'package:musemend/features/checkin/presentation/mood_visuals.dart';
 import 'package:musemend/features/notifications/application/notification_providers.dart';
+import 'package:musemend/l10n/generated/app_localizations.dart';
 
 class JournalScreen extends ConsumerStatefulWidget {
   const JournalScreen({this.requestedEntryId, super.key});
@@ -35,6 +36,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     ref.listen(reflectControllerProvider, (previous, next) {
       final previousMood = previous?.value?.today?.mood;
       final nextMood = next.value?.today?.mood;
@@ -63,11 +65,9 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
             top: 20,
             physics: const AlwaysScrollableScrollPhysics(),
             children: [
-              const MuseTopBar(trailing: MusePageBadge(label: 'Nhật ký')),
+              MuseTopBar(trailing: MusePageBadge(label: strings.navJournal)),
               const SizedBox(height: 4),
-              const MusePageTagline(
-                'Mỗi ngày một trang nhỏ để trở về chính mình.',
-              ),
+              MusePageTagline(strings.journalTagline),
               const SizedBox(height: 28),
               calendar.when(
                 loading: () => const _JournalCalendarLoading(),
@@ -95,18 +95,16 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
               ),
               const SizedBox(height: 28),
               MuseSectionLabel(
-                'Thư gửi tương lai',
+                strings.futureLetters,
                 trailing: IconButton(
-                  tooltip: 'Viết thư mới',
+                  tooltip: strings.futureLetterWriteNew,
                   onPressed: () => _editLetter(context, ref),
                   icon: const Icon(Icons.add_rounded),
                   color: MuseColors.teal,
                 ),
               ),
               const SizedBox(height: 6),
-              const Text(
-                'Những lời nhắn bạn muốn gửi cho một ngày phía trước.',
-              ),
+              Text(strings.futureLettersDescription),
               const SizedBox(height: 14),
               entries.when(
                 loading: () => const _JournalCalendarLoading(compact: true),
@@ -193,7 +191,9 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
       if (!mounted) return;
       if (entry == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Không tìm thấy mục nhật ký này.')),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).journalEntryNotFound),
+          ),
         );
         return;
       }
@@ -268,15 +268,14 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
   }
 
   void _promptMoodBeforeWriting(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: const Text(
-            'Hãy chọn mood hôm nay trước khi viết. Bạn có thể thay đổi mood bất kỳ lúc nào.',
-          ),
+          content: Text(strings.journalMoodRequired),
           action: SnackBarAction(
-            label: 'Chọn mood',
+            label: strings.journalChooseMood,
             onPressed: () => context.go('/reflect'),
           ),
         ),
@@ -304,22 +303,21 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
     WidgetRef ref,
     JournalEntry entry,
   ) async {
+    final strings = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder:
           (dialogContext) => AlertDialog(
-            title: const Text('Xóa mục này?'),
-            content: const Text(
-              'Mục sẽ được ẩn ngay. Tệp liên quan được dọn theo chính sách xóa mềm.',
-            ),
+            title: Text(strings.journalDeleteTitle),
+            content: Text(strings.journalDeleteBody),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext, false),
-                child: const Text('Giữ lại'),
+                child: Text(strings.keep),
               ),
               FilledButton(
                 onPressed: () => Navigator.pop(dialogContext, true),
-                child: const Text('Xóa'),
+                child: Text(strings.delete),
               ),
             ],
           ),
@@ -332,20 +330,24 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
       await ref.read(notificationServiceProvider).cancelFutureLetter(entry.id);
     }
     if (!context.mounted) return;
-    _showResult(context, deleted, 'Đã xóa mục nhật ký.');
+    _showResult(context, deleted, strings.journalDeleted);
   }
 
   void _showResult(BuildContext context, bool success, String successMessage) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(success ? successMessage : 'Chưa thể lưu. Hãy thử lại.'),
+        content: Text(
+          success ? successMessage : AppLocalizations.of(context).saveFailed,
+        ),
       ),
     );
   }
 
   void _showFailure(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Chưa thể mở thư. Hãy thử lại.')),
+      SnackBar(
+        content: Text(AppLocalizations.of(context).futureLetterOpenFailed),
+      ),
     );
   }
 }
@@ -367,18 +369,19 @@ class _DailyCalendarSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         MuseSectionLabel(
-          'Nhật ký hàng ngày',
+          strings.dailyJournal,
           trailing: MusePill(
             label:
                 todayMood == null
-                    ? 'Chọn mood trước'
+                    ? strings.journalChooseMoodFirst
                     : hasTodayEntry
-                    ? 'Sửa hôm nay'
-                    : 'Viết hôm nay',
+                    ? strings.journalEditToday
+                    : strings.journalWriteToday,
             icon:
                 todayMood == null
                     ? Icons.mood_outlined
@@ -400,7 +403,7 @@ class _DailyCalendarSection extends StatelessWidget {
           ),
         if (calendar.months.length == 1)
           Text(
-            'Kéo xuống trong những tháng sau để xem lại các trang đã viết.',
+            strings.journalPastHint,
             style: Theme.of(context).textTheme.bodySmall,
             textAlign: TextAlign.center,
           ),
@@ -422,6 +425,8 @@ class _MonthCalendar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
+    final material = MaterialLocalizations.of(context);
     final firstDay = DateTime.utc(month.year, month.month, 1);
     final leading = firstDay.weekday - 1;
     final cells = <Widget>[
@@ -441,14 +446,14 @@ class _MonthCalendar extends StatelessWidget {
           Row(
             children: [
               Text(
-                month.label,
+                material.formatMonthYear(DateTime(month.year, month.month)),
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
               ),
               const Spacer(),
               if (month.year == today.year && month.month == today.month)
-                const MusePill(label: 'Đang xem', selected: true),
+                MusePill(label: strings.journalViewing, selected: true),
               if (!(month.year == today.year && month.month == today.month))
                 const Icon(
                   Icons.history_rounded,
@@ -458,15 +463,10 @@ class _MonthCalendar extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
-          const Row(
+          Row(
             children: [
-              _WeekdayLabel('T2'),
-              _WeekdayLabel('T3'),
-              _WeekdayLabel('T4'),
-              _WeekdayLabel('T5'),
-              _WeekdayLabel('T6'),
-              _WeekdayLabel('T7'),
-              _WeekdayLabel('CN'),
+              for (final index in const [1, 2, 3, 4, 5, 6, 0])
+                _WeekdayLabel(material.narrowWeekdays[index]),
             ],
           ),
           const SizedBox(height: 6),
@@ -514,6 +514,7 @@ class _CalendarDayCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     final isFuture = day.date.isAfter(today);
     if (isFuture) return const SizedBox.shrink();
     final mood = day.checkin?.mood;
@@ -521,8 +522,16 @@ class _CalendarDayCell extends StatelessWidget {
     final hasActivity = day.hasActivity;
     return Semantics(
       button: onOpen != null,
-      label:
-          '${day.date.day} tháng ${day.date.month}${mood == null ? '' : ', ${mood.label}'}${day.isWritten ? ', đã viết nhật ký' : ''}',
+      label: strings.journalDaySemantics(
+        day.date.day,
+        day.date.month,
+        mood == null
+            ? ''
+            : strings.journalMoodSemantics(
+              mood.localizedLabel(strings).toLowerCase(),
+            ),
+        day.isWritten ? strings.journalWrittenSemantics : '',
+      ),
       child: InkWell(
         onTap: onOpen,
         borderRadius: BorderRadius.circular(99),
@@ -612,6 +621,7 @@ class _EmptyFutureLetters extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return MuseGlassCard(
       tint: MuseColors.lavender,
       child: Column(
@@ -622,15 +632,12 @@ class _EmptyFutureLetters extends StatelessWidget {
             color: MuseColors.teal,
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Chưa có lá thư nào. Bạn có muốn gửi một lời nhắn cho tương lai không?',
-            textAlign: TextAlign.center,
-          ),
+          Text(strings.futureLettersEmpty, textAlign: TextAlign.center),
           const SizedBox(height: 12),
           OutlinedButton.icon(
             onPressed: onCreate,
             icon: const Icon(Icons.edit_rounded),
-            label: const Text('Viết lá thư đầu tiên'),
+            label: Text(strings.futureLetterWriteFirst),
           ),
         ],
       ),
@@ -651,6 +658,7 @@ class _JournalCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final strings = AppLocalizations.of(context);
     final isLetter = entry.kind == JournalKind.futureLetter;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -675,16 +683,21 @@ class _JournalCard extends ConsumerWidget {
             entry.title?.trim().isNotEmpty == true
                 ? entry.title!
                 : isLetter
-                ? 'Thư gửi tương lai'
-                : 'Một ngày của tôi',
+                ? strings.futureLetters
+                : strings.journalMyDay,
           ),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 isLetter
-                    ? 'Hẹn ${_date(entry.deliverAt!)} · ${entry.openedAt == null ? 'chưa mở' : 'đã mở'}'
-                    : '${_date(entry.entryDate!)} · ${_preview(entry.content)}',
+                    ? strings.futureLetterScheduleState(
+                      _date(entry.deliverAt!),
+                      entry.openedAt == null
+                          ? strings.futureLetterUnopened
+                          : strings.futureLetterOpened,
+                    )
+                    : '${_date(entry.entryDate!)} · ${_preview(strings, entry.content)}',
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -702,20 +715,20 @@ class _JournalCard extends ConsumerWidget {
             ],
           ),
           trailing: PopupMenuButton<_JournalCardAction>(
-            tooltip: 'Tùy chọn thư',
+            tooltip: strings.futureLetterOptions,
             icon: const Icon(Icons.more_vert_rounded),
             onSelected: (action) {
               if (action == _JournalCardAction.delete) onDelete();
             },
             itemBuilder:
-                (context) => const [
+                (context) => [
                   PopupMenuItem(
                     value: _JournalCardAction.delete,
                     child: Row(
                       children: [
-                        Icon(Icons.delete_outline),
-                        SizedBox(width: 10),
-                        Text('Xóa thư'),
+                        const Icon(Icons.delete_outline),
+                        const SizedBox(width: 10),
+                        Text(strings.futureLetterDelete),
                       ],
                     ),
                   ),
@@ -729,9 +742,9 @@ class _JournalCard extends ConsumerWidget {
   static String _date(DateTime value) =>
       '${value.day.toString().padLeft(2, '0')}/${value.month.toString().padLeft(2, '0')}/${value.year}';
 
-  static String _preview(String value) {
+  static String _preview(AppLocalizations strings, String value) {
     final clean = value.trim().replaceAll(RegExp(r'\s+'), ' ');
-    return clean.isEmpty ? 'Chưa có nội dung' : clean;
+    return clean.isEmpty ? strings.journalNoContent : clean;
   }
 }
 
@@ -788,9 +801,12 @@ class _JournalError extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            const Text('Chưa thể tải nhật ký lúc này.'),
+            Text(AppLocalizations.of(context).journalLoadFailed),
             const SizedBox(height: 12),
-            OutlinedButton(onPressed: onRetry, child: const Text('Thử lại')),
+            OutlinedButton(
+              onPressed: onRetry,
+              child: Text(AppLocalizations.of(context).retry),
+            ),
           ],
         ),
       ),

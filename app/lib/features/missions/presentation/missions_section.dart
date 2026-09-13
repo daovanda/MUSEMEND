@@ -9,6 +9,7 @@ import 'package:musemend/features/missions/domain/mission_dashboard.dart';
 import 'package:musemend/features/missions/domain/mission_template.dart';
 import 'package:musemend/features/missions/domain/mission_type.dart';
 import 'package:musemend/features/missions/domain/user_mission.dart';
+import 'package:musemend/l10n/generated/app_localizations.dart';
 
 class MissionsSection extends ConsumerWidget {
   const MissionsSection({
@@ -28,6 +29,7 @@ class MissionsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final strings = AppLocalizations.of(context);
     final state = ref.watch(missionsControllerProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -47,12 +49,12 @@ class MissionsSection extends ConsumerWidget {
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     children: [
-                      const Text('Chưa thể tải nhiệm vụ.'),
+                      Text(strings.missionLoadFailed),
                       const SizedBox(height: 8),
                       OutlinedButton(
                         onPressed:
                             () => ref.invalidate(missionsControllerProvider),
-                        child: const Text('Thử lại'),
+                        child: Text(strings.retry),
                       ),
                     ],
                   ),
@@ -103,11 +105,13 @@ class MissionsSection extends ConsumerWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            'Nhiệm vụ hôm nay',
+                            strings.missionToday,
                             style: Theme.of(context).textTheme.titleLarge,
                           ),
                         ),
-                        Text('${dashboard.missions.length} việc'),
+                        Text(
+                          strings.missionTaskCount(dashboard.missions.length),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -125,26 +129,26 @@ class MissionsSection extends ConsumerWidget {
                     OutlinedButton.icon(
                       onPressed: () => _showCreateCustom(context, ref),
                       icon: const Icon(Icons.add_rounded),
-                      label: const Text('Tự tạo nhiệm vụ mới'),
+                      label: Text(strings.missionCreateNew),
                     ),
                   ],
                   if (!skyStyle) ...[
                     const SizedBox(height: 24),
                     Text(
-                      'Gợi ý từ Muse',
+                      strings.missionMuseSuggestions,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Những bước nhỏ phù hợp với cảm xúc hôm nay.',
+                      strings.missionSuggestionsDescription,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 10),
                     if (dashboard.suggestions.isEmpty)
-                      const Card(
+                      Card(
                         child: Padding(
                           padding: EdgeInsets.all(18),
-                          child: Text('Bạn đã thêm hết gợi ý phù hợp hôm nay.'),
+                          child: Text(strings.missionSuggestionsEmpty),
                         ),
                       )
                     else
@@ -169,6 +173,7 @@ class MissionsSection extends ConsumerWidget {
     WidgetRef ref,
     UserMission mission,
   ) async {
+    final strings = AppLocalizations.of(context);
     final result = await ref
         .read(missionsControllerProvider.notifier)
         .complete(mission.id);
@@ -177,10 +182,10 @@ class MissionsSection extends ConsumerWidget {
       SnackBar(
         content: Text(
           result == null
-              ? 'Chưa thể hoàn thành nhiệm vụ. Hãy thử lại.'
+              ? strings.missionCompleteFailed
               : result.alreadyCompleted
-              ? 'Nhiệm vụ này đã được ghi nhận trước đó.'
-              : 'Bạn đã nhận ${result.reward} năng lượng.',
+              ? strings.missionAlreadyCompleted
+              : strings.missionRewardReceived(result.reward),
         ),
       ),
     );
@@ -191,6 +196,7 @@ class MissionsSection extends ConsumerWidget {
     WidgetRef ref,
     UserMission mission,
   ) async {
+    final strings = AppLocalizations.of(context);
     final succeeded = await ref
         .read(missionsControllerProvider.notifier)
         .skip(mission.id);
@@ -198,9 +204,7 @@ class MissionsSection extends ConsumerWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          succeeded
-              ? 'Đã bỏ qua nhiệm vụ, không trừ năng lượng.'
-              : 'Chưa thể bỏ qua nhiệm vụ.',
+          succeeded ? strings.missionSkipped : strings.missionSkipFailed,
         ),
       ),
     );
@@ -211,6 +215,7 @@ class MissionsSection extends ConsumerWidget {
     WidgetRef ref,
     MissionTemplate template,
   ) async {
+    final strings = AppLocalizations.of(context);
     final draft = await showModalBottomSheet<_MissionDraft>(
       context: context,
       isScrollControlled: true,
@@ -227,13 +232,14 @@ class MissionsSection extends ConsumerWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          succeeded ? 'Đã thêm nhiệm vụ.' : 'Chưa thể thêm nhiệm vụ.',
+          succeeded ? strings.missionAdded : strings.missionAddFailed,
         ),
       ),
     );
   }
 
   Future<void> _showCreateCustom(BuildContext context, WidgetRef ref) async {
+    final strings = AppLocalizations.of(context);
     final draft = await showModalBottomSheet<_MissionDraft>(
       context: context,
       isScrollControlled: true,
@@ -256,9 +262,7 @@ class MissionsSection extends ConsumerWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          succeeded
-              ? 'Đã thêm nhiệm vụ riêng với phần thưởng 5 năng lượng.'
-              : 'Chưa thể tạo nhiệm vụ.',
+          succeeded ? strings.missionCustomAdded : strings.missionCreateFailed,
         ),
       ),
     );
@@ -288,6 +292,7 @@ class _SkyMissionPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     final grouped = <_MissionPeriod, List<UserMission>>{
       for (final period in _MissionPeriod.values) period: [],
     };
@@ -319,12 +324,12 @@ class _SkyMissionPanel extends StatelessWidget {
           height: 112,
           child: Stack(
             children: [
-              const Positioned(
+              Positioned(
                 top: 0,
                 left: 0,
                 child: Text(
-                  'Chăm sóc\nhôm nay',
-                  style: TextStyle(
+                  strings.missionCareToday,
+                  style: const TextStyle(
                     color: Color(0xFF384143),
                     fontSize: 24,
                     height: 1.02,
@@ -333,14 +338,14 @@ class _SkyMissionPanel extends StatelessWidget {
                   ),
                 ),
               ),
-              const Positioned(
+              Positioned(
                 left: 0,
                 bottom: 8,
                 right: 102,
                 child: Text(
-                  'Hãy dịu dàng với chính mình bằng một việc thật nhỏ.',
+                  strings.missionGentleStep,
                   maxLines: 2,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Color(0xFF697173),
                     fontSize: 10,
                     height: 1.25,
@@ -378,11 +383,11 @@ class _SkyMissionPanel extends StatelessWidget {
             ],
           ),
         ),
-        for (final entry in _missionPeriodLabels.entries)
-          if (grouped[entry.key]!.isNotEmpty)
+        for (final period in _MissionPeriod.values)
+          if (grouped[period]!.isNotEmpty)
             _SkyMissionGroup(
-              label: entry.value,
-              missions: grouped[entry.key]!,
+              label: _missionPeriodLabel(strings, period),
+              missions: grouped[period]!,
               onComplete: onComplete,
               onSkip: onSkip,
               onCreate: onCreate,
@@ -390,7 +395,9 @@ class _SkyMissionPanel extends StatelessWidget {
         for (final entry in groupedByType.entries)
           if (entry.value.isNotEmpty)
             _SkyMissionGroup(
-              label: 'Nhiệm vụ ${entry.key.label.toLowerCase()}',
+              label: strings.missionGroupType(
+                _missionTypeLabel(strings, entry.key).toLowerCase(),
+              ),
               missions: entry.value,
               onComplete: onComplete,
               onSkip: onSkip,
@@ -431,16 +438,17 @@ class _SkySuggestionGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(
+        SizedBox(
           height: 32,
           child: Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              'Gợi ý từ Muse',
-              style: TextStyle(
+              strings.missionMuseSuggestions,
+              style: const TextStyle(
                 color: Color(0xFF526164),
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
@@ -466,6 +474,7 @@ class _SkySuggestionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
@@ -499,7 +508,11 @@ class _SkySuggestionRow extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '${template.missionType.label} · ${template.estimatedMinutes ?? 1} phút · +${template.energyReward} năng lượng',
+                    strings.missionSuggestionMeta(
+                      _missionTypeLabel(strings, template.missionType),
+                      template.estimatedMinutes ?? 1,
+                      template.energyReward,
+                    ),
                     style: const TextStyle(
                       color: Color(0xFF7B8586),
                       fontSize: 8,
@@ -510,7 +523,7 @@ class _SkySuggestionRow extends StatelessWidget {
             ),
           ),
           IconButton(
-            tooltip: 'Thêm nhiệm vụ mẫu',
+            tooltip: strings.missionAddTemplate,
             onPressed: onAdd,
             icon: const Icon(Icons.add_circle_outline_rounded, size: 20),
             color: const Color(0xFF627B76),
@@ -523,13 +536,6 @@ class _SkySuggestionRow extends StatelessWidget {
 
 enum _MissionPeriod { morning, afternoon, evening, anytime }
 
-const _missionPeriodLabels = <_MissionPeriod, String>{
-  _MissionPeriod.morning: 'Buổi sáng',
-  _MissionPeriod.afternoon: 'Buổi chiều',
-  _MissionPeriod.evening: 'Buổi tối',
-  _MissionPeriod.anytime: 'Bất kỳ lúc nào',
-};
-
 class _DynamicStickerPlaceholder extends StatelessWidget {
   const _DynamicStickerPlaceholder({this.assetPath});
 
@@ -538,7 +544,7 @@ class _DynamicStickerPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: 'Minh họa địa danh của trạm hiện tại',
+      label: AppLocalizations.of(context).missionCurrentLandmarkSemantics,
       image: true,
       child: Container(
         width: 94,
@@ -585,6 +591,7 @@ class _SkyMissionGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -602,7 +609,7 @@ class _SkyMissionGroup extends StatelessWidget {
               ),
               const Spacer(),
               IconButton(
-                tooltip: 'Thêm nhiệm vụ vào $label',
+                tooltip: strings.missionAddToGroup(label),
                 onPressed: onCreate,
                 visualDensity: VisualDensity.compact,
                 icon: const Icon(Icons.add_rounded, size: 17),
@@ -636,6 +643,7 @@ class _SkyMissionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
@@ -656,7 +664,7 @@ class _SkyMissionRow extends StatelessWidget {
             radius: 17,
             backgroundColor: const Color(0xFFF2F7F3),
             child: Icon(
-              _iconForMission(mission),
+              Icons.spa_outlined,
               size: 17,
               color: const Color(0xFF627B76),
             ),
@@ -689,7 +697,7 @@ class _SkyMissionRow extends StatelessWidget {
                       ),
                     ),
                   Text(
-                    _missionScheduleLabel(mission),
+                    _missionScheduleLabel(strings, mission),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -718,7 +726,7 @@ class _SkyMissionRow extends StatelessWidget {
             ],
           ),
           IconButton(
-            tooltip: 'Hoàn thành',
+            tooltip: strings.missionComplete,
             onPressed: onComplete,
             icon: const Icon(Icons.check_rounded, size: 18),
             style: IconButton.styleFrom(
@@ -727,7 +735,7 @@ class _SkyMissionRow extends StatelessWidget {
             ),
           ),
           PopupMenuButton<void>(
-            tooltip: 'Tùy chọn nhiệm vụ',
+            tooltip: strings.missionOptions,
             padding: EdgeInsets.zero,
             iconSize: 17,
             icon: const Icon(Icons.more_vert_rounded, color: Color(0xFF778183)),
@@ -735,27 +743,13 @@ class _SkyMissionRow extends StatelessWidget {
                 (context) => [
                   PopupMenuItem<void>(
                     onTap: onSkip,
-                    child: const Text('Bỏ qua nhiệm vụ'),
+                    child: Text(strings.missionSkip),
                   ),
                 ],
           ),
         ],
       ),
     );
-  }
-
-  static IconData _iconForMission(UserMission mission) {
-    final text = '${mission.title} ${mission.description ?? ''}'.toLowerCase();
-    if (text.contains('nước') || text.contains('uống')) {
-      return Icons.water_drop_outlined;
-    }
-    if (text.contains('đi bộ') || text.contains('vận động')) {
-      return Icons.directions_walk_rounded;
-    }
-    if (text.contains('thở') || text.contains('thiền')) {
-      return Icons.air_rounded;
-    }
-    return Icons.spa_outlined;
   }
 }
 
@@ -767,6 +761,7 @@ class _EnergyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return Card(
       color: MuseColors.lavender.withValues(alpha: 0.82),
       child: Padding(
@@ -783,12 +778,10 @@ class _EnergyCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Năng lượng tích lũy',
+                    strings.missionEnergyAccumulated,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  Text(
-                    '$current tổng cộng · $available sẵn sàng cho hành trình',
-                  ),
+                  Text(strings.missionEnergySummary(current, available)),
                 ],
               ),
             ),
@@ -812,6 +805,7 @@ class _MissionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: Padding(
@@ -819,7 +813,7 @@ class _MissionCard extends StatelessWidget {
         child: Row(
           children: [
             IconButton(
-              tooltip: 'Hoàn thành',
+              tooltip: strings.missionComplete,
               onPressed: onComplete,
               icon: const Icon(Icons.radio_button_unchecked_rounded),
             ),
@@ -840,15 +834,15 @@ class _MissionCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   Text(
-                    _missionScheduleLabel(mission),
+                    _missionScheduleLabel(strings, mission),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
-                  Text('+${mission.energyReward} năng lượng'),
+                  Text(strings.missionEnergyReward(mission.energyReward)),
                 ],
               ),
             ),
             IconButton(
-              tooltip: 'Bỏ qua',
+              tooltip: strings.missionSkip,
               onPressed: onSkip,
               icon: const Icon(Icons.remove_circle_outline_rounded),
             ),
@@ -867,16 +861,21 @@ class _SuggestionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: ListTile(
         leading: const CircleAvatar(child: Text('🌱')),
         title: Text(template.title),
         subtitle: Text(
-          '${template.missionType.label} · ${template.estimatedMinutes ?? 1} phút · +${template.energyReward} năng lượng',
+          strings.missionSuggestionMeta(
+            _missionTypeLabel(strings, template.missionType),
+            template.estimatedMinutes ?? 1,
+            template.energyReward,
+          ),
         ),
         trailing: IconButton(
-          tooltip: 'Thêm nhiệm vụ',
+          tooltip: strings.missionAddAction,
           onPressed: onAdd,
           icon: const Icon(Icons.add_circle_rounded),
         ),
@@ -890,10 +889,10 @@ class _EmptyMissions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Card(
+    return Card(
       child: Padding(
         padding: EdgeInsets.all(18),
-        child: Text('Chưa có nhiệm vụ nào. Hãy chọn một bước thật nhẹ nhàng.'),
+        child: Text(AppLocalizations.of(context).missionEmpty),
       ),
     );
   }
@@ -972,6 +971,7 @@ class _CreateMissionSheetState extends State<_CreateMissionSheet> {
   @override
   Widget build(BuildContext context) {
     final viewInsets = MediaQuery.viewInsetsOf(context);
+    final strings = AppLocalizations.of(context);
     final viewport = MediaQuery.sizeOf(context);
     final template = widget.template;
     return SafeArea(
@@ -998,14 +998,14 @@ class _CreateMissionSheetState extends State<_CreateMissionSheet> {
                       Expanded(
                         child: Text(
                           widget.template == null
-                              ? 'Nhiệm vụ của bạn'
-                              : 'Thêm gợi ý từ Muse',
+                              ? strings.missionCustomSheetTitle
+                              : strings.missionSuggestionSheetTitle,
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                       ),
                       IconButton(
                         visualDensity: VisualDensity.compact,
-                        tooltip: 'Đóng',
+                        tooltip: strings.close,
                         onPressed: () => Navigator.of(context).pop(),
                         icon: const Icon(Icons.close_rounded),
                       ),
@@ -1014,8 +1014,8 @@ class _CreateMissionSheetState extends State<_CreateMissionSheet> {
                   const SizedBox(height: 2),
                   Text(
                     template == null
-                        ? 'Tự tạo nhiệm vụ được thưởng cố định 5 năng lượng.'
-                        : 'Gợi ý đã được Muse chuẩn bị sẵn cho bạn.',
+                        ? strings.missionCustomRewardDescription
+                        : strings.missionSuggestionPrepared,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   const SizedBox(height: 12),
@@ -1026,34 +1026,34 @@ class _CreateMissionSheetState extends State<_CreateMissionSheet> {
                           (value) => setState(() => _missionType = value),
                     ),
                     const SizedBox(height: 10),
-                    const _FieldLabel(label: 'Tên nhiệm vụ'),
+                    _FieldLabel(label: strings.missionName),
                     const SizedBox(height: 4),
                     TextFormField(
                       controller: _titleController,
                       maxLength: 200,
-                      decoration: const InputDecoration(
-                        hintText: 'Nhập tên nhiệm vụ',
-                        prefixIcon: Icon(Icons.spa_outlined),
+                      decoration: InputDecoration(
+                        hintText: strings.missionNameHint,
+                        prefixIcon: const Icon(Icons.spa_outlined),
                         isDense: true,
                         counterText: '',
                       ),
                       validator: (value) {
                         final length = value?.trim().length ?? 0;
                         return length < 1 || length > 200
-                            ? 'Tên nhiệm vụ cần từ 1 đến 200 ký tự.'
+                            ? strings.missionNameValidation
                             : null;
                       },
                     ),
                     const SizedBox(height: 8),
-                    const _FieldLabel(label: 'Ghi chú (không bắt buộc)'),
+                    _FieldLabel(label: strings.missionNoteOptional),
                     const SizedBox(height: 4),
                     TextFormField(
                       controller: _descriptionController,
                       maxLength: 500,
                       maxLines: 2,
-                      decoration: const InputDecoration(
-                        hintText: 'Thêm một lời nhắc nhẹ nhàng',
-                        prefixIcon: Icon(Icons.notes_rounded),
+                      decoration: InputDecoration(
+                        hintText: strings.missionNoteHint,
+                        prefixIcon: const Icon(Icons.notes_rounded),
                         isDense: true,
                         counterText: '',
                       ),
@@ -1066,7 +1066,7 @@ class _CreateMissionSheetState extends State<_CreateMissionSheet> {
                   const SizedBox(height: 8),
                   _SectionCaption(
                     icon: Icons.schedule_rounded,
-                    label: 'Thời gian thực hiện',
+                    label: strings.missionSchedule,
                   ),
                   const SizedBox(height: 6),
                   ..._scheduleFields(context),
@@ -1074,7 +1074,7 @@ class _CreateMissionSheetState extends State<_CreateMissionSheet> {
                   FilledButton.icon(
                     onPressed: _submit,
                     icon: const Icon(Icons.add_rounded),
-                    label: const Text('Thêm nhiệm vụ'),
+                    label: Text(strings.missionAddAction),
                   ),
                 ],
               ),
@@ -1086,6 +1086,7 @@ class _CreateMissionSheetState extends State<_CreateMissionSheet> {
   }
 
   List<Widget> _scheduleFields(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     switch (_missionType) {
       case MissionType.daily:
         return [
@@ -1093,7 +1094,7 @@ class _CreateMissionSheetState extends State<_CreateMissionSheet> {
             children: [
               Expanded(
                 child: _TimeField(
-                  label: 'Bắt đầu',
+                  label: strings.missionStart,
                   value: _dailyStart,
                   onChanged: (value) => setState(() => _dailyStart = value),
                 ),
@@ -1101,7 +1102,7 @@ class _CreateMissionSheetState extends State<_CreateMissionSheet> {
               const SizedBox(width: 10),
               Expanded(
                 child: _TimeField(
-                  label: 'Kết thúc',
+                  label: strings.missionEnd,
                   value: _dailyEnd,
                   onChanged: (value) => setState(() => _dailyEnd = value),
                 ),
@@ -1110,35 +1111,37 @@ class _CreateMissionSheetState extends State<_CreateMissionSheet> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Được xếp vào ${_periodLabelForTime(_dailyStart)} và tự làm mới mỗi ngày.',
+            strings.missionDailyRenewal(
+              _periodLabelForTime(strings, _dailyStart),
+            ),
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ];
       case MissionType.weekly:
-        return const [
+        return [
           _ScheduleInfo(
             icon: Icons.date_range_rounded,
-            label: 'Kết thúc lúc 00:00 đầu tuần kế tiếp.',
+            label: strings.missionWeeklyEnd,
           ),
         ];
       case MissionType.monthly:
-        return const [
+        return [
           _ScheduleInfo(
             icon: Icons.calendar_view_month_rounded,
-            label: 'Kết thúc lúc 00:00 ngày đầu tháng kế tiếp.',
+            label: strings.missionMonthlyEnd,
           ),
         ];
       case MissionType.yearly:
-        return const [
+        return [
           _ScheduleInfo(
             icon: Icons.event_available_outlined,
-            label: 'Kết thúc lúc 00:00 ngày đầu năm kế tiếp.',
+            label: strings.missionYearlyEnd,
           ),
         ];
       case MissionType.custom:
         return [
           _DateTimeField(
-            label: 'Bắt đầu',
+            label: strings.missionStart,
             date: _customStartDate,
             time: _customStartTime,
             onDateChanged: (value) => setState(() => _customStartDate = value),
@@ -1146,7 +1149,7 @@ class _CreateMissionSheetState extends State<_CreateMissionSheet> {
           ),
           const SizedBox(height: 10),
           _DateTimeField(
-            label: 'Kết thúc',
+            label: strings.missionEnd,
             date: _customEndDate,
             time: _customEndTime,
             onDateChanged: (value) => setState(() => _customEndDate = value),
@@ -1162,23 +1165,21 @@ class _CreateMissionSheetState extends State<_CreateMissionSheet> {
     DateTime? dueAt;
     if (_missionType == MissionType.daily) {
       if (_minutes(_dailyEnd) <= _minutes(_dailyStart)) {
-        _showValidation('Giờ kết thúc phải sau giờ bắt đầu trong cùng ngày.');
+        _showValidation(AppLocalizations.of(context).missionEndTimeAfterStart);
         return;
       }
       final today = _vietnamToday();
       startAt = _vietnamInstant(today, _dailyStart);
       dueAt = _vietnamInstant(today, _dailyEnd);
       if (!dueAt.isAfter(DateTime.now().toUtc())) {
-        _showValidation('Giờ kết thúc phải ở sau thời điểm hiện tại.');
+        _showValidation(AppLocalizations.of(context).missionEndTimeFuture);
         return;
       }
     } else if (_missionType == MissionType.custom) {
       startAt = _vietnamInstant(_customStartDate, _customStartTime);
       dueAt = _vietnamInstant(_customEndDate, _customEndTime);
       if (!dueAt.isAfter(startAt) || !dueAt.isAfter(DateTime.now().toUtc())) {
-        _showValidation(
-          'Thời gian kết thúc phải ở tương lai và sau lúc bắt đầu.',
-        );
+        _showValidation(AppLocalizations.of(context).missionEndDateFuture);
         return;
       }
     }
@@ -1276,7 +1277,9 @@ class _TimeFieldState extends State<_TimeField> {
           ),
           validator:
               (value) =>
-                  _parseTime(value) == null ? 'Nhập giờ dạng HH:mm.' : null,
+                  _parseTime(value) == null
+                      ? AppLocalizations.of(context).missionTimeFormat
+                      : null,
           onChanged: (value) {
             final parsed = _parseTime(value);
             if (parsed != null) widget.onChanged(parsed);
@@ -1364,9 +1367,11 @@ class _DateFieldState extends State<_DateField> {
           ),
           validator: (value) {
             final parsed = _parseDate(value);
-            if (parsed == null) return 'Nhập ngày dạng dd/MM/yyyy.';
+            if (parsed == null) {
+              return AppLocalizations.of(context).missionDateFormat;
+            }
             if (parsed.isBefore(_vietnamToday())) {
-              return 'Không chọn ngày quá khứ.';
+              return AppLocalizations.of(context).missionDateNotPast;
             }
             return null;
           },
@@ -1405,12 +1410,13 @@ class _DateTimeField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
           child: _DateField(
-            label: '$label · ngày',
+            label: strings.missionDateField(label),
             value: date,
             onChanged: onDateChanged,
           ),
@@ -1418,7 +1424,7 @@ class _DateTimeField extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
           child: _TimeField(
-            label: '$label · giờ',
+            label: strings.missionTimeField(label),
             value: time,
             onChanged: onTimeChanged,
           ),
@@ -1480,11 +1486,12 @@ class _MissionTypeField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Loại nhiệm vụ',
+          strings.missionType,
           style: Theme.of(
             context,
           ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
@@ -1496,7 +1503,7 @@ class _MissionTypeField extends StatelessWidget {
           children: [
             for (final type in MissionType.values)
               ChoiceChip(
-                label: Text(type.label),
+                label: Text(_missionTypeLabel(strings, type)),
                 selected: type == value,
                 onSelected: (_) => onChanged(type),
                 showCheckmark: false,
@@ -1535,6 +1542,7 @@ class _TemplateMissionSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -1544,25 +1552,25 @@ class _TemplateMissionSummary extends StatelessWidget {
           children: [
             _SummaryPill(
               icon: Icons.calendar_month_outlined,
-              label: missionType.label,
+              label: _missionTypeLabel(strings, missionType),
             ),
             _SummaryPill(
               icon: Icons.air_rounded,
-              label: '+${template.energyReward} năng lượng',
+              label: strings.missionEnergyReward(template.energyReward),
             ),
           ],
         ),
         const SizedBox(height: 10),
         _TemplateDetail(
           icon: Icons.spa_outlined,
-          label: 'Tên nhiệm vụ',
+          label: strings.missionName,
           value: template.title,
         ),
         if (template.description?.trim().isNotEmpty ?? false) ...[
           const SizedBox(height: 8),
           _TemplateDetail(
             icon: Icons.notes_rounded,
-            label: 'Ghi chú',
+            label: strings.missionNoteOptional,
             value: template.description!.trim(),
           ),
         ],
@@ -1699,11 +1707,13 @@ DateTime _vietnamInstant(DateTime date, TimeOfDay time) {
   ).subtract(const Duration(hours: 7));
 }
 
-String _periodLabelForTime(TimeOfDay time) {
-  if (time.hour >= 5 && time.hour < 12) return 'Buổi sáng';
-  if (time.hour >= 12 && time.hour < 17) return 'Buổi chiều';
-  if (time.hour >= 17 && time.hour < 22) return 'Buổi tối';
-  return 'Bất kỳ lúc nào';
+String _periodLabelForTime(AppLocalizations strings, TimeOfDay time) {
+  if (time.hour >= 5 && time.hour < 12) return strings.missionPeriodMorning;
+  if (time.hour >= 12 && time.hour < 17) {
+    return strings.missionPeriodAfternoon;
+  }
+  if (time.hour >= 17 && time.hour < 22) return strings.missionPeriodEvening;
+  return strings.missionPeriodAnytime;
 }
 
 String _formatDate(DateTime date) =>
@@ -1737,7 +1747,7 @@ TimeOfDay? _parseTime(String? input) {
   return TimeOfDay(hour: hour, minute: minute);
 }
 
-String _missionScheduleLabel(UserMission mission) {
+String _missionScheduleLabel(AppLocalizations strings, UserMission mission) {
   final start = mission.startAt.toUtc().add(const Duration(hours: 7));
   final due = mission.dueAt?.toUtc().add(const Duration(hours: 7));
   String clock(DateTime value) =>
@@ -1750,6 +1760,23 @@ String _missionScheduleLabel(UserMission mission) {
   if (mission.missionType == MissionType.custom && due != null) {
     return '${date(start)} ${clock(start)} → ${date(due)} ${clock(due)}';
   }
-  if (due != null) return 'Hạn ${date(due)}';
-  return mission.missionType.label;
+  if (due != null) return strings.missionDue(date(due));
+  return _missionTypeLabel(strings, mission.missionType);
 }
+
+String _missionTypeLabel(AppLocalizations strings, MissionType type) =>
+    switch (type) {
+      MissionType.daily => strings.missionTypeDaily,
+      MissionType.weekly => strings.missionTypeWeekly,
+      MissionType.monthly => strings.missionTypeMonthly,
+      MissionType.yearly => strings.missionTypeYearly,
+      MissionType.custom => strings.missionTypeCustom,
+    };
+
+String _missionPeriodLabel(AppLocalizations strings, _MissionPeriod period) =>
+    switch (period) {
+      _MissionPeriod.morning => strings.missionPeriodMorning,
+      _MissionPeriod.afternoon => strings.missionPeriodAfternoon,
+      _MissionPeriod.evening => strings.missionPeriodEvening,
+      _MissionPeriod.anytime => strings.missionPeriodAnytime,
+    };

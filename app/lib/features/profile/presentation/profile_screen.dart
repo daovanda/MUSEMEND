@@ -10,11 +10,21 @@ import 'package:musemend/features/profile/application/profile_providers.dart';
 import 'package:musemend/features/profile/domain/account_overview.dart';
 import 'package:musemend/l10n/generated/app_localizations.dart';
 
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  bool _settingsExpanded = false;
+  bool _privacyExpanded = false;
+  bool _termsExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     final session = ref.watch(authSessionProvider).asData?.value;
     final operation = ref.watch(authControllerProvider);
     final overview = ref.watch(accountOverviewProvider);
@@ -25,11 +35,9 @@ class ProfileScreen extends ConsumerWidget {
         child: MuseResponsiveList(
           top: 20,
           children: [
-            const MuseTopBar(trailing: MusePageBadge(label: 'Cá nhân')),
+            MuseTopBar(trailing: MusePageBadge(label: strings.navProfile)),
             const SizedBox(height: 4),
-            const MusePageTagline(
-              'Một góc nhỏ để chăm sóc tài khoản và sự riêng tư của bạn.',
-            ),
+            MusePageTagline(strings.profileTagline),
             const SizedBox(height: 28),
             overview.when(
               loading:
@@ -43,7 +51,7 @@ class ProfileScreen extends ConsumerWidget {
                   (_, _) => MuseGlassCard(
                     child: ListTile(
                       leading: const Icon(Icons.cloud_off_rounded),
-                      title: const Text('Chưa thể tải hồ sơ'),
+                      title: Text(strings.profileLoadFailed),
                       trailing: IconButton(
                         onPressed:
                             () => ref.invalidate(accountOverviewProvider),
@@ -51,47 +59,79 @@ class ProfileScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-              data:
-                  (data) => MuseGlassCard(
-                    child: Column(
-                      children: [
-                        ListTile(
-                          leading: const CircleAvatar(
-                            child: Icon(Icons.person_rounded),
-                          ),
-                          title: Text(
-                            data.profile.displayName ?? 'Bạn của Muse',
-                          ),
-                          subtitle: Text(session?.email ?? 'Email được bảo vệ'),
+              data: (data) {
+                return MuseGlassCard(
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: const CircleAvatar(
+                          child: Icon(Icons.person_rounded),
                         ),
+                        title: Text(
+                          data.profile.displayName ?? strings.profileMuseFriend,
+                        ),
+                        subtitle: Text(
+                          session?.email ?? strings.profileProtectedEmail,
+                        ),
+                      ),
+                      const Divider(height: 1),
+                      ListTile(
+                        leading: const Icon(Icons.cloud_rounded),
+                        title: Text(strings.profileCloudNameTitle),
+                        trailing: Text(
+                          data.settings.cloudName.trim().isEmpty
+                              ? strings.defaultCloudName
+                              : data.settings.cloudName,
+                        ),
+                      ),
+                      SwitchListTile(
+                        value: data.settings.notificationEnabled,
+                        onChanged: null,
+                        secondary: const Icon(Icons.notifications_outlined),
+                        title: Text(strings.notifications),
+                        subtitle: Text(strings.profileFutureLetterReminder),
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.tune_rounded),
+                        title: Text(strings.profileEditSettings),
+                        trailing: AnimatedRotation(
+                          turns: _settingsExpanded ? .5 : 0,
+                          duration: const Duration(milliseconds: 180),
+                          child: const Icon(Icons.expand_more_rounded),
+                        ),
+                        onTap:
+                            () => setState(() {
+                              _settingsExpanded = !_settingsExpanded;
+                            }),
+                      ),
+                      if (_settingsExpanded) ...[
                         const Divider(height: 1),
-                        ListTile(
-                          leading: const Icon(Icons.cloud_rounded),
-                          title: const Text('Tên của Mây'),
-                          trailing: Text(data.settings.cloudName),
-                        ),
-                        SwitchListTile(
-                          value: data.settings.notificationEnabled,
-                          onChanged: null,
-                          secondary: const Icon(Icons.notifications_outlined),
-                          title: const Text('Thông báo'),
-                          subtitle: const Text(
-                            'Nhắc thư tương lai trên thiết bị',
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 18, 16, 16),
+                          child: _InlineSettingsForm(
+                            key: ValueKey(
+                              '${data.profile.displayName}|'
+                              '${data.settings.cloudName}|'
+                              '${data.settings.themeMode}|'
+                              '${data.settings.soundEnabled}|'
+                              '${data.settings.notificationEnabled}|'
+                              '${data.settings.languageCode}',
+                            ),
+                            overview: data,
+                            onSave: (draft) => _saveSettings(context, draft),
+                            onCancel:
+                                () => setState(() => _settingsExpanded = false),
                           ),
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.tune_rounded),
-                          title: const Text('Chỉnh sửa hồ sơ và cài đặt'),
-                          trailing: const Icon(Icons.chevron_right_rounded),
-                          onTap: () => _editSettings(context, ref, data),
                         ),
                       ],
-                    ),
+                    ],
                   ),
+                );
+              },
             ),
             const SizedBox(height: 16),
             Text(
-              'Thông báo trong ứng dụng',
+              strings.profileInboxTitle,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
@@ -107,7 +147,7 @@ class ProfileScreen extends ConsumerWidget {
                   (_, _) => MuseGlassCard(
                     child: ListTile(
                       leading: const Icon(Icons.cloud_off_rounded),
-                      title: const Text('Chưa thể tải thông báo'),
+                      title: Text(strings.profileInboxLoadFailed),
                       trailing: IconButton(
                         onPressed:
                             () => ref.invalidate(notificationInboxProvider),
@@ -118,12 +158,12 @@ class ProfileScreen extends ConsumerWidget {
               data:
                   (items) =>
                       items.isEmpty
-                          ? const MuseGlassCard(
+                          ? MuseGlassCard(
                             child: ListTile(
                               leading: Icon(Icons.notifications_none_rounded),
-                              title: Text('Chưa có thông báo mới'),
+                              title: Text(strings.profileInboxEmpty),
                               subtitle: Text(
-                                'Thư đến hạn sẽ xuất hiện tại đây.',
+                                strings.profileInboxEmptyDescription,
                               ),
                             ),
                           )
@@ -166,35 +206,33 @@ class ProfileScreen extends ConsumerWidget {
                 children: [
                   ListTile(
                     leading: const Icon(Icons.privacy_tip_outlined),
-                    title: const Text('Quyền riêng tư'),
-                    trailing: const Icon(Icons.chevron_right_rounded),
+                    title: Text(strings.profilePrivacyTitle),
+                    trailing: AnimatedRotation(
+                      turns: _privacyExpanded ? .5 : 0,
+                      duration: const Duration(milliseconds: 180),
+                      child: const Icon(Icons.expand_more_rounded),
+                    ),
                     onTap:
-                        () => _showInformation(
-                          context,
-                          title: 'Quyền riêng tư',
-                          body:
-                              'Nhật ký được lưu riêng tư trên Supabase và chỉ '
-                              'tài khoản của bạn được đọc qua RLS. MuseMend không '
-                              'đưa nội dung thư lên thông báo màn hình khóa. Bản '
-                              'MVP chưa mã hóa đầu-cuối và chưa cung cấp xuất dữ liệu.',
+                        () => setState(
+                          () => _privacyExpanded = !_privacyExpanded,
                         ),
                   ),
+                  if (_privacyExpanded)
+                    _InlineInformationBody(body: strings.profilePrivacyBody),
                   const Divider(height: 1),
                   ListTile(
                     leading: const Icon(Icons.description_outlined),
-                    title: const Text('Điều khoản và giới hạn'),
-                    trailing: const Icon(Icons.chevron_right_rounded),
+                    title: Text(strings.profileTermsTitle),
+                    trailing: AnimatedRotation(
+                      turns: _termsExpanded ? .5 : 0,
+                      duration: const Duration(milliseconds: 180),
+                      child: const Icon(Icons.expand_more_rounded),
+                    ),
                     onTap:
-                        () => _showInformation(
-                          context,
-                          title: 'Điều khoản và giới hạn',
-                          body:
-                              'MuseMend là công cụ hỗ trợ phản tư, không chẩn đoán '
-                              'và không thay thế chuyên gia y tế hoặc sức khỏe tâm '
-                              'thần. Nếu bạn đang gặp nguy hiểm tức thời, hãy liên '
-                              'hệ dịch vụ khẩn cấp hoặc một người đáng tin cậy.',
-                        ),
+                        () => setState(() => _termsExpanded = !_termsExpanded),
                   ),
+                  if (_termsExpanded)
+                    _InlineInformationBody(body: strings.profileTermsBody),
                 ],
               ),
             ),
@@ -206,7 +244,7 @@ class ProfileScreen extends ConsumerWidget {
                       : () =>
                           ref.read(authControllerProvider.notifier).signOut(),
               icon: const Icon(Icons.logout_rounded),
-              label: const Text('Đăng xuất'),
+              label: Text(strings.profileSignOut),
             ),
             const SizedBox(height: 8),
             TextButton.icon(
@@ -215,7 +253,7 @@ class ProfileScreen extends ConsumerWidget {
                       ? null
                       : () => _requestDeletion(context, ref),
               icon: const Icon(Icons.delete_forever_outlined),
-              label: const Text('Yêu cầu xóa tài khoản'),
+              label: Text(strings.profileRequestDeletion),
               style: TextButton.styleFrom(
                 foregroundColor: Theme.of(context).colorScheme.error,
               ),
@@ -226,16 +264,7 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _editSettings(
-    BuildContext context,
-    WidgetRef ref,
-    AccountOverview overview,
-  ) async {
-    final draft = await showDialog<_SettingsDraft>(
-      context: context,
-      builder: (_) => _SettingsDialog(overview: overview),
-    );
-    if (draft == null) return;
+  Future<void> _saveSettings(BuildContext context, _SettingsDraft draft) async {
     final saved = await ref
         .read(accountOverviewProvider.notifier)
         .save(
@@ -276,7 +305,11 @@ class ProfileScreen extends ConsumerWidget {
     if (!requested) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Chưa thể gửi yêu cầu xóa tài khoản.')),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).profileDeletionRequestFailed,
+          ),
+        ),
       );
       return;
     }
@@ -287,39 +320,182 @@ class ProfileScreen extends ConsumerWidget {
     }
     await ref.read(authControllerProvider.notifier).signOut();
   }
+}
 
-  void _showInformation(
-    BuildContext context, {
-    required String title,
-    required String body,
-  }) {
-    showDialog<void>(
-      context: context,
-      builder:
-          (dialogContext) => AlertDialog(
-            title: Text(title),
-            content: Text(body),
-            actions: [
-              FilledButton(
-                onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('Đã hiểu'),
-              ),
-            ],
-          ),
+class _InlineInformationBody extends StatelessWidget {
+  const _InlineInformationBody({required this.body});
+
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(56, 0, 20, 18),
+      child: Text(
+        body,
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.55),
+      ),
     );
   }
 }
 
-class _SettingsDialog extends StatefulWidget {
-  const _SettingsDialog({required this.overview});
+class _SettingsFieldLabel extends StatelessWidget {
+  const _SettingsFieldLabel(this.label);
 
-  final AccountOverview overview;
+  final String label;
 
   @override
-  State<_SettingsDialog> createState() => _SettingsDialogState();
+  Widget build(BuildContext context) {
+    return Text(
+      label,
+      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+        color: MuseColors.teal,
+        fontWeight: FontWeight.w700,
+      ),
+    );
+  }
 }
 
-class _SettingsDialogState extends State<_SettingsDialog> {
+class _MuseSelectOption {
+  const _MuseSelectOption({required this.value, required this.label});
+
+  final String value;
+  final String label;
+}
+
+class _MusePopupField extends StatelessWidget {
+  const _MusePopupField({
+    required this.label,
+    required this.icon,
+    required this.value,
+    required this.options,
+    required this.onSelected,
+    this.helperText,
+  });
+
+  final String label;
+  final IconData icon;
+  final String value;
+  final List<_MuseSelectOption> options;
+  final ValueChanged<String> onSelected;
+  final String? helperText;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final selected = options.firstWhere((option) => option.value == value);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _SettingsFieldLabel(label),
+        const SizedBox(height: 6),
+        PopupMenuButton<String>(
+          initialValue: value,
+          tooltip: label,
+          position: PopupMenuPosition.under,
+          offset: const Offset(0, 6),
+          color: theme.colorScheme.surface.withValues(alpha: .98),
+          surfaceTintColor: Colors.transparent,
+          elevation: 8,
+          constraints: const BoxConstraints(
+            minWidth: 220,
+            maxWidth: 320,
+            maxHeight: 360,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+            side: BorderSide(color: Colors.white.withValues(alpha: .8)),
+          ),
+          onSelected: onSelected,
+          itemBuilder:
+              (context) => [
+                for (final option in options)
+                  PopupMenuItem<String>(
+                    value: option.value,
+                    height: 42,
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 28,
+                          child:
+                              option.value == value
+                                  ? const Icon(
+                                    Icons.check_rounded,
+                                    size: 18,
+                                    color: MuseColors.teal,
+                                  )
+                                  : null,
+                        ),
+                        Expanded(
+                          child: Text(
+                            option.label,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+          child: Container(
+            height: 52,
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest.withValues(
+                alpha: .78,
+              ),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: MuseColors.teal.withValues(alpha: .16)),
+            ),
+            child: Row(
+              children: [
+                Icon(icon, size: 20, color: MuseColors.teal),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    selected.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const Icon(Icons.expand_more_rounded, color: MuseColors.teal),
+              ],
+            ),
+          ),
+        ),
+        if (helperText != null) ...[
+          const SizedBox(height: 6),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Text(helperText!, style: theme.textTheme.bodySmall),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _InlineSettingsForm extends StatefulWidget {
+  const _InlineSettingsForm({
+    required this.overview,
+    required this.onSave,
+    required this.onCancel,
+    super.key,
+  });
+
+  final AccountOverview overview;
+  final Future<void> Function(_SettingsDraft draft) onSave;
+  final VoidCallback onCancel;
+
+  @override
+  State<_InlineSettingsForm> createState() => _InlineSettingsFormState();
+}
+
+class _InlineSettingsFormState extends State<_InlineSettingsForm> {
   late final _displayName = TextEditingController(
     text: widget.overview.profile.displayName ?? '',
   );
@@ -341,109 +517,110 @@ class _SettingsDialogState extends State<_SettingsDialog> {
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context);
-    return AlertDialog(
-      title: Text(strings.profileAndSettings),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _SettingsFieldLabel(strings.displayName),
+        const SizedBox(height: 6),
+        TextField(
+          controller: _displayName,
+          maxLength: 80,
+          decoration: const InputDecoration(),
+        ),
+        const SizedBox(height: 8),
+        _SettingsFieldLabel(strings.cloudName),
+        const SizedBox(height: 6),
+        TextField(
+          controller: _cloudName,
+          maxLength: 40,
+          onChanged: (_) => setState(() {}),
+          decoration: const InputDecoration(),
+        ),
+        const SizedBox(height: 8),
+        _MusePopupField(
+          label: strings.language,
+          icon: Icons.language_rounded,
+          value: _languageCode,
+          helperText: strings.languageAutomaticDescription,
+          options: [
+            _MuseSelectOption(
+              value: 'system',
+              label: strings.languageAutomatic,
+            ),
+            const _MuseSelectOption(value: 'en', label: 'English'),
+            const _MuseSelectOption(value: 'vi', label: 'Tiếng Việt'),
+            const _MuseSelectOption(value: 'ja', label: '日本語'),
+            const _MuseSelectOption(value: 'fr', label: 'Français'),
+            const _MuseSelectOption(value: 'es', label: 'Español'),
+            const _MuseSelectOption(value: 'it', label: 'Italiano'),
+            const _MuseSelectOption(value: 'de', label: 'Deutsch'),
+            const _MuseSelectOption(value: 'ko', label: '한국어'),
+            const _MuseSelectOption(value: 'pt', label: 'Português'),
+            const _MuseSelectOption(value: 'ms', label: 'Bahasa Melayu'),
+            const _MuseSelectOption(value: 'id', label: 'Bahasa Indonesia'),
+            const _MuseSelectOption(value: 'th', label: 'ไทย'),
+          ],
+          onSelected: (value) => setState(() => _languageCode = value),
+        ),
+        const SizedBox(height: 14),
+        _MusePopupField(
+          label: strings.appearance,
+          icon: Icons.palette_outlined,
+          value: _themeMode,
+          options: [
+            _MuseSelectOption(value: 'system', label: strings.themeSystem),
+            _MuseSelectOption(value: 'light', label: strings.themeLight),
+            _MuseSelectOption(value: 'dark', label: strings.themeDark),
+          ],
+          onSelected: (value) => setState(() => _themeMode = value),
+        ),
+        const SizedBox(height: 8),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          value: _soundEnabled,
+          onChanged: (value) => setState(() => _soundEnabled = value),
+          title: Text(strings.sound),
+        ),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          value: _notificationEnabled,
+          onChanged: (value) => setState(() => _notificationEnabled = value),
+          title: Text(strings.notifications),
+          subtitle: Text(strings.profileFutureLetterReminder),
+        ),
+        const SizedBox(height: 8),
+        Row(
           children: [
-            TextField(
-              controller: _displayName,
-              maxLength: 80,
-              decoration: InputDecoration(labelText: strings.displayName),
-            ),
-            TextField(
-              controller: _cloudName,
-              maxLength: 40,
-              decoration: InputDecoration(labelText: strings.cloudName),
-            ),
-            DropdownButtonFormField<String>(
-              value: _languageCode,
-              decoration: InputDecoration(
-                labelText: strings.language,
-                helperText: strings.languageAutomaticDescription,
+            Expanded(
+              child: OutlinedButton(
+                onPressed: widget.onCancel,
+                child: Text(strings.cancel),
               ),
-              items: [
-                DropdownMenuItem(
-                  value: 'system',
-                  child: Text(strings.languageAutomatic),
-                ),
-                const DropdownMenuItem(value: 'en', child: Text('English')),
-                const DropdownMenuItem(value: 'vi', child: Text('Tiếng Việt')),
-                const DropdownMenuItem(value: 'ja', child: Text('日本語')),
-                const DropdownMenuItem(value: 'fr', child: Text('Français')),
-                const DropdownMenuItem(value: 'es', child: Text('Español')),
-                const DropdownMenuItem(value: 'it', child: Text('Italiano')),
-                const DropdownMenuItem(value: 'de', child: Text('Deutsch')),
-                const DropdownMenuItem(value: 'ko', child: Text('한국어')),
-                const DropdownMenuItem(value: 'pt', child: Text('Português')),
-                const DropdownMenuItem(
-                  value: 'ms',
-                  child: Text('Bahasa Melayu'),
-                ),
-                const DropdownMenuItem(
-                  value: 'id',
-                  child: Text('Bahasa Indonesia'),
-                ),
-                const DropdownMenuItem(value: 'th', child: Text('ไทย')),
-              ],
-              onChanged: (value) => setState(() => _languageCode = value!),
             ),
-            DropdownButtonFormField<String>(
-              value: _themeMode,
-              decoration: InputDecoration(labelText: strings.appearance),
-              items: [
-                DropdownMenuItem(
-                  value: 'system',
-                  child: Text(strings.themeSystem),
-                ),
-                DropdownMenuItem(
-                  value: 'light',
-                  child: Text(strings.themeLight),
-                ),
-                DropdownMenuItem(value: 'dark', child: Text(strings.themeDark)),
-              ],
-              onChanged: (value) => setState(() => _themeMode = value!),
-            ),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              value: _soundEnabled,
-              onChanged: (value) => setState(() => _soundEnabled = value),
-              title: Text(strings.sound),
-            ),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              value: _notificationEnabled,
-              onChanged:
-                  (value) => setState(() => _notificationEnabled = value),
-              title: Text(strings.notifications),
-              subtitle: const Text('Nhắc thư tương lai trên thiết bị'),
+            const SizedBox(width: 8),
+            Expanded(
+              child: FilledButton(
+                onPressed:
+                    _cloudName.text.trim().isEmpty
+                        ? null
+                        : () => widget.onSave(
+                          _SettingsDraft(
+                            displayName: _nullable(_displayName.text),
+                            cloudName: _cloudName.text.trim(),
+                            themeMode: _themeMode,
+                            soundEnabled: _soundEnabled,
+                            notificationEnabled: _notificationEnabled,
+                            languageCode:
+                                _languageCode == 'system'
+                                    ? null
+                                    : _languageCode,
+                          ),
+                        ),
+                child: Text(strings.save),
+              ),
             ),
           ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(strings.cancel),
-        ),
-        FilledButton(
-          onPressed:
-              _cloudName.text.trim().isEmpty
-                  ? null
-                  : () => Navigator.pop(
-                    context,
-                    _SettingsDraft(
-                      displayName: _nullable(_displayName.text),
-                      cloudName: _cloudName.text.trim(),
-                      themeMode: _themeMode,
-                      soundEnabled: _soundEnabled,
-                      notificationEnabled: _notificationEnabled,
-                      languageCode:
-                          _languageCode == 'system' ? null : _languageCode,
-                    ),
-                  ),
-          child: Text(strings.save),
         ),
       ],
     );
@@ -491,41 +668,46 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     return AlertDialog(
-      title: const Text('Xóa tài khoản vĩnh viễn?'),
+      title: Text(strings.profileDeleteTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Yêu cầu này khóa tài khoản ngay, ẩn nhật ký và đưa tệp riêng tư '
-            'vào hàng đợi xóa. Thao tác hiện không thể hoàn tác.',
-          ),
+          Text(strings.profileDeleteBody),
           const SizedBox(height: 16),
-          const Text('Nhập XÓA để xác nhận:'),
+          Text(
+            strings.profileDeleteConfirmationPrompt(
+              strings.profileDeleteConfirmationKeyword,
+            ),
+          ),
           const SizedBox(height: 8),
           TextField(
             controller: _confirmation,
             autocorrect: false,
             onChanged: (_) => setState(() {}),
-            decoration: const InputDecoration(hintText: 'XÓA'),
+            decoration: InputDecoration(
+              hintText: strings.profileDeleteConfirmationKeyword,
+            ),
           ),
         ],
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, false),
-          child: const Text('Hủy'),
+          child: Text(strings.cancel),
         ),
         FilledButton(
           onPressed:
-              _confirmation.text.trim() == 'XÓA'
+              _confirmation.text.trim() ==
+                      strings.profileDeleteConfirmationKeyword
                   ? () => Navigator.pop(context, true)
                   : null,
           style: FilledButton.styleFrom(
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
-          child: const Text('Xóa tài khoản'),
+          child: Text(strings.profileDeleteAccount),
         ),
       ],
     );
@@ -545,6 +727,7 @@ class _NotificationTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     final local = notification.scheduledFor.toLocal();
     final date =
         '${local.day.toString().padLeft(2, '0')}/'
@@ -558,8 +741,8 @@ class _NotificationTile extends StatelessWidget {
                 ? Icons.mark_email_unread_rounded
                 : Icons.drafts_rounded,
           ),
-          title: const Text('Lá thư tương lai đã đến hạn'),
-          subtitle: Text('Hẹn mở ngày $date'),
+          title: Text(strings.profileFutureLetterDue),
+          subtitle: Text(strings.profileFutureLetterScheduled(date)),
           trailing:
               notification.isUnread
                   ? const Icon(Icons.circle, size: 10)
