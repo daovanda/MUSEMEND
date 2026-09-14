@@ -1,7 +1,7 @@
 # Onboarding tài khoản mới
 
 **Trạng thái:** `implemented`
-**Cập nhật:** 2026-09-13
+**Cập nhật:** 2026-09-14
 
 ## Mục tiêu và phạm vi
 
@@ -19,6 +19,11 @@ thẳng tới app. Ba bước gồm:
 1. Chào mừng: gọi tên cảm xúc, viết riêng tư và chăm sóc bằng bước nhỏ.
 2. Riêng tư: giới thiệu nhật ký trên thiết bị, dùng ngoại tuyến và sao lưu tùy chọn.
 3. Cá nhân hóa: tên hiển thị tùy chọn và một trong năm cách xưng hô.
+
+Onboarding luôn dùng giao diện sáng, kể cả khi thiết bị Android/iOS đang bật chế
+độ tối hoặc tài khoản còn giá trị `theme_mode = dark` từ bản QA cũ. Quy tắc này
+được áp dụng ở root app nên không tạo khác biệt giữa onboarding và các màn hình
+bên trong.
 
 Ở bước đầu, nút quay lại thực hiện `AuthController.signOut()` rồi để auth router
 đưa người dùng về `/sign-in`; không điều hướng thẳng khi session vẫn còn vì router
@@ -59,7 +64,8 @@ Migration backfill tài khoản hiện có thành đã hoàn tất để không 
 nghiệm đăng nhập của họ; tài khoản tạo sau migration có giá trị null và thấy flow.
 Integration test kiểm tra trạng thái ban đầu và RPC hoàn tất. Widget/DTO test kiểm
 tra mapping, nội dung ba bước, hành vi bỏ qua/lưu tên và nút quay về đăng nhập có
-gọi sign-out ở bước đầu.
+gọi sign-out ở bước đầu. Test cấp ứng dụng giả lập thiết bị đang ở dark mode và
+xác nhận `Theme.of(context).brightness` vẫn là `Brightness.light`.
 
 Rollback ứng dụng vẫn tương thích với hai cột mới. Sau khi migration đã deploy,
 không xóa cột/RPC trong rollback nóng; dùng forward migration nếu cần sửa. Offline,

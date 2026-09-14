@@ -357,6 +357,57 @@ class _SettingsFieldLabel extends StatelessWidget {
   }
 }
 
+class _LockedAppearanceField extends StatelessWidget {
+  const _LockedAppearanceField({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _SettingsFieldLabel(label),
+        const SizedBox(height: 6),
+        Container(
+          height: 52,
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest.withValues(
+              alpha: .78,
+            ),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: MuseColors.teal.withValues(alpha: .16)),
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.light_mode_outlined,
+                size: 20,
+                color: MuseColors.teal,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const Icon(Icons.lock_outline_rounded, color: MuseColors.teal),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _MuseSelectOption {
   const _MuseSelectOption({required this.value, required this.label});
 
@@ -502,7 +553,9 @@ class _InlineSettingsFormState extends State<_InlineSettingsForm> {
   late final _cloudName = TextEditingController(
     text: widget.overview.settings.cloudName,
   );
-  late String _themeMode = widget.overview.settings.themeMode;
+  // The MVP is deliberately light-only until dark mode is fully designed.
+  // Saving the form also normalizes legacy `system`/`dark` values to `light`.
+  static const _themeMode = 'light';
   late bool _soundEnabled = widget.overview.settings.soundEnabled;
   late bool _notificationEnabled = widget.overview.settings.notificationEnabled;
   late String _languageCode = widget.overview.settings.languageCode ?? 'system';
@@ -564,16 +617,9 @@ class _InlineSettingsFormState extends State<_InlineSettingsForm> {
           onSelected: (value) => setState(() => _languageCode = value),
         ),
         const SizedBox(height: 14),
-        _MusePopupField(
+        _LockedAppearanceField(
           label: strings.appearance,
-          icon: Icons.palette_outlined,
-          value: _themeMode,
-          options: [
-            _MuseSelectOption(value: 'system', label: strings.themeSystem),
-            _MuseSelectOption(value: 'light', label: strings.themeLight),
-            _MuseSelectOption(value: 'dark', label: strings.themeDark),
-          ],
-          onSelected: (value) => setState(() => _themeMode = value),
+          value: strings.themeLight,
         ),
         const SizedBox(height: 8),
         SwitchListTile(

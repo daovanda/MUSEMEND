@@ -1,7 +1,7 @@
 # Flutter application foundation
 
 **Trạng thái:** `implemented`
-**Cập nhật:** 2026-09-06
+**Cập nhật:** 2026-09-14
 
 ## Mục tiêu và phạm vi
 
@@ -19,7 +19,10 @@ router và shell bốn vùng Reflect/Journal/Library/Profile.
 
 Riverpod cung cấp dependency/state; go_router redirect theo session. Các tab
 Reflect, Journal, Library và Profile đều đã nối repository/Supabase cho phạm vi MVP.
-Theme hỗ trợ system/light/dark; nền pastel tự chuyển sang surface token ở dark mode.
+Trong giai đoạn MVP hiện tại, root app bị khóa ở `ThemeMode.light`. Giá trị
+`system`/`dark` còn tồn tại trong dữ liệu cũ không được phép đổi giao diện khi app
+khởi động; dark mode chỉ được bật lại sau khi toàn bộ màn hình đã được thiết kế và
+QA riêng.
 
 ## Cấu hình và interface
 

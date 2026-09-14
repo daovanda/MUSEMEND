@@ -1,7 +1,7 @@
 # Profile overview client
 
 **Trạng thái:** `in-progress`
-**Cập nhật:** 2026-09-13
+**Cập nhật:** 2026-09-14
 
 ## Mục tiêu và phạm vi
 
@@ -9,15 +9,16 @@ Xác nhận bootstrap sau Auth bằng cách đọc profile/settings của sessio
 hiển thị và chỉnh sửa tên user, tên Mây, theme, ngôn ngữ, âm thanh và notification. Profile
 cũng chứa inbox, thông tin privacy/giới hạn, sign-out và request account deletion.
 Màn Cá nhân dùng nền xanh trời–kem với accent mint và mây chuyển động dùng chung;
-opacity tự thích nghi dark mode và chuyển động dừng theo Reduce Motion.
+chuyển động dừng theo Reduce Motion. Nhánh hiển thị dark cũ không được kích hoạt
+trong MVP light-only.
 
 ## Thiết kế và contract
 
 `ProfileRepository` trả `AccountOverview`. Adapter Supabase đọc song song một row
 `profiles` và một row `user_settings`; RLS xác định owner nên client không gửi
 `user_id`. DTO tách tên cột DB khỏi presentation. `accountOverviewProvider` quản lý
-loading/error/retry và mutation. Theme controller tải lại mode theo authenticated
-session để áp dụng `system`/`light`/`dark` sau restart.
+loading/error/retry và mutation. Trong MVP, theme controller và root app luôn trả
+`light`; giá trị `system`/`dark` cũ không còn được áp dụng sau restart.
 Language controller dùng `NULL` cho tự động theo thiết bị và lưu mã locale khi
 user chọn thủ công; locale ngoài 12 ngôn ngữ hỗ trợ fallback về tiếng Anh.
 Mọi nhãn, dialog, inbox, privacy/terms tóm tắt và trạng thái lỗi lấy từ ARB. Tên
@@ -28,9 +29,11 @@ ngôn ngữ trong selector luôn dùng tên bản địa; tên hiển thị và 
 vào dòng này mở form xuống dưới trong cùng card; Hủy thu gọn form và Lưu gọi
 controller hiện có, không dùng dialog/bottom sheet. Nhãn của ô nhập nằm riêng phía
 trên thay vì dùng floating label trên đường viền, tránh chồng chữ với nền kính.
-Ngôn ngữ và giao diện dùng popup neo ngay dưới ô chọn, có kích thước giới hạn,
-dấu chọn cho giá trị hiện tại và cuộn riêng khi danh sách dài; popup không chiếm
-toàn màn hình như dialog hoặc bottom sheet. Hai nút hành động nằm trong
+Ngôn ngữ dùng popup neo ngay dưới ô chọn, có kích thước giới hạn, dấu chọn cho giá
+trị hiện tại và cuộn riêng khi danh sách dài; popup không chiếm toàn màn hình như
+dialog hoặc bottom sheet. Giao diện tạm hiển thị trường `Sáng` có biểu tượng khóa,
+không cho chọn system/dark; khi lưu form, giá trị cũ được chuẩn hóa thành `light`.
+Hai nút hành động nằm trong
 `Expanded` để nhận chiều rộng hữu hạn: theme MuseMend đặt button rộng toàn phần,
 nên button đặt trực tiếp trong `Row` không ràng buộc sẽ gây lỗi
 `BoxConstraints(w=Infinity)` trên Flutter Web. `Quyền riêng tư` và `Điều khoản và
@@ -59,9 +62,10 @@ idempotently ở backend.
 
 Unit test kiểm tra mapping profile/settings. DB integration test xác nhận các cột
 được cấp có thể sửa, `account_status` bị chặn, deletion request được tạo và profile
-bị vô hiệu hóa trong transaction rollback. Android E2E đã xác nhận update tên Mây,
-theme dark áp dụng tức thời và khôi phục sau restart; dialog xóa bị khóa trước khi
-nhập xác nhận. Không gọi xóa thật trên tài khoản QA từ client.
+bị vô hiệu hóa trong transaction rollback. Android E2E đã xác nhận update tên Mây;
+dialog xóa bị khóa trước khi nhập xác nhận. Widget test xác nhận giá trị `dark` cũ
+vẫn hiển thị `Sáng`, không cung cấp lựa chọn `Tối`, và form luôn lưu
+`theme_mode = light`. Không gọi xóa thật trên tài khoản QA từ client.
 
 ## Tương thích, rollback và việc còn lại
 
@@ -71,8 +75,8 @@ vẫn ngoài lát cắt hiện tại. iOS theme/notification/account UI cần ng
 thiết bị thật.
 Widget test dùng chính `buildMuseTheme()` và xác nhận ba mục trên mở inline, không
 tạo `AlertDialog`, card tài khoản bao trọn nút Lưu và Quyền riêng tư/Điều khoản có
-thể cùng mở. Test cũng mở menu ngôn ngữ/giao diện, đổi lựa chọn và xác nhận các ô
-nhập không còn sử dụng floating label.
+thể cùng mở. Test cũng mở menu ngôn ngữ, xác nhận giao diện bị khóa ở chế độ sáng
+và các ô nhập không còn sử dụng floating label.
 
 ## Liên quan
 

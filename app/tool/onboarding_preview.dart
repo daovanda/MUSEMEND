@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:musemend/app/theme/muse_theme.dart';
+import 'package:musemend/core/localization/supported_locales.dart';
 import 'package:musemend/features/onboarding/application/onboarding_providers.dart';
 import 'package:musemend/features/onboarding/domain/onboarding_profile.dart';
 import 'package:musemend/features/onboarding/domain/onboarding_repository.dart';
 import 'package:musemend/features/onboarding/presentation/onboarding_screen.dart';
+import 'package:musemend/l10n/generated/app_localizations.dart';
 
 void main() {
   final repository = _PreviewOnboardingRepository();
@@ -30,6 +32,12 @@ class _OnboardingPreviewApp extends StatelessWidget {
       title: 'MuseMend Onboarding Preview',
       debugShowCheckedModeBanner: false,
       theme: buildMuseTheme(),
+      themeMode: ThemeMode.light,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      localeListResolutionCallback: (locales, supportedLocales) {
+        return resolveDeviceLocale(locales);
+      },
       home: const OnboardingScreen(),
     );
   }

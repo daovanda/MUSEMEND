@@ -105,20 +105,11 @@ class AppLanguageCodeController extends AsyncNotifier<String?> {
 class AppThemeModeController extends AsyncNotifier<ThemeMode> {
   @override
   Future<ThemeMode> build() async {
-    final userId = ref.watch(authSessionProvider).value?.userId;
-    if (userId == null) return ThemeMode.light;
-    final overview = await ref.watch(profileRepositoryProvider).loadOverview();
-    return _fromStored(overview.settings.themeMode);
+    ref.watch(authSessionProvider);
+    return ThemeMode.light;
   }
 
   void applyStoredMode(String value) {
-    state = AsyncData(_fromStored(value));
+    state = const AsyncData(ThemeMode.light);
   }
-
-  ThemeMode _fromStored(String value) => switch (value) {
-    'light' => ThemeMode.light,
-    'dark' => ThemeMode.dark,
-    'system' => ThemeMode.light,
-    _ => ThemeMode.light,
-  };
 }
