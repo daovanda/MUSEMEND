@@ -21,7 +21,7 @@ accessibility, bảo mật dữ liệu trên thiết bị và kiểm thử.
 - [Màn Bầu trời (Reflect)](./sky-screen.md) — in-progress
 - [Missions và energy](./missions-energy.md) — in-progress
 - [Daily quote](./daily-quotes.md) — implemented
-- [Journey và Library](./journey-library.md) — in-progress
+- [Journey và Library](./journey-library.md) — implemented
 - [Daily Journal và Future Letter](./journals-future-letters.md) — in-progress
 - [Journal editor toàn màn hình](./journal-editor.md) — in-progress
 - [Notification cục bộ và inbox](./notifications-inbox.md) — in-progress

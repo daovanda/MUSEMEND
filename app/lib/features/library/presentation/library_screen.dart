@@ -255,99 +255,106 @@ class _DestinationHero extends StatelessWidget {
         destination.name,
         destination.description ?? '',
       ),
-      child: Container(
-        height: 260,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(34),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x1F44536A),
-              blurRadius: 24,
-              offset: Offset(0, 12),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(34),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              DecoratedBox(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFFDDEEF3), Color(0xFFE8E0F4)],
-                  ),
-                ),
-                child: CatalogArtwork(
-                  assetPath: destination.heroAssetPath,
-                  fit: BoxFit.cover,
-                  semanticLabel: strings.destinationImageSemantics(
-                    destination.name,
-                  ),
-                  placeholder: const Icon(
-                    Icons.landscape_rounded,
-                    size: 72,
-                    color: Color(0x66718087),
-                  ),
-                ),
+      // Catalog hero exports are square. Keeping the card square removes the
+      // fixed-height/variable-width crop that was most visible on wide web
+      // windows. `contain` also keeps future non-square server artwork intact.
+      child: AspectRatio(
+        aspectRatio: 1,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(34),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x1F44536A),
+                blurRadius: 24,
+                offset: Offset(0, 12),
               ),
-              const DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Color(0x08000000), Color(0xC7444A50)],
-                    stops: [0.35, 1],
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(34),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                DecoratedBox(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Color(0xFFDDEEF3), Color(0xFFE8E0F4)],
+                    ),
+                  ),
+                  child: CatalogArtwork(
+                    assetPath: destination.heroAssetPath,
+                    fit: BoxFit.contain,
+                    semanticLabel: strings.destinationImageSemantics(
+                      destination.name,
+                    ),
+                    placeholder: const Icon(
+                      Icons.landscape_rounded,
+                      size: 72,
+                      color: Color(0x66718087),
+                    ),
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        if (destination.countryCode != null)
-                          _HeroPill(label: destination.countryCode!),
-                        _HeroPill(
-                          label: _destinationTypeLabel(
-                            strings,
-                            destination.destinationType,
+                const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Color(0x08000000), Color(0xC7444A50)],
+                      stops: [0.35, 1],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          if (destination.countryCode != null)
+                            _HeroPill(label: destination.countryCode!),
+                          _HeroPill(
+                            label: _destinationTypeLabel(
+                              strings,
+                              destination.destinationType,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Spacer(),
+                      Text(
+                        destination.name,
+                        style: Theme.of(
+                          context,
+                        ).textTheme.headlineMedium?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      if (destination.description case final description?) ...[
+                        const SizedBox(height: 7),
+                        Text(
+                          description,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.copyWith(
+                            color: Colors.white.withValues(alpha: .94),
+                            height: 1.4,
                           ),
                         ),
                       ],
-                    ),
-                    const Spacer(),
-                    Text(
-                      destination.name,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.headlineMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    if (destination.description case final description?) ...[
-                      const SizedBox(height: 7),
-                      Text(
-                        description,
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.white.withValues(alpha: .94),
-                          height: 1.4,
-                        ),
-                      ),
                     ],
-                  ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

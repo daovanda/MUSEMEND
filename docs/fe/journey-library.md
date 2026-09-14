@@ -1,7 +1,7 @@
 # Journey và Library
 
 Trạng thái: `implemented`
-Cập nhật: 2026-09-13
+Cập nhật: 2026-09-14
 
 ## Phạm vi hiện đã triển khai
 
@@ -25,6 +25,12 @@ map `asset_path` của landmark/food/item và checkpoint, cùng `cover_asset_pat
 `NULL` luôn được xử lý như fallback, không tải URL do người dùng cung cấp.
 `CatalogArtwork` chỉ nhận local asset hoặc HTTPS URL server-owned; storage path
 tương đối chưa được tự ghép thành URL khi chưa chốt bucket/catalog resolver.
+
+Ảnh hero của điểm đến được render trong khung vuông co giãn theo bề rộng nội dung,
+đúng với tỉ lệ 1:1 của content pack hiện tại. `BoxFit.contain` đảm bảo toàn bộ
+ảnh luôn được nhìn thấy trên màn hình hẹp và rộng, thay vì dùng chiều cao cố định
+với `BoxFit.cover` rồi cắt mất phần trên/dưới khi cửa sổ mở rộng. Nếu sau này
+catalog có ảnh khác tỉ lệ, phần thừa sẽ dùng nền gradient của thẻ, không cắt ảnh.
 
 ## Kiến trúc
 

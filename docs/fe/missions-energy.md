@@ -1,7 +1,7 @@
 # Missions và energy client
 
 **Trạng thái:** `in-progress`
-**Cập nhật:** 2026-09-12
+**Cập nhật:** 2026-09-14
 
 ## Mục tiêu và phạm vi
 
@@ -42,6 +42,9 @@ UI `MissionsSection` nằm sau check-in trên Reflect:
   date/time picker hoặc modal phụ; ngày quá khứ và ngày/giờ không hợp lệ bị từ chối;
 - tên và ghi chú của nhiệm vụ tự tạo dùng nhãn cố định phía trên thay vì floating
   label để không chạm viền hoặc đè nội dung khi tăng cỡ chữ;
+- ô ngày/giờ trong lịch tùy chỉnh giữ một vùng xác thực tối thiểu cố định. Khi
+  một ô nhập sai định dạng, thông báo lỗi vẫn hiển thị ngay dưới ô đó nhưng
+  không làm ô bên cạnh hoặc phần mô tả lịch nhảy lệch theo chiều dọc;
 - bottom sheet thêm gợi ý giữ nguyên loại do template quyết định, hiển thị loại
   và năng lượng bằng badge viên thuốc; tên cùng ghi chú dùng khối chỉ đọc có nhãn
   nằm trong nội dung thay vì floating label để không đè chữ;
