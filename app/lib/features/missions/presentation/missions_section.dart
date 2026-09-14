@@ -1089,26 +1089,30 @@ class _CreateMissionSheetState extends State<_CreateMissionSheet> {
     final strings = AppLocalizations.of(context);
     switch (_missionType) {
       case MissionType.daily:
+        final start = _TimeField(
+          label: strings.missionStart,
+          value: _dailyStart,
+          onChanged: (value) => setState(() => _dailyStart = value),
+        );
+        final end = _TimeField(
+          label: strings.missionEnd,
+          value: _dailyEnd,
+          onChanged: (value) => setState(() => _dailyEnd = value),
+        );
+        final isNarrow = MediaQuery.sizeOf(context).width < 420;
         return [
-          Row(
-            children: [
-              Expanded(
-                child: _TimeField(
-                  label: strings.missionStart,
-                  value: _dailyStart,
-                  onChanged: (value) => setState(() => _dailyStart = value),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _TimeField(
-                  label: strings.missionEnd,
-                  value: _dailyEnd,
-                  onChanged: (value) => setState(() => _dailyEnd = value),
-                ),
-              ),
-            ],
-          ),
+          if (isNarrow) ...[
+            start,
+            const SizedBox(height: 8),
+            end,
+          ] else
+            Row(
+              children: [
+                Expanded(child: start),
+                const SizedBox(width: 10),
+                Expanded(child: end),
+              ],
+            ),
           const SizedBox(height: 8),
           Text(
             strings.missionDailyRenewal(
@@ -1248,48 +1252,59 @@ class _TimeFieldState extends State<_TimeField> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 10, bottom: 4),
-          child: Text(
-            widget.label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: MuseColors.ink.withValues(alpha: .78),
+    // Keep a stable validation slot for fields that are rendered side by side.
+    // Without it, an error under only one field changes the row height and
+    // makes the schedule hint jump vertically when the form is submitted.
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 112),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 10, bottom: 4),
+            child: Text(
+              widget.label,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: MuseColors.ink.withValues(alpha: .78),
+              ),
             ),
           ),
-        ),
-        TextFormField(
-          controller: _controller,
-          focusNode: _focusNode,
-          keyboardType: TextInputType.datetime,
-          textInputAction: TextInputAction.next,
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'[0-9:]')),
-            LengthLimitingTextInputFormatter(5),
-          ],
-          decoration: const InputDecoration(
-            prefixIcon: Icon(Icons.schedule_rounded),
-            hintText: 'HH:mm',
-            isDense: true,
-            contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+          TextFormField(
+            controller: _controller,
+            focusNode: _focusNode,
+            keyboardType: TextInputType.datetime,
+            textInputAction: TextInputAction.next,
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9:]')),
+              LengthLimitingTextInputFormatter(5),
+            ],
+            decoration: const InputDecoration(
+              prefixIcon: Icon(Icons.schedule_rounded),
+              hintText: 'HH:mm',
+              isDense: true,
+              errorMaxLines: 2,
+              errorStyle: TextStyle(fontSize: 9, height: 1.15),
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 12,
+              ),
+            ),
+            validator:
+                (value) =>
+                    _parseTime(value) == null
+                        ? AppLocalizations.of(context).missionTimeFormat
+                        : null,
+            onChanged: (value) {
+              final parsed = _parseTime(value);
+              if (parsed != null) widget.onChanged(parsed);
+            },
+            onFieldSubmitted: (value) {
+              final parsed = _parseTime(value);
+              if (parsed != null) _controller.text = _formatTime(parsed);
+            },
           ),
-          validator:
-              (value) =>
-                  _parseTime(value) == null
-                      ? AppLocalizations.of(context).missionTimeFormat
-                      : null,
-          onChanged: (value) {
-            final parsed = _parseTime(value);
-            if (parsed != null) widget.onChanged(parsed);
-          },
-          onFieldSubmitted: (value) {
-            final parsed = _parseTime(value);
-            if (parsed != null) _controller.text = _formatTime(parsed);
-          },
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -1338,57 +1353,65 @@ class _DateFieldState extends State<_DateField> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 10, bottom: 4),
-          child: Text(
-            widget.label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: MuseColors.ink.withValues(alpha: .78),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 112),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 10, bottom: 4),
+            child: Text(
+              widget.label,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: MuseColors.ink.withValues(alpha: .78),
+              ),
             ),
           ),
-        ),
-        TextFormField(
-          controller: _controller,
-          focusNode: _focusNode,
-          keyboardType: TextInputType.datetime,
-          textInputAction: TextInputAction.next,
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'[0-9/]')),
-            LengthLimitingTextInputFormatter(10),
-          ],
-          decoration: const InputDecoration(
-            prefixIcon: Icon(Icons.calendar_today_outlined),
-            hintText: 'dd/MM/yyyy',
-            isDense: true,
-            contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+          TextFormField(
+            controller: _controller,
+            focusNode: _focusNode,
+            keyboardType: TextInputType.datetime,
+            textInputAction: TextInputAction.next,
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9/]')),
+              LengthLimitingTextInputFormatter(10),
+            ],
+            decoration: const InputDecoration(
+              prefixIcon: Icon(Icons.calendar_today_outlined),
+              hintText: 'dd/MM/yyyy',
+              isDense: true,
+              errorMaxLines: 2,
+              errorStyle: TextStyle(fontSize: 9, height: 1.15),
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 12,
+              ),
+            ),
+            validator: (value) {
+              final parsed = _parseDate(value);
+              if (parsed == null) {
+                return AppLocalizations.of(context).missionDateFormat;
+              }
+              if (parsed.isBefore(_vietnamToday())) {
+                return AppLocalizations.of(context).missionDateNotPast;
+              }
+              return null;
+            },
+            onChanged: (value) {
+              final parsed = _parseDate(value);
+              if (parsed != null && !parsed.isBefore(_vietnamToday())) {
+                widget.onChanged(parsed);
+              }
+            },
+            onFieldSubmitted: (value) {
+              final parsed = _parseDate(value);
+              if (parsed != null && !parsed.isBefore(_vietnamToday())) {
+                _controller.text = _formatDate(parsed);
+              }
+            },
           ),
-          validator: (value) {
-            final parsed = _parseDate(value);
-            if (parsed == null) {
-              return AppLocalizations.of(context).missionDateFormat;
-            }
-            if (parsed.isBefore(_vietnamToday())) {
-              return AppLocalizations.of(context).missionDateNotPast;
-            }
-            return null;
-          },
-          onChanged: (value) {
-            final parsed = _parseDate(value);
-            if (parsed != null && !parsed.isBefore(_vietnamToday())) {
-              widget.onChanged(parsed);
-            }
-          },
-          onFieldSubmitted: (value) {
-            final parsed = _parseDate(value);
-            if (parsed != null && !parsed.isBefore(_vietnamToday())) {
-              _controller.text = _formatDate(parsed);
-            }
-          },
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -1411,24 +1434,28 @@ class _DateTimeField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context);
+    final dateField = _DateField(
+      label: strings.missionDateField(label),
+      value: date,
+      onChanged: onDateChanged,
+    );
+    final timeField = _TimeField(
+      label: strings.missionTimeField(label),
+      value: time,
+      onChanged: onTimeChanged,
+    );
+    if (MediaQuery.sizeOf(context).width < 420) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [dateField, const SizedBox(height: 8), timeField],
+      );
+    }
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: _DateField(
-            label: strings.missionDateField(label),
-            value: date,
-            onChanged: onDateChanged,
-          ),
-        ),
+        Expanded(child: dateField),
         const SizedBox(width: 8),
-        Expanded(
-          child: _TimeField(
-            label: strings.missionTimeField(label),
-            value: time,
-            onChanged: onTimeChanged,
-          ),
-        ),
+        Expanded(child: timeField),
       ],
     );
   }
