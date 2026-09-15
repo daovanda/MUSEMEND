@@ -362,7 +362,7 @@ class _NameStepState extends State<_NameStep> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const _CloudEmblem(brand: true),
+        const _CloudEmblem(icon: Icons.cloud_outlined),
         const SizedBox(height: 20),
         _OnboardingHeadline(strings.onboardingNamePrompt),
         const SizedBox(height: 8),

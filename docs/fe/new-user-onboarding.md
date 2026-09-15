@@ -33,9 +33,10 @@ tránh gửi thao tác lặp. Ba bước nằm trong `PageView`: vuốt trái/ph
 còn nút tiếp tục/quay lại dùng cùng bộ điều khiển trang để trạng thái luôn đồng bộ.
 Vùng nội dung không còn cuộn dọc; mỗi bước được co giãn theo chiều cao viewport để
 toàn bộ thông tin xuất hiện trong một màn hình, kể cả trên thiết bị nhỏ.
-Logo thương hiệu dùng `mascot-cloud.png` trong thanh MuseTopBar và ở biểu tượng
-trung tâm của bước cá nhân hóa; biểu tượng tay và khiên của hai bước giới thiệu
-được giữ như icon chức năng để người dùng phân biệt nội dung.
+Logo thương hiệu dùng `mascot-cloud.png` trong thanh MuseTopBar. Biểu tượng
+đám mây nét đơn ở bước cá nhân hóa được giữ như thiết kế ban đầu để đồng bộ
+với phần nhập tên; biểu tượng tay và khiên của hai bước giới thiệu cũng giữ như
+icon chức năng để người dùng phân biệt nội dung.
 Headline của cả ba bước dùng cùng component responsive, bỏ xuống dòng thủ công từ
 ARB và giới hạn tối đa hai dòng; cỡ chữ giảm nhẹ dưới 480dp để câu tiếng Việt không
 bị tách thành dòng thứ ba. Nội dung mô tả bên dưới vẫn được phép tự xuống dòng để
