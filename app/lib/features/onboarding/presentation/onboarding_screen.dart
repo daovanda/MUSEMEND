@@ -249,15 +249,7 @@ class _WelcomeStep extends StatelessWidget {
       children: [
         const _CloudEmblem(icon: Icons.waving_hand_rounded),
         const SizedBox(height: 24),
-        Text(
-          strings.onboardingWelcomeHeadline,
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-            color: MuseColors.ink,
-            fontWeight: FontWeight.w800,
-            height: 1.18,
-          ),
-        ),
+        _OnboardingHeadline(strings.onboardingWelcomeHeadline),
         const SizedBox(height: 24),
         _OnboardingCard(
           icon: Icons.sentiment_satisfied_alt_rounded,
@@ -294,15 +286,7 @@ class _PrivacyStep extends StatelessWidget {
       children: [
         const _CloudEmblem(icon: Icons.shield_outlined),
         const SizedBox(height: 24),
-        Text(
-          strings.onboardingPrivacyHeadline,
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-            color: MuseColors.ink,
-            fontWeight: FontWeight.w800,
-            height: 1.18,
-          ),
-        ),
+        _OnboardingHeadline(strings.onboardingPrivacyHeadline),
         const SizedBox(height: 12),
         Text(
           strings.onboardingPrivacyBody,
@@ -380,14 +364,7 @@ class _NameStepState extends State<_NameStep> {
       children: [
         const _CloudEmblem(icon: Icons.cloud_outlined),
         const SizedBox(height: 20),
-        Text(
-          strings.onboardingNamePrompt,
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-            color: MuseColors.ink,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
+        _OnboardingHeadline(strings.onboardingNamePrompt),
         const SizedBox(height: 8),
         Text(
           strings.onboardingNameCanChange,
@@ -454,6 +431,40 @@ class _NameStepState extends State<_NameStep> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _OnboardingHeadline extends StatelessWidget {
+  const _OnboardingHeadline(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final fontSize =
+            width < 360
+                ? 22.0
+                : width < 480
+                ? 24.0
+                : 28.0;
+        return Text(
+          text.replaceAll('\n', ' '),
+          textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.clip,
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            color: MuseColors.ink,
+            fontSize: fontSize,
+            fontWeight: FontWeight.w800,
+            height: 1.12,
+            letterSpacing: -.2,
+          ),
+        );
+      },
     );
   }
 }

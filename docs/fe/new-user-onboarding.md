@@ -33,6 +33,10 @@ tránh gửi thao tác lặp. Ba bước nằm trong `PageView`: vuốt trái/ph
 còn nút tiếp tục/quay lại dùng cùng bộ điều khiển trang để trạng thái luôn đồng bộ.
 Vùng nội dung không còn cuộn dọc; mỗi bước được co giãn theo chiều cao viewport để
 toàn bộ thông tin xuất hiện trong một màn hình, kể cả trên thiết bị nhỏ.
+Headline của cả ba bước dùng cùng component responsive, bỏ xuống dòng thủ công từ
+ARB và giới hạn tối đa hai dòng; cỡ chữ giảm nhẹ dưới 480dp để câu tiếng Việt không
+bị tách thành dòng thứ ba. Nội dung mô tả bên dưới vẫn được phép tự xuống dòng để
+không cắt mất thông tin.
 
 Tên từ đăng ký được điền sẵn. Tên người dùng nhập ở bước cuối được ưu tiên; bỏ
 qua giữ tên hiện có. Nếu không có tên, các màn hình tiếp tục dùng fallback
