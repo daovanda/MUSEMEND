@@ -47,6 +47,7 @@ class _OnboardingFlow extends ConsumerStatefulWidget {
 
 class _OnboardingFlowState extends ConsumerState<_OnboardingFlow> {
   late final TextEditingController _nameController;
+  late final PageController _pageController;
   var _step = 0;
   PreferredAddress? _preferredAddress;
 
@@ -54,13 +55,24 @@ class _OnboardingFlowState extends ConsumerState<_OnboardingFlow> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.profile.displayName);
+    _pageController = PageController();
     _preferredAddress = widget.profile.preferredAddress;
   }
 
   @override
   void dispose() {
     _nameController.dispose();
+    _pageController.dispose();
     super.dispose();
+  }
+
+  void _goToStep(int step) {
+    if (step < 0 || step > 2 || step == _step) return;
+    _pageController.animateToPage(
+      step,
+      duration: const Duration(milliseconds: 260),
+      curve: Curves.easeOutCubic,
+    );
   }
 
   Future<void> _finish({required bool skip}) async {
@@ -113,7 +125,7 @@ class _OnboardingFlowState extends ConsumerState<_OnboardingFlow> {
                           ? null
                           : _step == 0
                           ? _returnToSignIn
-                          : () => setState(() => _step--),
+                          : () => _goToStep(_step - 1),
                   icon: const Icon(Icons.arrow_back_rounded),
                 ),
                 const Expanded(child: MuseTopBar()),
@@ -128,19 +140,14 @@ class _OnboardingFlowState extends ConsumerState<_OnboardingFlow> {
             _ProgressDots(step: _step),
             const SizedBox(height: 14),
             Expanded(
-              child: SingleChildScrollView(
-                keyboardDismissBehavior:
-                    ScrollViewKeyboardDismissBehavior.onDrag,
-                padding: const EdgeInsets.only(top: 8, bottom: 18),
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 260),
-                  switchInCurve: Curves.easeOutCubic,
-                  switchOutCurve: Curves.easeInCubic,
-                  child: switch (_step) {
-                    0 => const _WelcomeStep(key: ValueKey('welcome-step')),
-                    1 => const _PrivacyStep(key: ValueKey('privacy-step')),
-                    _ => _NameStep(
-                      key: const ValueKey('name-step'),
+              child: PageView(
+                controller: _pageController,
+                onPageChanged: (value) => setState(() => _step = value),
+                children: [
+                  const _OnboardingPageViewport(child: _WelcomeStep()),
+                  const _OnboardingPageViewport(child: _PrivacyStep()),
+                  _OnboardingPageViewport(
+                    child: _NameStep(
                       controller: _nameController,
                       selected: _preferredAddress,
                       fallbackName:
@@ -149,8 +156,8 @@ class _OnboardingFlowState extends ConsumerState<_OnboardingFlow> {
                       onSelected:
                           (value) => setState(() => _preferredAddress = value),
                     ),
-                  },
-                ),
+                  ),
+                ],
               ),
             ),
             if (operation.hasError) ...[
@@ -176,7 +183,7 @@ class _OnboardingFlowState extends ConsumerState<_OnboardingFlow> {
                       ? null
                       : () {
                         if (_step < 2) {
-                          setState(() => _step++);
+                          _goToStep(_step + 1);
                         } else {
                           _finish(skip: false);
                         }
@@ -208,8 +215,32 @@ class _OnboardingFlowState extends ConsumerState<_OnboardingFlow> {
   }
 }
 
+/// Keeps each onboarding step inside one viewport. On compact devices the
+/// complete step scales down instead of introducing a second vertical scroll.
+class _OnboardingPageViewport extends StatelessWidget {
+  const _OnboardingPageViewport({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Align(
+          alignment: Alignment.topCenter,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.topCenter,
+            child: SizedBox(width: constraints.maxWidth, child: child),
+          ),
+        );
+      },
+    );
+  }
+}
+
 class _WelcomeStep extends StatelessWidget {
-  const _WelcomeStep({super.key});
+  const _WelcomeStep();
 
   @override
   Widget build(BuildContext context) {
@@ -254,7 +285,7 @@ class _WelcomeStep extends StatelessWidget {
 }
 
 class _PrivacyStep extends StatelessWidget {
-  const _PrivacyStep({super.key});
+  const _PrivacyStep();
 
   @override
   Widget build(BuildContext context) {
@@ -313,7 +344,6 @@ class _NameStep extends StatefulWidget {
     required this.selected,
     required this.fallbackName,
     required this.onSelected,
-    super.key,
   });
 
   final TextEditingController controller;

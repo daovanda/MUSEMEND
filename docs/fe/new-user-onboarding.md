@@ -1,7 +1,7 @@
 # Onboarding tài khoản mới
 
 **Trạng thái:** `implemented`
-**Cập nhật:** 2026-09-14
+**Cập nhật:** 2026-09-15
 
 ## Mục tiêu và phạm vi
 
@@ -29,7 +29,10 @@ bên trong.
 đưa người dùng về `/sign-in`; không điều hướng thẳng khi session vẫn còn vì router
 sẽ đưa tài khoản chưa onboarding quay trở lại. Từ bước hai trở đi, cùng nút đó chỉ
 quay về bước onboarding trước. Trong lúc sign-out/lưu đang chạy, nút bị khóa để
-tránh gửi thao tác lặp.
+tránh gửi thao tác lặp. Ba bước nằm trong `PageView`: vuốt trái/phải chuyển bước,
+còn nút tiếp tục/quay lại dùng cùng bộ điều khiển trang để trạng thái luôn đồng bộ.
+Vùng nội dung không còn cuộn dọc; mỗi bước được co giãn theo chiều cao viewport để
+toàn bộ thông tin xuất hiện trong một màn hình, kể cả trên thiết bị nhỏ.
 
 Tên từ đăng ký được điền sẵn. Tên người dùng nhập ở bước cuối được ưu tiên; bỏ
 qua giữ tên hiện có. Nếu không có tên, các màn hình tiếp tục dùng fallback
@@ -64,8 +67,9 @@ Migration backfill tài khoản hiện có thành đã hoàn tất để không 
 nghiệm đăng nhập của họ; tài khoản tạo sau migration có giá trị null và thấy flow.
 Integration test kiểm tra trạng thái ban đầu và RPC hoàn tất. Widget/DTO test kiểm
 tra mapping, nội dung ba bước, hành vi bỏ qua/lưu tên và nút quay về đăng nhập có
-gọi sign-out ở bước đầu. Test cấp ứng dụng giả lập thiết bị đang ở dark mode và
-xác nhận `Theme.of(context).brightness` vẫn là `Brightness.light`.
+gọi sign-out ở bước đầu. Widget test cũng kiểm tra vuốt ngang tới bước riêng tư và
+vuốt ngược về bước chào mừng. Test cấp ứng dụng giả lập thiết bị đang ở dark mode
+và xác nhận `Theme.of(context).brightness` vẫn là `Brightness.light`.
 
 Rollback ứng dụng vẫn tương thích với hai cột mới. Sau khi migration đã deploy,
 không xóa cột/RPC trong rollback nóng; dùng forward migration nếu cần sửa. Offline,
