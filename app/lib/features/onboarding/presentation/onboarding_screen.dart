@@ -362,7 +362,7 @@ class _NameStepState extends State<_NameStep> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const _CloudEmblem(icon: Icons.cloud_outlined),
+        const _CloudEmblem(brand: true),
         const SizedBox(height: 20),
         _OnboardingHeadline(strings.onboardingNamePrompt),
         const SizedBox(height: 8),
@@ -470,9 +470,11 @@ class _OnboardingHeadline extends StatelessWidget {
 }
 
 class _CloudEmblem extends StatelessWidget {
-  const _CloudEmblem({required this.icon});
+  const _CloudEmblem({this.icon, this.brand = false})
+    : assert(brand || icon != null);
 
-  final IconData icon;
+  final IconData? icon;
+  final bool brand;
 
   @override
   Widget build(BuildContext context) {
@@ -500,7 +502,10 @@ class _CloudEmblem extends StatelessWidget {
             ),
           ],
         ),
-        child: Icon(icon, size: 38, color: MuseColors.teal),
+        child:
+            brand
+                ? const MuseBrandMark(width: 66, height: 48)
+                : Icon(icon, size: 38, color: MuseColors.teal),
       ),
     );
   }
