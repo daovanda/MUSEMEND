@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:musemend/features/auth/domain/auth_repository.dart';
 import 'package:musemend/features/auth/domain/auth_failure.dart';
@@ -9,6 +11,10 @@ class SupabaseAuthRepository implements AuthRepository {
 
   final SupabaseClient _client;
 
+  // A restored token must not keep the splash screen blocked indefinitely when
+  // the Auth endpoint is unavailable (or the account was deleted remotely).
+  static const restoredSessionValidationTimeout = Duration(seconds: 15);
+
   @override
   AuthSession? get currentSession => _mapSession(_client.auth.currentSession);
 
@@ -19,19 +25,25 @@ class SupabaseAuthRepository implements AuthRepository {
       yield null;
     } else {
       try {
-        final response = await _client.auth.getUser(
-          restoredSession.accessToken,
-        );
+        final response = await _client.auth
+            .getUser(restoredSession.accessToken)
+            .timeout(restoredSessionValidationTimeout);
         final remoteUser = response.user;
         if (remoteUser == null || remoteUser.id != restoredSession.user.id) {
-          await _client.auth.signOut();
+          _clearInvalidRestoredSession();
           yield null;
         } else {
           yield _mapSession(restoredSession);
         }
       } on AuthException catch (error) {
         if (!shouldClearRestoredSession(error)) rethrow;
-        await _client.auth.signOut();
+        _clearInvalidRestoredSession();
+        yield null;
+      } on TimeoutException {
+        // Do not trust a token that could not be validated during startup.
+        // Clearing the local session lets the router reach sign-in; the
+        // fire-and-forget cleanup cannot hold the auth stream hostage.
+        _clearInvalidRestoredSession();
         yield null;
       }
     }
@@ -71,6 +83,13 @@ class SupabaseAuthRepository implements AuthRepository {
 
   @override
   Future<void> signOut() => _client.auth.signOut();
+
+  void _clearInvalidRestoredSession() {
+    // gotrue removes its local session before awaiting the server revoke call.
+    // Deliberately do not await it here: a deleted user can make that endpoint
+    // slow or unreachable, and startup must still publish the signed-out state.
+    unawaited(_client.auth.signOut().catchError((_) {}));
+  }
 
   AuthSession? _mapSession(Session? session) {
     if (session == null) return null;
