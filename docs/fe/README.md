@@ -27,3 +27,4 @@ accessibility, bảo mật dữ liệu trên thiết bị và kiểm thử.
 - [Notification cục bộ và inbox](./notifications-inbox.md) — in-progress
 - [Profile overview](./profile-overview.md) — in-progress
 - [Flutter Web local QA](./flutter-web-local.md) — implemented
+- [Android build versioning](./android-build-versioning.md) — implemented
