@@ -63,10 +63,13 @@ class _MvpShellState extends ConsumerState<MvpShell>
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context);
+    final todayMood =
+        ref.watch(reflectControllerProvider).asData?.value.today?.mood;
     return Scaffold(
       body: widget.navigationShell,
       bottomNavigationBar: _MuseBottomNavigation(
         shell: widget.navigationShell,
+        mood: todayMood,
         onMoodSelected: (mood) async {
           final saved = await ref
               .read(reflectControllerProvider.notifier)
@@ -92,10 +95,12 @@ class _MvpShellState extends ConsumerState<MvpShell>
 class _MuseBottomNavigation extends StatelessWidget {
   const _MuseBottomNavigation({
     required this.shell,
+    required this.mood,
     required this.onMoodSelected,
   });
 
   final StatefulNavigationShell shell;
+  final Mood? mood;
   final Future<void> Function(Mood mood) onMoodSelected;
 
   @override
@@ -163,6 +168,7 @@ class _MuseBottomNavigation extends StatelessWidget {
               Positioned(
                 top: -19,
                 child: _MoodCloudButton(
+                  mood: mood,
                   onMoodSelected: onMoodSelected,
                   onTap:
                       () => shell.goBranch(
@@ -193,8 +199,13 @@ class _MuseBottomNavigation extends StatelessWidget {
 }
 
 class _MoodCloudButton extends StatefulWidget {
-  const _MoodCloudButton({required this.onMoodSelected, required this.onTap});
+  const _MoodCloudButton({
+    required this.mood,
+    required this.onMoodSelected,
+    required this.onTap,
+  });
 
+  final Mood? mood;
   final Future<void> Function(Mood mood) onMoodSelected;
   final VoidCallback onTap;
 
@@ -295,10 +306,36 @@ class _MoodCloudButtonState extends State<_MoodCloudButton> {
                         color: Color(0xFFEFFBFF),
                       ),
                     )
-                    : const SizedBox(
-                      width: 27.5,
-                      height: 20,
-                      child: CustomPaint(painter: _CloudOutlinePainter()),
+                    : AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 220),
+                      switchInCurve: Curves.easeOutCubic,
+                      switchOutCurve: Curves.easeInCubic,
+                      child:
+                          widget.mood == null
+                              ? const SizedBox(
+                                key: ValueKey('default-cloud-outline'),
+                                width: 27.5,
+                                height: 20,
+                                child: CustomPaint(
+                                  painter: _CloudOutlinePainter(),
+                                ),
+                              )
+                              : Image.asset(
+                                key: ValueKey(widget.mood),
+                                widget.mood!.visual.assetPath,
+                                width: 36,
+                                height: 30,
+                                fit: BoxFit.contain,
+                                errorBuilder:
+                                    (context, error, stackTrace) =>
+                                        const SizedBox(
+                                          width: 27.5,
+                                          height: 20,
+                                          child: CustomPaint(
+                                            painter: _CloudOutlinePainter(),
+                                          ),
+                                        ),
+                              ),
                     ),
           ),
         ),

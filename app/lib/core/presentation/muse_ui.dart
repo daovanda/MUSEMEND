@@ -24,11 +24,7 @@ class MuseTopBar extends StatelessWidget {
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.white.withValues(alpha: .64)),
               ),
-              child: const Icon(
-                Icons.cloud_outlined,
-                size: 21,
-                color: MuseColors.teal,
-              ),
+              child: const MuseBrandMark(width: 30, height: 26),
             ),
           ),
           const SizedBox(width: 10),
@@ -61,6 +57,33 @@ class MuseTopBar extends StatelessWidget {
           if (trailing != null) trailing!,
         ],
       ),
+    );
+  }
+}
+
+/// The official MuseMend cloud mark used wherever the app presents its brand.
+/// Feature icons remain code-native; this mark is intentionally an asset so it
+/// can be replaced without changing layout or business logic.
+class MuseBrandMark extends StatelessWidget {
+  const MuseBrandMark({this.width = 42, this.height = 30, super.key});
+
+  final double width;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      'assets/illustrations/clouds/mascot-cloud.png',
+      width: width,
+      height: height,
+      fit: BoxFit.contain,
+      semanticLabel: 'MuseMend cloud logo',
+      errorBuilder:
+          (context, error, stackTrace) => Icon(
+            Icons.cloud_outlined,
+            size: height * .72,
+            color: MuseColors.teal,
+          ),
     );
   }
 }

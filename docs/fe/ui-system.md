@@ -1,7 +1,7 @@
 # MuseMend UI system
 
 - **Trạng thái:** `in-progress`
-- **Cập nhật:** 2026-09-10
+- **Cập nhật:** 2026-09-14
 
 ## Mục tiêu và phạm vi
 
@@ -13,14 +13,14 @@ mờ, bo góc lớn và chuyển động ngắn của màn Bầu trời; không 
 ## Implementation
 
 Token màu nằm ở `lib/app/theme/` (`MuseColors`, `buildMuseTheme`). Trong MVP,
-giao diện mặc định là sáng; Flutter cũng dùng `ThemeMode.light` trong lúc chưa tải
-được setting và ánh xạ giá trị mặc định cũ `system` sang sáng để tránh nháy hoặc
-quay lại nền tối theo thiết bị. Người đã chủ động chọn giao diện tối vẫn được tôn
-trọng, nhưng dark theme còn là phạm vi in-progress. Primitive dùng
+toàn bộ ứng dụng bị khóa ở `ThemeMode.light`, không chỉ trong lúc tải setting.
+Flutter bỏ qua cả brightness của thiết bị lẫn giá trị `system`/`dark` từng lưu để
+tránh onboarding và các màn hình khác rơi vào giao diện tối chưa hoàn thiện. Dark
+mode sẽ được mở lại trong một thay đổi riêng sau khi thiết kế và QA đầy đủ. Primitive dùng
 chung nằm tại `lib/core/presentation/muse_ui.dart`:
 
-- `MusePageBackground`: nền gradient theo page/accent, có dark-mode fallback và
-  ba lớp mây mềm chuyển động phía sau nội dung.
+- `MusePageBackground`: nền gradient theo page/accent và ba lớp mây mềm chuyển
+  động phía sau nội dung; dark-mode fallback hiện chưa được kích hoạt.
 - `MuseTopBar`: thanh thương hiệu dùng chung ở đầu các tab chính, gồm biểu tượng
   mây, chữ MuseMend gradient và vùng trạng thái tùy chọn.
 - `MusePageTagline`: câu dẫn ngắn căn giữa dưới thanh thương hiệu; các tab không
@@ -56,8 +56,8 @@ phía trên; shadow vẫn được vẽ bởi lớp ngoài clip.
 
 Button/surface dùng Material ink và animation 140–180ms. Không dùng animation làm
 tín hiệu duy nhất; vùng chạm vẫn tối thiểu 48dp. Nền và card giữ contrast với
-text token, hỗ trợ dark mode và text scale. Artwork trang trí không được chứa dữ
-liệu người dùng.
+text token ở light mode và hỗ trợ text scale. Artwork trang trí không được chứa
+dữ liệu người dùng.
 
 Nền Bầu trời, Nhật ký, Khám phá, Cá nhân và journal editor dùng chung chu kỳ mây
 18 giây. Ở Bầu trời, ảnh `SkyScene` nằm trên frame mây; hiệu ứng chỉ lộ ra ở các
@@ -67,7 +67,8 @@ mây không đổi màu theo accent của trang. Một frame mây được lặp
 Frame tự trôi ngang tuyến tính đúng một chiều rộng rồi nối vào bản sao kế tiếp,
 vì vậy không có khoảng trống hoặc điểm đảo chiều. Khi nội dung cuộn dọc, lưới mây
 dịch 14% quãng cuộn và lặp sau mỗi chiều cao viewport để tạo parallax liền mạch.
-Opacity được giảm riêng cho dark mode và mây luôn nằm sau nội dung.
+Nhánh giảm opacity cho dark mode được giữ làm nền tảng nhưng hiện không kích hoạt;
+mây luôn nằm sau nội dung.
 `AnimationController` dừng cả tự trôi lẫn parallax khi hệ thống bật Reduce Motion;
 route không hoạt động được `TickerMode` của Flutter ngắt tick.
 
@@ -87,8 +88,9 @@ bảo mật; RLS/repository vẫn là lớp bảo vệ dữ liệu.
   viewport 320×640 không phát sinh overflow.
 - QA thủ công xác nhận hover/pressed trên từng tab không tạo lớp chữ nhật vượt
   khỏi vùng bo, đồng thời cả bốn tab hiển thị cùng thanh MuseMend.
-- Cần kiểm tra thủ công Android/iOS ở màn hình nhỏ, text scale 200%, dark mode,
-  reduce motion và contrast trước khi gọi pixel-polished.
+- Cần kiểm tra thủ công Android/iOS ở màn hình nhỏ, text scale 200%, thiết bị bật
+  dark mode nhưng app vẫn sáng, reduce motion và contrast trước khi gọi
+  pixel-polished.
 
 ## Việc còn lại
 

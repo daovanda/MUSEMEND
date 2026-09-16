@@ -1,7 +1,7 @@
 # Onboarding tài khoản mới
 
 **Trạng thái:** `implemented`
-**Cập nhật:** 2026-09-13
+**Cập nhật:** 2026-09-15
 
 ## Mục tiêu và phạm vi
 
@@ -20,11 +20,28 @@ thẳng tới app. Ba bước gồm:
 2. Riêng tư: giới thiệu nhật ký trên thiết bị, dùng ngoại tuyến và sao lưu tùy chọn.
 3. Cá nhân hóa: tên hiển thị tùy chọn và một trong năm cách xưng hô.
 
+Onboarding luôn dùng giao diện sáng, kể cả khi thiết bị Android/iOS đang bật chế
+độ tối hoặc tài khoản còn giá trị `theme_mode = dark` từ bản QA cũ. Quy tắc này
+được áp dụng ở root app nên không tạo khác biệt giữa onboarding và các màn hình
+bên trong.
+
 Ở bước đầu, nút quay lại thực hiện `AuthController.signOut()` rồi để auth router
 đưa người dùng về `/sign-in`; không điều hướng thẳng khi session vẫn còn vì router
 sẽ đưa tài khoản chưa onboarding quay trở lại. Từ bước hai trở đi, cùng nút đó chỉ
 quay về bước onboarding trước. Trong lúc sign-out/lưu đang chạy, nút bị khóa để
-tránh gửi thao tác lặp.
+tránh gửi thao tác lặp. Ba bước nằm trong `PageView`: vuốt trái/phải chuyển bước,
+còn nút tiếp tục/quay lại dùng cùng bộ điều khiển trang để trạng thái luôn đồng bộ.
+Vùng nội dung không còn cuộn dọc; mỗi bước được co giãn theo chiều cao viewport để
+toàn bộ thông tin xuất hiện trong một màn hình, kể cả trên thiết bị nhỏ.
+Logo thương hiệu dùng `mascot-cloud.png` trong thanh MuseTopBar và ở huy hiệu
+trung tâm của bước cá nhân hóa — bước dẫn người dùng vào sản phẩm. Nhờ vậy
+hình đám mây ở onboarding nhất quán với thương hiệu và không bị nhầm với icon
+chức năng. Biểu tượng tay và khiên của hai bước giới thiệu vẫn giữ để người
+dùng phân biệt nội dung.
+Headline của cả ba bước dùng cùng component responsive, bỏ xuống dòng thủ công từ
+ARB và giới hạn tối đa hai dòng; cỡ chữ giảm nhẹ dưới 480dp để câu tiếng Việt không
+bị tách thành dòng thứ ba. Nội dung mô tả bên dưới vẫn được phép tự xuống dòng để
+không cắt mất thông tin.
 
 Tên từ đăng ký được điền sẵn. Tên người dùng nhập ở bước cuối được ưu tiên; bỏ
 qua giữ tên hiện có. Nếu không có tên, các màn hình tiếp tục dùng fallback
@@ -59,7 +76,9 @@ Migration backfill tài khoản hiện có thành đã hoàn tất để không 
 nghiệm đăng nhập của họ; tài khoản tạo sau migration có giá trị null và thấy flow.
 Integration test kiểm tra trạng thái ban đầu và RPC hoàn tất. Widget/DTO test kiểm
 tra mapping, nội dung ba bước, hành vi bỏ qua/lưu tên và nút quay về đăng nhập có
-gọi sign-out ở bước đầu.
+gọi sign-out ở bước đầu. Widget test cũng kiểm tra vuốt ngang tới bước riêng tư và
+vuốt ngược về bước chào mừng. Test cấp ứng dụng giả lập thiết bị đang ở dark mode
+và xác nhận `Theme.of(context).brightness` vẫn là `Brightness.light`.
 
 Rollback ứng dụng vẫn tương thích với hai cột mới. Sau khi migration đã deploy,
 không xóa cột/RPC trong rollback nóng; dùng forward migration nếu cần sửa. Offline,

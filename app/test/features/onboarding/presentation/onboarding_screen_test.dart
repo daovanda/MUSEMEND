@@ -105,6 +105,46 @@ void main() {
     expect(repository.savedAddress, isNull);
   });
 
+  testWidgets('swiping horizontally changes onboarding steps', (tester) async {
+    final repository = _FakeOnboardingRepository(
+      const OnboardingProfile(
+        displayName: null,
+        preferredAddress: null,
+        completedAt: null,
+      ),
+    );
+    tester.view.physicalSize = const Size(430, 932);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          onboardingRepositoryProvider.overrideWithValue(repository),
+          onboardingProfileProvider.overrideWith(
+            (ref) async => repository.profile,
+          ),
+        ],
+        child: const MaterialApp(
+          locale: Locale('vi'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: OnboardingScreen(),
+        ),
+      ),
+    );
+    await _pumpUi(tester);
+
+    await tester.drag(find.byType(PageView), const Offset(-320, 0));
+    await _pumpUi(tester);
+    expect(find.text('Nhật ký lưu trên thiết bị'), findsOneWidget);
+
+    await tester.drag(find.byType(PageView), const Offset(320, 0));
+    await _pumpUi(tester);
+    expect(find.text('Gọi tên cảm xúc'), findsOneWidget);
+  });
+
   testWidgets('first step can return to sign in', (tester) async {
     final onboardingRepository = _FakeOnboardingRepository(
       const OnboardingProfile(

@@ -66,12 +66,12 @@ void main() {
     await _pumpUi(tester);
     expect(find.text('日本語'), findsOneWidget);
 
-    await tester.tap(find.text('Sáng'));
+    expect(find.text('Sáng'), findsOneWidget);
+    expect(find.text('Tối'), findsNothing);
+    expect(find.byIcon(Icons.lock_outline_rounded), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Lưu'));
     await _pumpUi(tester);
-    expect(find.text('Tối'), findsOneWidget);
-    await tester.tap(find.text('Tối'));
-    await _pumpUi(tester);
-    expect(find.text('Tối'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     final accountCard = find.byType(MuseGlassCard).at(0);
@@ -147,7 +147,7 @@ class _FakeProfileRepository implements ProfileRepository {
     profile: AccountProfile(displayName: 'QA', accountStatus: 'active'),
     settings: AccountSettings(
       cloudName: 'Mây Nhỏ',
-      themeMode: 'light',
+      themeMode: 'dark',
       soundEnabled: true,
       notificationEnabled: true,
       languageCode: 'vi',
@@ -168,7 +168,9 @@ class _FakeProfileRepository implements ProfileRepository {
     required bool soundEnabled,
     required bool notificationEnabled,
     required String? languageCode,
-  }) async {}
+  }) async {
+    expect(themeMode, 'light');
+  }
 }
 
 class _FakeNotificationRepository implements NotificationRepository {

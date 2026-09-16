@@ -11,14 +11,15 @@ class MuseMendApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeMode = ref.watch(appThemeModeProvider).value ?? ThemeMode.light;
     final languageCode = ref.watch(appLanguageCodeProvider).value;
     return MaterialApp.router(
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       debugShowCheckedModeBanner: false,
       theme: buildMuseTheme(),
-      darkTheme: buildMuseTheme(Brightness.dark),
-      themeMode: themeMode,
+      // Dark mode is intentionally disabled until its complete visual system
+      // has been designed and QA-approved. Stored legacy values must not make
+      // onboarding or authenticated screens follow the device brightness.
+      themeMode: ThemeMode.light,
       locale: languageCode == null ? null : Locale(languageCode),
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,

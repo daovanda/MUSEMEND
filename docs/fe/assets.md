@@ -16,7 +16,7 @@ thế mà không sửa nghiệp vụ. Frame screenshot chỉ là tài liệu tha
 | --- | --- | --- | --- |
 | Sky gradient | Home/Bầu trời (`233:893`) | Flutter gradient `#E0F2F7 → #FBF9F5` | implemented |
 | Sky background, hills, river | `image 20` (`58:184`), source `1024×1536` | `app/assets/illustrations/journey/sky-background.png` | integrated |
-| Cloud mascot | `image 23` (`174:44`), source `1536×1024` | `app/assets/illustrations/clouds/mascot-cloud.png` | integrated |
+| Cloud mascot / brand mark | `image 23` (`174:44`), source `1536×1024` | `app/assets/illustrations/clouds/mascot-cloud.png` | integrated in auth, shared top bar, Home and onboarding |
 | Secondary cloud | `image 12` (`57:21`), source `160×131` | `app/assets/illustrations/clouds/secondary-cloud.png` | exported; reserved until Home placement is confirmed |
 | Mood QUẠO | `85:587`, source `1024×1024` | `app/assets/illustrations/clouds/moods/awful.png` | integrated |
 | Mood TRỐNG RỖNG | `85:570`, source `1024×1024` | `app/assets/illustrations/clouds/moods/sad.png` | integrated |

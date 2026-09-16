@@ -13,7 +13,12 @@ void main() {
     );
 
     expect(find.text('MuseMend'), findsOneWidget);
-    expect(find.byIcon(Icons.cloud_outlined), findsOneWidget);
+    expect(
+      find.image(
+        const AssetImage('assets/illustrations/clouds/mascot-cloud.png'),
+      ),
+      findsOneWidget,
+    );
     expect(find.text('Trạng thái'), findsOneWidget);
     expect(tester.getSize(find.byType(MuseTopBar)).height, 60);
   });

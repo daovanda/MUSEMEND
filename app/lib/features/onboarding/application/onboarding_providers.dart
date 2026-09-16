@@ -14,7 +14,12 @@ final onboardingProfileProvider = FutureProvider<OnboardingProfile?>((
 ) async {
   final userId = ref.watch(authSessionProvider).value?.userId;
   if (userId == null) return null;
-  return ref.watch(onboardingRepositoryProvider).loadProfile();
+  // Keep auth bootstrap bounded even if the profile request gets stuck. The
+  // router will show the onboarding retry state instead of an endless splash.
+  return ref
+      .watch(onboardingRepositoryProvider)
+      .loadProfile()
+      .timeout(const Duration(seconds: 20));
 });
 
 final onboardingControllerProvider =

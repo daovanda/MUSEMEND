@@ -1,7 +1,7 @@
 # Authentication client
 
 **Trạng thái:** `in-progress`
-**Cập nhật:** 2026-09-13
+**Cập nhật:** 2026-09-15
 
 ## Mục tiêu và phạm vi
 
@@ -19,9 +19,12 @@ gọi Supabase Auth. `AuthController` điều phối thao tác và trạng thái
 Khi khởi động, session khôi phục từ bộ nhớ thiết bị chưa được coi là đăng nhập
 chỉ vì token còn tồn tại cục bộ. Adapter gọi Supabase Auth để xác thực user trước
 khi phát session cho router. Nếu user/session đã bị thu hồi, hết hạn hoặc không
-còn tồn tại, adapter xóa session cục bộ và router trở về `/sign-in`. Lỗi mạng tạm
-thời và lỗi máy chủ không tự động đăng xuất người dùng. Vì vậy chỉ tài khoản hợp
-lệ có profile chưa hoàn tất mới được chuyển tới `/onboarding`.
+còn tồn tại, adapter xoá session cục bộ và router trở về `/sign-in`. Việc xoá này
+được phát ra ngay, không chờ endpoint thu hồi token trên server; điều đó đặc biệt
+quan trọng khi tài khoản vừa bị xoá và đăng ký lại bằng cùng email. Bước xác thực
+khởi động có giới hạn 15 giây, nên mạng hoặc Auth endpoint không thể giữ splash
+vĩnh viễn. Khi hết thời gian mà chưa xác thực được token, app yêu cầu đăng nhập
+lại để tránh tin cậy một session không rõ trạng thái.
 
 Màn auth dùng cùng ngôn ngữ thị giác với Bầu trời: artwork phong cảnh và mascot
 cục bộ, nền chuyển từ xanh trời sang kem/tím pastel, logo gradient và form kính
@@ -65,6 +68,9 @@ Test Reduce Motion xác nhận transform nền không đổi theo thời gian kh
 bị vô hiệu hóa.
 Unit test session policy xác nhận lỗi `user_not_found`/session hết hạn làm sạch
 session khôi phục, còn lỗi kết nối có thể retry không làm mất đăng nhập cục bộ.
+Luồng khôi phục phiên bị thu hồi không chờ server revoke; kiểm thử khởi động cần
+bao gồm trường hợp xoá tài khoản, đăng ký lại cùng email và đăng nhập trên thiết bị
+còn token cũ.
 Android QA đã xác nhận đăng nhập, session restore và sign-out. Database integration
 kiểm tra bootstrap cùng cách ly hai tài khoản. Còn phải nghiệm thu account/session
 token hết hạn cưỡng bức và luồng sign-up có email confirmation trên cấu hình thật.
