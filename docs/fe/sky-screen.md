@@ -57,8 +57,11 @@ tiến độ vẫn do RPC/database xác định; các con số hiển thị ch�
   đề, mô tả và nút chia sẻ. Nội dung hiện là mẫu cứng; hành vi export/share thực
   tế được để vòng sau và không truy cập journal riêng tư trong lát cắt này.
 - Bottom navigation có bốn route và mây ở giữa. Nút mây `56×56`, màu `#366672`,
-  nhô lên `19dp`, icon `#EFFBFF`; chạm về Bầu trời, giữ để mở năm mood. Bốn tab
-  dùng icon nét mảnh, không có selected pill lớn như bản cũ.
+  nhô lên `19dp`; trước khi check-in nút dùng đám mây nét đơn `#EFFBFF` như
+  thiết kế gốc. Sau khi có mood hôm nay, nút chuyển mượt sang artwork cloud của
+  mood đó và tự cập nhật khi người dùng đổi mood; thiếu asset vẫn fallback về nét
+  đơn. Chạm về Bầu trời, giữ để mở năm mood. Bốn tab dùng icon nét mảnh, không có
+  selected pill lớn như bản cũ.
 - Nhãn check-in, hành trình, quote, chia sẻ, trạng thái lỗi và semantics đều lấy
   từ ARB. Tên/mô tả catalog do các provider locale-aware tải từ DB; nội dung do
   user viết không bị dịch ở client.
