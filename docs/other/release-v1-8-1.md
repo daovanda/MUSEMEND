@@ -5,8 +5,10 @@
 
 ## Mục tiêu
 
-Phát hành bản Android QA `1.8.1+1` với logo mascot đám mây nhất quán ở bước
-cá nhân hóa onboarding và thanh thương hiệu trong ứng dụng.
+Phát hành bản Android QA `1.8.1+6` với logo mascot đám mây nhất quán ở bước
+cá nhân hóa onboarding và thanh thương hiệu trong ứng dụng. Build number được
+tăng từ `+1` lên `+6` để Android cho phép cập nhật đè bản `1.8.0+5` đã phát hành;
+build number phải tăng đơn điệu giữa các APK cùng application id.
 
 ## Luồng phát hành
 
@@ -19,6 +21,8 @@ cá nhân hóa onboarding và thanh thương hiệu trong ứng dụng.
 
 - `flutter analyze` không có issue.
 - `flutter test` đạt toàn bộ test hiện có.
+- APK có `versionCode` lớn hơn bản `1.8.0+5` và có thể cài đè mà không cần gỡ
+  ứng dụng hoặc xóa dữ liệu cục bộ.
 - Onboarding preview hiển thị ảnh `mascot-cloud.png` ở huy hiệu trung tâm của
   bước cá nhân hóa; hai bước trước vẫn giữ icon tay và khiên.
 - Logo không làm thay đổi luồng vuốt, nút quay lại, bỏ qua hoặc hoàn tất
