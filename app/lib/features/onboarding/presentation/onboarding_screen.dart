@@ -362,7 +362,9 @@ class _NameStepState extends State<_NameStep> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const _CloudEmblem(icon: Icons.cloud_outlined),
+        // The final step is the hand-off into the product, so use the same
+        // mascot artwork as the brand mark instead of a generic cloud glyph.
+        const _CloudEmblem(brand: true),
         const SizedBox(height: 20),
         _OnboardingHeadline(strings.onboardingNamePrompt),
         const SizedBox(height: 8),
