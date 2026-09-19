@@ -79,6 +79,11 @@ NODE
   tar -xJf "$archive_path" --strip-components=1 -C "$sdk_root/flutter-$flutter_version"
 fi
 
+# Vercel build containers may run as root while the verified SDK directory is
+# owned by another uid. Flutter invokes Git internally, so explicitly trust
+# only this pinned, checksum-verified SDK directory before running the tool.
+git config --global --add safe.directory "$sdk_root/flutter-$flutter_version"
+
 "$flutter_bin" config --no-analytics --enable-web
 "$flutter_bin" pub get --enforce-lockfile
 "$flutter_bin" build web --release --no-pub \

@@ -57,6 +57,11 @@ build release vào `app/build/web`. `app/vercel.json` dành cho project Root
 Directory `app`, còn `/vercel.json` hỗ trợ Root Directory là repository. Cả hai
 giữ rewrite callback cho `/email-confirmed` và `/reset-password`.
 
+Trong build container Vercel, Flutter có thể chạy dưới UID khác với owner của
+SDK vừa giải nén. Sau khi xác minh SHA-256, script chỉ thêm đúng thư mục SDK đã
+pin vào Git `safe.directory` trước khi gọi Flutter; không đánh dấu toàn bộ repo
+hay thư mục cha là an toàn.
+
 Vercel cần Environment Variables `APP_ENV`, `SUPABASE_URL` và
 `SUPABASE_PUBLISHABLE_KEY`. Chúng là compile-time values được nhúng vào bundle;
 `APP_ENV` phải đặt tường minh. Chỉ dùng project URL và publishable/anon key;

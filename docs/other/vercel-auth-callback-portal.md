@@ -29,6 +29,11 @@ alias domain callback hiện tại có thể đang phục vụ QA bằng Supabas
 Build fail-closed nếu thiếu cấu hình, URL không hợp lệ hoặc khóa không phải
 publishable/legacy `anon`. Build log không in giá trị biến.
 
+Một số build container của Vercel chạy Flutter với quyền root trong khi SDK đã
+giải nén có owner khác. Trước khi gọi Flutter, script chỉ thêm thư mục SDK đã
+được xác minh SHA-256 vào Git `safe.directory`; không đánh dấu an toàn toàn bộ
+repository hoặc thư mục rộng hơn.
+
 Project cần kết nối repo `daovanda/MUSEMEND` và đặt Root Directory là `app`.
 Trong giai đoạn QA callback hiện tại, đặt Vercel Production Branch là `develop`
 để domain callback cố định nhận bản đã merge; đây chỉ là ngoại lệ cho portal
