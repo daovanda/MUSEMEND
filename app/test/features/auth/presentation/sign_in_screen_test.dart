@@ -39,6 +39,81 @@ void main() {
     expect(find.text('Mật khẩu cần ít nhất 8 ký tự.'), findsOneWidget);
   });
 
+  testWidgets('requests a password reset link from the sign-in form', (
+    tester,
+  ) async {
+    final repository = _FakeAuthRepository();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [authRepositoryProvider.overrideWithValue(repository)],
+        child: const MaterialApp(
+          locale: Locale('vi'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: SignInScreen(),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Quên mật khẩu?'));
+    await tester.pump();
+    expect(find.text('Đặt lại mật khẩu'), findsOneWidget);
+    expect(find.text('Mật khẩu'), findsNothing);
+
+    await tester.enterText(find.byType(TextFormField), 'qa@example.com');
+    await tester.tap(find.text('Gửi liên kết đặt lại mật khẩu'));
+    await tester.pump();
+
+    expect(repository.resetEmail, 'qa@example.com');
+    expect(
+      repository.resetRedirectTo,
+      'https://musemend-app.vercel.app/reset-password',
+    );
+    expect(
+      find.text('Liên kết đã được gửi. Hãy kiểm tra email của bạn.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('sends new account confirmation to the public success page', (
+    tester,
+  ) async {
+    final repository = _FakeAuthRepository();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [authRepositoryProvider.overrideWithValue(repository)],
+        child: MaterialApp(
+          locale: Locale('vi'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Builder(
+            builder:
+                (context) => MediaQuery(
+                  data: MediaQuery.of(
+                    context,
+                  ).copyWith(disableAnimations: true),
+                  child: const SignInScreen(),
+                ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Chưa có tài khoản? Đăng ký'));
+    await tester.pump();
+    final fields = find.byType(TextFormField);
+    await tester.enterText(fields.at(0), 'QA User');
+    await tester.enterText(fields.at(1), 'qa@example.com');
+    await tester.enterText(fields.at(2), 'MuseMend-QA-passphrase');
+    await tester.tap(find.text('Tạo tài khoản'));
+    await tester.pumpAndSettle();
+
+    expect(
+      repository.signUpRedirectTo,
+      'https://musemend-app.vercel.app/email-confirmed',
+    );
+  });
+
   testWidgets('remains usable on a small screen at 200 percent text scale', (
     tester,
   ) async {
@@ -150,6 +225,10 @@ void main() {
 }
 
 class _FakeAuthRepository implements AuthRepository {
+  String? resetEmail;
+  String? resetRedirectTo;
+  String? signUpRedirectTo;
+
   @override
   AuthSession? get currentSession => null;
 
@@ -167,7 +246,26 @@ class _FakeAuthRepository implements AuthRepository {
     required String displayName,
     required String email,
     required String password,
-  }) async {}
+    required String languageCode,
+    required String emailRedirectTo,
+  }) async {
+    signUpRedirectTo = emailRedirectTo;
+  }
+
+  @override
+  Future<void> requestPasswordReset({
+    required String email,
+    required String redirectTo,
+  }) async {
+    resetEmail = email;
+    resetRedirectTo = redirectTo;
+  }
+
+  @override
+  Future<void> updatePassword({required String password}) async {}
+
+  @override
+  Future<void> updateLanguageCode({required String languageCode}) async {}
 
   @override
   Stream<AuthSession?> watchSession() => Stream.value(null);

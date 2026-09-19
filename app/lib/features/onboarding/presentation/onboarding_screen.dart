@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import 'package:musemend/app/theme/muse_colors.dart';
+import 'package:musemend/app/theme/muse_theme.dart';
 import 'package:musemend/core/presentation/muse_ui.dart';
 import 'package:musemend/features/auth/application/auth_providers.dart';
 import 'package:musemend/features/onboarding/application/onboarding_providers.dart';
@@ -13,22 +15,34 @@ class OnboardingScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(onboardingProfileProvider);
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: MusePageBackground(
-        accent: MuseColors.mint,
-        child: SafeArea(
-          child: profile.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error:
-                (_, _) => _OnboardingError(
-                  onRetry: () => ref.invalidate(onboardingProfileProvider),
-                ),
-            data:
-                (value) =>
-                    value == null
-                        ? const SizedBox.shrink()
-                        : _OnboardingFlow(profile: value),
+    return Theme(
+      data: buildMuseTheme(),
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
+          systemNavigationBarColor: MuseColors.cream,
+          systemNavigationBarIconBrightness: Brightness.dark,
+        ),
+        child: Scaffold(
+          backgroundColor: MuseColors.cream,
+          body: MusePageBackground(
+            accent: MuseColors.mint,
+            child: SafeArea(
+              child: profile.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error:
+                    (_, _) => _OnboardingError(
+                      onRetry: () => ref.invalidate(onboardingProfileProvider),
+                    ),
+                data:
+                    (value) =>
+                        value == null
+                            ? const SizedBox.shrink()
+                            : _OnboardingFlow(profile: value),
+              ),
+            ),
           ),
         ),
       ),
@@ -149,12 +163,9 @@ class _OnboardingFlowState extends ConsumerState<_OnboardingFlow> {
                   _OnboardingPageViewport(
                     child: _NameStep(
                       controller: _nameController,
-                      selected: _preferredAddress,
                       fallbackName:
                           widget.profile.displayName ??
                           strings.onboardingFallbackName,
-                      onSelected:
-                          (value) => setState(() => _preferredAddress = value),
                     ),
                   ),
                 ],
@@ -215,23 +226,54 @@ class _OnboardingFlowState extends ConsumerState<_OnboardingFlow> {
   }
 }
 
-/// Keeps each onboarding step inside one viewport. On compact devices the
-/// complete step scales down instead of introducing a second vertical scroll.
+/// Keeps every page at the same width and top anchor. The intro and cards use
+/// explicit, shared heights, and the same design viewport is used for every
+/// page so PageView never scales one page differently while dragging.
 class _OnboardingPageViewport extends StatelessWidget {
   const _OnboardingPageViewport({required this.child});
 
   final Widget child;
+  static const designHeight = 620.0;
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        return Align(
-          alignment: Alignment.topCenter,
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
+        final viewportWidth = MediaQuery.sizeOf(context).width;
+        final gutter = viewportWidth < 360 ? 16.0 : 24.0;
+        // Each PageView child owns half of the space between pages. Keeping
+        // this inset inside the page avoids revealing its neighbour at rest.
+        const pageInset = 8.0;
+        final pageWidth = (constraints.maxWidth - pageInset * 2).clamp(
+          0.0,
+          viewportWidth - gutter * 2,
+        );
+        final designViewport = SizedBox(
+          width: pageWidth,
+          height: designHeight,
+          child: child,
+        );
+        // Keep the original onboarding scale on normal phone/web viewports.
+        // Browser device-pixel-ratio can make MediaQuery's logical height look
+        // short even when the visible viewport is large, which would shrink
+        // every card and make the onboarding feel too small. Scale only a
+        // genuinely constrained desktop/test viewport or an exceptionally
+        // narrow device; ordinary phone-width layouts keep their designed size.
+        final useScaleDown =
+            (viewportWidth >= 700 && constraints.maxHeight < designHeight) ||
+            (viewportWidth < 320 && constraints.maxHeight < 500);
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: pageInset),
+          child: Align(
             alignment: Alignment.topCenter,
-            child: SizedBox(width: constraints.maxWidth, child: child),
+            child:
+                useScaleDown
+                    ? FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.topCenter,
+                      child: designViewport,
+                    )
+                    : designViewport,
           ),
         );
       },
@@ -247,24 +289,25 @@ class _WelcomeStep extends StatelessWidget {
     final strings = AppLocalizations.of(context);
     return Column(
       children: [
-        const _CloudEmblem(icon: Icons.waving_hand_rounded),
-        const SizedBox(height: 24),
-        _OnboardingHeadline(strings.onboardingWelcomeHeadline),
-        const SizedBox(height: 24),
+        _OnboardingIntro(
+          icon: Icons.waving_hand_rounded,
+          headline: strings.onboardingWelcomeHeadline,
+          subtitle: strings.onboardingWelcomeBody,
+        ),
         _OnboardingCard(
           icon: Icons.sentiment_satisfied_alt_rounded,
           tint: MuseColors.sky,
           title: strings.onboardingEmotionTitle,
           description: strings.onboardingEmotionDescription,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 4),
         _OnboardingCard(
           icon: Icons.lock_outline_rounded,
           tint: MuseColors.mint,
           title: strings.onboardingPrivateWritingTitle,
           description: strings.onboardingPrivateWritingDescription,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 4),
         _OnboardingCard(
           icon: Icons.spa_outlined,
           tint: Color(0xFFF8E6DC),
@@ -284,33 +327,25 @@ class _PrivacyStep extends StatelessWidget {
     final strings = AppLocalizations.of(context);
     return Column(
       children: [
-        const _CloudEmblem(icon: Icons.shield_outlined),
-        const SizedBox(height: 24),
-        _OnboardingHeadline(strings.onboardingPrivacyHeadline),
-        const SizedBox(height: 12),
-        Text(
-          strings.onboardingPrivacyBody,
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            color: MuseColors.mutedInk,
-            height: 1.45,
-          ),
+        _OnboardingIntro(
+          icon: Icons.shield_outlined,
+          headline: strings.onboardingPrivacyHeadline,
+          subtitle: strings.onboardingPrivacyBody,
         ),
-        const SizedBox(height: 24),
         _OnboardingCard(
           icon: Icons.lock_rounded,
           tint: MuseColors.mint,
           title: strings.onboardingDeviceJournalTitle,
           description: strings.onboardingDeviceJournalDescription,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 4),
         _OnboardingCard(
           icon: Icons.wifi_off_rounded,
           tint: MuseColors.sky,
           title: strings.onboardingOfflineTitle,
           description: strings.onboardingOfflineDescription,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 4),
         _OnboardingCard(
           icon: Icons.cloud_sync_outlined,
           tint: MuseColors.lavender,
@@ -323,17 +358,10 @@ class _PrivacyStep extends StatelessWidget {
 }
 
 class _NameStep extends StatefulWidget {
-  const _NameStep({
-    required this.controller,
-    required this.selected,
-    required this.fallbackName,
-    required this.onSelected,
-  });
+  const _NameStep({required this.controller, required this.fallbackName});
 
   final TextEditingController controller;
-  final PreferredAddress? selected;
   final String fallbackName;
-  final ValueChanged<PreferredAddress> onSelected;
 
   @override
   State<_NameStep> createState() => _NameStepState();
@@ -362,77 +390,108 @@ class _NameStepState extends State<_NameStep> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // The final step is the hand-off into the product, so use the same
-        // mascot artwork as the brand mark instead of a generic cloud glyph.
-        const _CloudEmblem(brand: true),
-        const SizedBox(height: 20),
-        _OnboardingHeadline(strings.onboardingNamePrompt),
-        const SizedBox(height: 8),
-        Text(
-          strings.onboardingNameCanChange,
-          textAlign: TextAlign.center,
-          style: TextStyle(color: MuseColors.mutedInk),
+        _OnboardingIntro(
+          brand: true,
+          headline: strings.onboardingNamePrompt,
+          subtitle: strings.onboardingNameCanChange,
         ),
-        const SizedBox(height: 22),
-        MuseGlassCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                strings.onboardingDisplayNameLabel,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: MuseColors.teal,
-                  fontWeight: FontWeight.w800,
+        SizedBox(
+          height: 108,
+          child: MuseGlassCard(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: TextField(
+              controller: widget.controller,
+              maxLength: 80,
+              textCapitalization: TextCapitalization.words,
+              textInputAction: TextInputAction.done,
+              decoration: InputDecoration(
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
                 ),
+                hintText: strings.onboardingDisplayNameLabel,
+                prefixIcon: const Icon(Icons.person_outline_rounded),
+                counterText: '',
               ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: widget.controller,
-                maxLength: 80,
-                textCapitalization: TextCapitalization.words,
-                textInputAction: TextInputAction.done,
-                decoration: InputDecoration(
-                  hintText: strings.onboardingNameHint,
-                  prefixIcon: const Icon(Icons.person_outline_rounded),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
-        const SizedBox(height: 18),
-        MuseSectionLabel(strings.onboardingAddressLabel),
-        const SizedBox(height: 10),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
+        const SizedBox(height: 16),
+        Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            for (final address in PreferredAddress.values)
-              MusePill(
-                label: _preferredAddressLabel(strings, address),
-                selected: widget.selected == address,
-                onTap: () => widget.onSelected(address),
+            const Icon(
+              Icons.waving_hand_outlined,
+              size: 26,
+              color: MuseColors.teal,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              strings.onboardingGreeting(previewName),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: MuseColors.ink,
+                fontWeight: FontWeight.w700,
+                height: 1.2,
               ),
+            ),
           ],
         ),
-        const SizedBox(height: 24),
-        MuseGlassCard(
-          tint: MuseColors.cream,
-          child: Column(
-            children: [
-              const Icon(Icons.waving_hand_outlined, color: MuseColors.teal),
-              const SizedBox(height: 10),
-              Text(
-                strings.onboardingGreeting(previewName),
+      ],
+    );
+  }
+}
+
+class _OnboardingIntro extends StatelessWidget {
+  const _OnboardingIntro({
+    required this.headline,
+    required this.subtitle,
+    this.icon,
+    this.brand = false,
+  }) : assert(brand || icon != null);
+
+  final String headline;
+  final String subtitle;
+  final IconData? icon;
+  final bool brand;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 248,
+      child: Column(
+        children: [
+          SizedBox(height: 92, child: _CloudEmblem(icon: icon, brand: brand)),
+          const SizedBox(height: 14),
+          SizedBox(
+            height: 66,
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: _OnboardingHeadline(headline),
+            ),
+          ),
+          const SizedBox(height: 6),
+          SizedBox(
+            height: 70,
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: Text(
+                subtitle,
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: MuseColors.ink,
-                  fontWeight: FontWeight.w700,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: MuseColors.mutedInk,
+                  height: 1.35,
                 ),
               ),
-            ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -480,6 +539,10 @@ class _CloudEmblem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (brand) {
+      return const Center(child: MuseBrandMark(width: 104, height: 72));
+    }
+
     return Center(
       child: Container(
         width: 92,
@@ -504,10 +567,7 @@ class _CloudEmblem extends StatelessWidget {
             ),
           ],
         ),
-        child:
-            brand
-                ? const MuseBrandMark(width: 66, height: 48)
-                : Icon(icon, size: 38, color: MuseColors.teal),
+        child: Icon(icon, size: 38, color: MuseColors.teal),
       ),
     );
   }
@@ -528,39 +588,47 @@ class _OnboardingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MuseGlassCard(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CircleAvatar(
-            backgroundColor: tint,
-            foregroundColor: MuseColors.teal,
-            child: Icon(icon),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: MuseColors.ink,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  description,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: MuseColors.mutedInk,
-                    height: 1.42,
-                  ),
-                ),
-              ],
+    return SizedBox(
+      width: double.infinity,
+      height: 108,
+      child: MuseGlassCard(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CircleAvatar(
+              backgroundColor: tint,
+              foregroundColor: MuseColors.teal,
+              child: Icon(icon),
             ),
-          ),
-        ],
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: MuseColors.ink,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: MuseColors.mutedInk,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -626,14 +694,3 @@ class _OnboardingError extends StatelessWidget {
     );
   }
 }
-
-String _preferredAddressLabel(
-  AppLocalizations strings,
-  PreferredAddress address,
-) => switch (address) {
-  PreferredAddress.cauMinh => strings.preferredAddressCauMinh,
-  PreferredAddress.banMinh => strings.preferredAddressBanMinh,
-  PreferredAddress.anhEm => strings.preferredAddressAnhEm,
-  PreferredAddress.chiEm => strings.preferredAddressChiEm,
-  PreferredAddress.tenRieng => strings.preferredAddressNameOnly,
-};

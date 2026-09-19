@@ -95,6 +95,25 @@ class AppLocalizationsId extends AppLocalizations {
       'Akunmu sudah dibuat. Periksa email jika konfirmasi diperlukan.';
 
   @override
+  String get webAuthLandingBody =>
+      'Halaman ini hanya untuk mengonfirmasi email atau mengatur ulang kata sandi. Buka tautan terbaru di email untuk melanjutkan.';
+
+  @override
+  String get authEmailConfirmedTitle => 'Email terkonfirmasi';
+
+  @override
+  String get authEmailConfirmedBody =>
+      'Email Anda telah dikonfirmasi. Kembali ke aplikasi MuseMend untuk melanjutkan.';
+
+  @override
+  String get authLinkInvalidTitle =>
+      'Tautan ini tidak valid atau sudah kedaluwarsa';
+
+  @override
+  String get authLinkInvalidBody =>
+      'Buka tautan terbaru di email atau minta tautan baru melalui aplikasi MuseMend.';
+
+  @override
   String get authMascotSemantics => 'Maskot awan MuseMend';
 
   @override
@@ -163,6 +182,52 @@ class AppLocalizationsId extends AppLocalizations {
       'Kata sandi ini belum memenuhi persyaratan keamanan.';
 
   @override
+  String get authForgotPassword => 'Lupa kata sandi?';
+
+  @override
+  String get authResetPasswordTitle => 'Atur ulang kata sandi';
+
+  @override
+  String get authResetPasswordSubtitle =>
+      'Masukkan email untuk menerima tautan pengaturan ulang.';
+
+  @override
+  String get authCreateNewPasswordSubtitle =>
+      'Buat kata sandi baru untuk akun MuseMend Anda.';
+
+  @override
+  String get authSendResetLink => 'Kirim tautan';
+
+  @override
+  String get authResetLinkSent => 'Tautan sudah dikirim. Periksa email Anda.';
+
+  @override
+  String get authBackToSignIn => 'Kembali ke masuk';
+
+  @override
+  String get authNewPassword => 'Kata sandi baru';
+
+  @override
+  String get authConfirmPassword => 'Konfirmasi kata sandi';
+
+  @override
+  String get authPasswordMismatch => 'Kata sandi tidak cocok.';
+
+  @override
+  String get authPasswordResetSuccess =>
+      'Kata sandi Anda telah diubah. Silakan masuk lagi.';
+
+  @override
+  String get authPasswordResetSuccessTitle => 'Kata sandi berhasil diubah';
+
+  @override
+  String get authPasswordResetFailed =>
+      'Kata sandi belum dapat diatur ulang. Silakan coba lagi.';
+
+  @override
+  String get authUpdatePassword => 'Ubah kata sandi';
+
+  @override
   String get onboardingBackToSignIn => 'Kembali ke halaman masuk';
 
   @override
@@ -181,6 +246,10 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get onboardingWelcomeHeadline =>
       'Tempat untuk mendengarkan diri,\ndengan sedikit lebih lembut.';
+
+  @override
+  String get onboardingWelcomeBody =>
+      'Mulailah dengan mengenali perasaanmu, menuliskan isi hati, dan merawat diri selangkah demi selangkah.';
 
   @override
   String get onboardingEmotionTitle => 'Beri nama pada perasaan';

@@ -21,8 +21,9 @@ chung nằm tại `lib/core/presentation/muse_ui.dart`:
 
 - `MusePageBackground`: nền gradient theo page/accent và ba lớp mây mềm chuyển
   động phía sau nội dung; dark-mode fallback hiện chưa được kích hoạt.
-- `MuseTopBar`: thanh thương hiệu dùng chung ở đầu các tab chính, gồm biểu tượng
-  mây, chữ MuseMend gradient và vùng trạng thái tùy chọn.
+- `MuseTopBar`: thanh thương hiệu dùng chung ở đầu các tab chính, gồm mascot mây
+  hiển thị trực tiếp trên nền trang (không có vòng tròn/bong bóng bao quanh), chữ
+  MuseMend gradient và vùng trạng thái tùy chọn.
 - `MusePageTagline`: câu dẫn ngắn căn giữa dưới thanh thương hiệu; các tab không
   lặp lại icon và tiêu đề lớn của chính tab. Câu dẫn được đặt trong dấu ngoặc
   kép kiểu chữ để tạo cảm giác như một lời nhắn dịu dàng.

@@ -95,6 +95,24 @@ class AppLocalizationsVi extends AppLocalizations {
       'Đã tạo tài khoản. Hãy kiểm tra email nếu cần xác nhận.';
 
   @override
+  String get webAuthLandingBody =>
+      'Trang này chỉ dùng để xác nhận email hoặc đặt lại mật khẩu. Hãy mở liên kết mới nhất trong email để tiếp tục.';
+
+  @override
+  String get authEmailConfirmedTitle => 'Email đã được xác nhận';
+
+  @override
+  String get authEmailConfirmedBody =>
+      'Email của bạn đã được xác nhận thành công. Hãy quay lại ứng dụng MuseMend để tiếp tục.';
+
+  @override
+  String get authLinkInvalidTitle => 'Liên kết không hợp lệ hoặc đã hết hạn';
+
+  @override
+  String get authLinkInvalidBody =>
+      'Hãy mở liên kết mới nhất trong email hoặc yêu cầu gửi lại liên kết trong ứng dụng MuseMend.';
+
+  @override
   String get authMascotSemantics => 'Linh vật mây MuseMend';
 
   @override
@@ -161,6 +179,53 @@ class AppLocalizationsVi extends AppLocalizations {
   String get authWeakPassword => 'Mật khẩu chưa đáp ứng yêu cầu bảo mật.';
 
   @override
+  String get authForgotPassword => 'Quên mật khẩu?';
+
+  @override
+  String get authResetPasswordTitle => 'Đặt lại mật khẩu';
+
+  @override
+  String get authResetPasswordSubtitle =>
+      'Nhập email để nhận liên kết đặt lại mật khẩu.';
+
+  @override
+  String get authCreateNewPasswordSubtitle =>
+      'Tạo mật khẩu mới cho tài khoản MuseMend của bạn.';
+
+  @override
+  String get authSendResetLink => 'Gửi liên kết đặt lại mật khẩu';
+
+  @override
+  String get authResetLinkSent =>
+      'Liên kết đã được gửi. Hãy kiểm tra email của bạn.';
+
+  @override
+  String get authBackToSignIn => 'Quay lại đăng nhập';
+
+  @override
+  String get authNewPassword => 'Mật khẩu mới';
+
+  @override
+  String get authConfirmPassword => 'Nhập lại mật khẩu';
+
+  @override
+  String get authPasswordMismatch => 'Mật khẩu nhập lại chưa khớp.';
+
+  @override
+  String get authPasswordResetSuccess =>
+      'Mật khẩu đã được đổi. Hãy đăng nhập lại.';
+
+  @override
+  String get authPasswordResetSuccessTitle => 'Đổi mật khẩu thành công';
+
+  @override
+  String get authPasswordResetFailed =>
+      'Chưa thể đặt lại mật khẩu. Vui lòng thử lại.';
+
+  @override
+  String get authUpdatePassword => 'Đổi mật khẩu';
+
+  @override
   String get onboardingBackToSignIn => 'Quay lại màn đăng nhập';
 
   @override
@@ -179,6 +244,10 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get onboardingWelcomeHeadline =>
       'Một nơi để bạn lắng nghe mình,\ntheo cách nhẹ nhàng hơn.';
+
+  @override
+  String get onboardingWelcomeBody =>
+      'Bắt đầu bằng việc nhận ra cảm xúc, viết xuống tâm tư và chăm sóc mình từng chút một.';
 
   @override
   String get onboardingEmotionTitle => 'Gọi tên cảm xúc';

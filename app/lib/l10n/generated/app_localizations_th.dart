@@ -95,6 +95,24 @@ class AppLocalizationsTh extends AppLocalizations {
       'สร้างบัญชีแล้ว โปรดตรวจสอบอีเมลหากจำเป็นต้องยืนยัน';
 
   @override
+  String get webAuthLandingBody =>
+      'หน้านี้ใช้สำหรับยืนยันอีเมลและตั้งรหัสผ่านใหม่เท่านั้น เปิดลิงก์ล่าสุดในอีเมลเพื่อดำเนินการต่อ';
+
+  @override
+  String get authEmailConfirmedTitle => 'ยืนยันอีเมลแล้ว';
+
+  @override
+  String get authEmailConfirmedBody =>
+      'ยืนยันอีเมลเรียบร้อยแล้ว กลับไปที่แอป MuseMend เพื่อดำเนินการต่อ';
+
+  @override
+  String get authLinkInvalidTitle => 'ลิงก์นี้ไม่ถูกต้องหรือหมดอายุแล้ว';
+
+  @override
+  String get authLinkInvalidBody =>
+      'เปิดลิงก์ล่าสุดในอีเมล หรือขอลิงก์ใหม่จากแอป MuseMend';
+
+  @override
   String get authMascotSemantics => 'มาสคอตก้อนเมฆ MuseMend';
 
   @override
@@ -163,6 +181,52 @@ class AppLocalizationsTh extends AppLocalizations {
       'รหัสผ่านนี้ยังไม่ตรงตามข้อกำหนดด้านความปลอดภัย';
 
   @override
+  String get authForgotPassword => 'ลืมรหัสผ่านใช่ไหม';
+
+  @override
+  String get authResetPasswordTitle => 'ตั้งรหัสผ่านใหม่';
+
+  @override
+  String get authResetPasswordSubtitle =>
+      'กรอกอีเมลเพื่อรับลิงก์ตั้งรหัสผ่านใหม่';
+
+  @override
+  String get authCreateNewPasswordSubtitle =>
+      'ตั้งรหัสผ่านใหม่สำหรับบัญชี MuseMend ของคุณ';
+
+  @override
+  String get authSendResetLink => 'ส่งลิงก์';
+
+  @override
+  String get authResetLinkSent => 'ส่งลิงก์แล้ว โปรดตรวจสอบอีเมลของคุณ';
+
+  @override
+  String get authBackToSignIn => 'กลับไปเข้าสู่ระบบ';
+
+  @override
+  String get authNewPassword => 'รหัสผ่านใหม่';
+
+  @override
+  String get authConfirmPassword => 'ยืนยันรหัสผ่าน';
+
+  @override
+  String get authPasswordMismatch => 'รหัสผ่านไม่ตรงกัน';
+
+  @override
+  String get authPasswordResetSuccess =>
+      'เปลี่ยนรหัสผ่านแล้ว โปรดเข้าสู่ระบบอีกครั้ง';
+
+  @override
+  String get authPasswordResetSuccessTitle => 'เปลี่ยนรหัสผ่านแล้ว';
+
+  @override
+  String get authPasswordResetFailed =>
+      'ยังตั้งรหัสผ่านใหม่ไม่ได้ โปรดลองอีกครั้ง';
+
+  @override
+  String get authUpdatePassword => 'เปลี่ยนรหัสผ่าน';
+
+  @override
   String get onboardingBackToSignIn => 'กลับไปหน้าเข้าสู่ระบบ';
 
   @override
@@ -181,6 +245,10 @@ class AppLocalizationsTh extends AppLocalizations {
   @override
   String get onboardingWelcomeHeadline =>
       'พื้นที่ให้คุณรับฟังตัวเอง\nอย่างอ่อนโยนขึ้นอีกนิด';
+
+  @override
+  String get onboardingWelcomeBody =>
+      'เริ่มจากรับรู้ความรู้สึก เขียนสิ่งที่อยู่ในใจ แล้วค่อย ๆ ดูแลตัวเองทีละก้าว';
 
   @override
   String get onboardingEmotionTitle => 'เรียกชื่อความรู้สึก';

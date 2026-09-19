@@ -1,13 +1,15 @@
 name: musemend
 description: "MuseMend healing journal MVP"
 publish_to: 'none'
-version: 1.8.1+6
+version: 1.8.2+7
 
 environment:
   sdk: ^3.7.2
 
 dependencies:
   flutter:
+    sdk: flutter
+  flutter_web_plugins:
     sdk: flutter
   flutter_localizations:
     sdk: flutter

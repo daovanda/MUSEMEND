@@ -16,15 +16,10 @@ class MuseTopBar extends StatelessWidget {
       child: Row(
         children: [
           ExcludeSemantics(
-            child: Container(
+            child: SizedBox(
               width: 38,
               height: 38,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: .42),
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white.withValues(alpha: .64)),
-              ),
-              child: const MuseBrandMark(width: 30, height: 26),
+              child: const MuseBrandMark(width: 38, height: 30),
             ),
           ),
           const SizedBox(width: 10),
@@ -573,12 +568,16 @@ class MuseSectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(
-          text.toUpperCase(),
-          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-            color: MuseColors.teal,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.1,
+        Flexible(
+          child: Text(
+            text.toUpperCase(),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: MuseColors.teal,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.1,
+            ),
           ),
         ),
         const Spacer(),
@@ -632,12 +631,16 @@ class MusePill extends StatelessWidget {
                 Icon(icon, size: 16, color: foreground),
                 const SizedBox(width: 5),
               ],
-              Text(
-                label,
-                style: TextStyle(
-                  color: foreground,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: foreground,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ],

@@ -95,6 +95,24 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your account has been created. Please check your email if confirmation is required.';
 
   @override
+  String get webAuthLandingBody =>
+      'This page is only for confirming your email or resetting your password. Open the latest link in your email to continue.';
+
+  @override
+  String get authEmailConfirmedTitle => 'Email confirmed';
+
+  @override
+  String get authEmailConfirmedBody =>
+      'Your email has been confirmed. Return to the MuseMend app to continue.';
+
+  @override
+  String get authLinkInvalidTitle => 'This link is invalid or has expired';
+
+  @override
+  String get authLinkInvalidBody =>
+      'Open the latest link in your email or request a new one in the MuseMend app.';
+
+  @override
   String get authMascotSemantics => 'MuseMend cloud mascot';
 
   @override
@@ -168,6 +186,52 @@ class AppLocalizationsEn extends AppLocalizations {
       'This password does not meet the security requirements.';
 
   @override
+  String get authForgotPassword => 'Forgot password?';
+
+  @override
+  String get authResetPasswordTitle => 'Reset your password';
+
+  @override
+  String get authResetPasswordSubtitle =>
+      'Enter your email to receive a password reset link.';
+
+  @override
+  String get authCreateNewPasswordSubtitle =>
+      'Choose a new password for your MuseMend account.';
+
+  @override
+  String get authSendResetLink => 'Send reset link';
+
+  @override
+  String get authResetLinkSent => 'The link is on its way. Check your email.';
+
+  @override
+  String get authBackToSignIn => 'Back to sign in';
+
+  @override
+  String get authNewPassword => 'New password';
+
+  @override
+  String get authConfirmPassword => 'Confirm password';
+
+  @override
+  String get authPasswordMismatch => 'The passwords do not match.';
+
+  @override
+  String get authPasswordResetSuccess =>
+      'Your password has been changed. Sign in again.';
+
+  @override
+  String get authPasswordResetSuccessTitle => 'Password changed';
+
+  @override
+  String get authPasswordResetFailed =>
+      'Could not reset your password. Please try again.';
+
+  @override
+  String get authUpdatePassword => 'Update password';
+
+  @override
   String get onboardingBackToSignIn => 'Back to sign in';
 
   @override
@@ -187,6 +251,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get onboardingWelcomeHeadline =>
       'A place to listen to yourself,\nwith a little more gentleness.';
+
+  @override
+  String get onboardingWelcomeBody =>
+      'Begin by noticing how you feel, writing what is on your mind, and caring for yourself one step at a time.';
 
   @override
   String get onboardingEmotionTitle => 'Name what you feel';

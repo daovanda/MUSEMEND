@@ -1,12 +1,13 @@
 # Authentication client
 
 **Trạng thái:** `in-progress`
-**Cập nhật:** 2026-09-15
+**Cập nhật:** 2026-09-19
 
 ## Mục tiêu và phạm vi
 
-Lát cắt P0.1 hỗ trợ đăng ký, đăng nhập email/mật khẩu, khôi phục session qua SDK
-và đăng xuất. Profile/settings bootstrap phía DB vẫn là nguồn sự thật.
+Lát cắt P0.1 hỗ trợ đăng ký, đăng nhập email/mật khẩu, khôi phục session qua SDK,
+đăng xuất và khôi phục mật khẩu qua email. Profile/settings bootstrap phía DB vẫn
+là nguồn sự thật.
 
 ## Luồng và trách nhiệm
 
@@ -42,9 +43,61 @@ chu kỳ 18 giây và đường cong `easeInOutSine`. Ảnh nền được phón
 chuyển động không lộ mép. Đây chỉ là motion trang trí; controller tự dừng khi
 `MediaQuery.disableAnimations` bật và nội dung form hoàn toàn không chuyển vị trí.
 
-Đăng ký gửi duy nhất metadata `display_name`; trigger DB tạo profile/settings và
-travel progress. Tên này được điền sẵn trong onboarding, nhưng người dùng có thể
-đổi hoặc bỏ qua. UI không gửi `user_id`, role hoặc quyền.
+Đăng ký gửi metadata `display_name` và `language_code`; trigger DB tạo
+profile/settings và travel progress. Mã ngôn ngữ được lưu trong Auth metadata để
+template email tùy biến có thể chọn đúng ngôn ngữ trước khi profile/settings
+được tải. Tên này được điền sẵn trong onboarding, nhưng người dùng có thể đổi
+hoặc bỏ qua. UI không gửi `user_id`, role hoặc quyền.
+
+Khi người dùng đổi ngôn ngữ trong Hồ sơ, app cập nhật `language_code` trong Auth
+metadata theo locale hiệu dụng (ngôn ngữ chọn tay hoặc locale thiết bị). Lỗi cập
+nhật metadata không chặn việc lưu hồ sơ/cài đặt vì đây chỉ là dữ liệu
+personalization cho email.
+
+### Web callback portal
+
+Trên Flutter Web, router chỉ mở landing trung tính, `/email-confirmed` và
+`/reset-password`. Trang web không phải bản web của app: các route sign-in,
+onboarding và nghiệp vụ không render giao diện ứng dụng. Android/iOS giữ nguyên
+flow đăng nhập và onboarding native. Đăng ký truyền
+`emailRedirectTo=https://musemend-app.vercel.app/email-confirmed`; recovery từ
+bất kỳ nền tảng nào dùng web `/reset-password`. Trang xác nhận chỉ hiển thị
+thành công sau khi callback hợp lệ khôi phục session; nếu link sai/hết hạn thì
+hiện hướng dẫn mở link mới. Root chỉ hướng dẫn mở email, không giả làm trang xác
+nhận thành công.
+
+### Khôi phục mật khẩu
+
+Từ màn đăng nhập, người dùng chuyển sang form chỉ yêu cầu email. App gọi
+`AuthRepository.requestPasswordReset`, adapter dùng
+`supabase.auth.resetPasswordForEmail` và hiển thị thông báo thành công chung để
+không tiết lộ email có tồn tại hay không. Liên kết trong email luôn trỏ tới URL
+web production cố định `https://musemend-app.vercel.app/reset-password`, kể cả
+khi người dùng yêu cầu email từ app di động hoặc bản Flutter Web local. Flutter
+Web dùng `PathUrlStrategy`; Vercel rewrite callback route về app shell để giữ
+pathname riêng và session callback của Supabase. Trên web, form chỉ hiện khi có
+session hợp lệ từ link recovery; mở URL trống sẽ hiện trạng thái link không hợp
+lệ, không hiển thị form có thể submit vô ích.
+
+Màn đặt lại yêu cầu mật khẩu mới và nhập lại mật khẩu, sau đó gọi
+`supabase.auth.updateUser`. Đây là lần ghi mật khẩu thật lên Supabase Auth, không
+chỉ đổi trạng thái giao diện. Khi thành công app đăng xuất phiên recovery và
+đưa người dùng về đăng nhập với thông báo đã đổi mật khẩu. Link recovery dùng
+`{{ .ConfirmationURL }}` do Supabase tạo: token riêng cho yêu cầu, dùng một lần;
+Email OTP Expiration đặt 3600 giây (1 giờ).
+
+Email xác nhận đăng ký có template riêng, cũng dùng `{{ .ConfirmationURL }}` và
+chọn nội dung theo `language_code`; callback hợp lệ mở trang web báo xác nhận
+thành công và hướng người dùng quay lại app. Hai HTML source được giữ trong
+`supabase/templates/confirm-sign-up.html` và
+`supabase/templates/reset-password.html`; nội dung được đồng bộ thủ công với
+Supabase Dashboard hosted.
+
+Supabase Auth phải allow-list URL production `/email-confirmed` và
+`/reset-password`. Không cần allow-list từng origin local cho luồng email vì
+liên kết luôn trỏ tới domain public. Không lưu token vào DB, log
+hoặc repository. Email recovery và confirmation không được đi qua click tracking
+có thể viết lại/xử lý trước token.
 
 ## Validation và lỗi
 
@@ -72,14 +125,18 @@ Luồng khôi phục phiên bị thu hồi không chờ server revoke; kiểm th
 bao gồm trường hợp xoá tài khoản, đăng ký lại cùng email và đăng nhập trên thiết bị
 còn token cũ.
 Android QA đã xác nhận đăng nhập, session restore và sign-out. Database integration
-kiểm tra bootstrap cùng cách ly hai tài khoản. Còn phải nghiệm thu account/session
-token hết hạn cưỡng bức và luồng sign-up có email confirmation trên cấu hình thật.
+kiểm tra bootstrap cùng cách ly hai tài khoản. Widget/unit test kiểm tra việc yêu
+cầu reset dùng URL public và màn reset gọi update password rồi sign-out. Cần QA
+thực tế trên email mới để xác nhận sign-up template, callback production, link chỉ
+dùng một lần/hết hạn sau 1 giờ, đổi mật khẩu thành công rồi đăng nhập lại; không
+dùng mật khẩu người dùng thật trong automated tests.
 
 ## Tương thích, rollback và việc còn lại
 
 Không có migration trong thay đổi client này. Revert adapter/UI không làm mất dữ
-liệu Auth. Còn thiếu quên mật khẩu, xử lý account-disabled chi tiết, deep link xác
-nhận email và integration test trên Supabase Dev.
+liệu Auth. Còn thiếu xử lý account-disabled chi tiết và QA end-to-end trên email
+test; password reset không được xem là verified production cho tới khi người dùng
+hoàn tất lần QA thủ công này.
 
 ## Liên quan
 

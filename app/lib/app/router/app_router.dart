@@ -4,15 +4,41 @@ import 'package:go_router/go_router.dart';
 import 'package:musemend/app/router/mvp_shell.dart';
 import 'package:musemend/features/auth/application/auth_providers.dart';
 import 'package:musemend/features/auth/presentation/sign_in_screen.dart';
+import 'package:musemend/features/auth/presentation/email_confirmation_screen.dart';
+import 'package:musemend/features/auth/presentation/web_auth_landing_screen.dart';
 import 'package:musemend/features/checkin/presentation/reflect_screen.dart';
 import 'package:musemend/features/journals/presentation/journal_screen.dart';
 import 'package:musemend/features/library/presentation/library_screen.dart';
 import 'package:musemend/features/notifications/application/notification_providers.dart';
 import 'package:musemend/features/onboarding/application/onboarding_providers.dart';
 import 'package:musemend/features/onboarding/presentation/onboarding_screen.dart';
+import 'package:musemend/features/auth/presentation/password_reset_screen.dart';
 import 'package:musemend/features/profile/presentation/profile_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
+  if (ref.watch(publicAuthPortalModeProvider)) {
+    final router = GoRouter(
+      initialLocation: '/',
+      errorBuilder: (context, state) => const WebAuthLandingScreen(),
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => const WebAuthLandingScreen(),
+        ),
+        GoRoute(
+          path: '/email-confirmed',
+          builder: (context, state) => const EmailConfirmationScreen(),
+        ),
+        GoRoute(
+          path: '/reset-password',
+          builder: (context, state) => const PasswordResetScreen(),
+        ),
+      ],
+    );
+    ref.onDispose(router.dispose);
+    return router;
+  }
+
   final auth = ref.watch(authSessionProvider);
   final onboarding = ref.watch(onboardingProfileProvider);
   final initialNotificationJournalId = ref.watch(
@@ -24,11 +50,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isLoading = auth.isLoading;
       final isSignedIn = auth.asData?.value != null;
       final isAuthRoute = state.matchedLocation == '/sign-in';
+      final isPasswordResetRoute = state.matchedLocation == '/reset-password';
       final isOnboardingRoute = state.matchedLocation == '/onboarding';
       final isSplash = state.matchedLocation == '/splash';
 
-      if (isLoading) return isSplash ? null : '/splash';
-      if (!isSignedIn) return isAuthRoute ? null : '/sign-in';
+      if (isLoading) {
+        return isSplash || isPasswordResetRoute ? null : '/splash';
+      }
+      if (!isSignedIn) {
+        return isAuthRoute || isPasswordResetRoute ? null : '/sign-in';
+      }
+      if (isPasswordResetRoute) return null;
       if (onboarding.isLoading) return isSplash ? null : '/splash';
       if (onboarding.hasError) {
         return isOnboardingRoute ? null : '/onboarding';
@@ -54,7 +86,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/sign-in',
-        builder: (context, state) => const SignInScreen(),
+        builder:
+            (context, state) => SignInScreen(
+              showPasswordResetSuccess:
+                  state.uri.queryParameters['reset'] == 'success',
+            ),
+      ),
+      GoRoute(
+        path: '/reset-password',
+        builder: (context, state) => const PasswordResetScreen(),
       ),
       GoRoute(
         path: '/onboarding',

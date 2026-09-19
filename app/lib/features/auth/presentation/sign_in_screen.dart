@@ -3,12 +3,23 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:musemend/app/theme/muse_colors.dart';
+import 'package:musemend/core/localization/supported_locales.dart';
 import 'package:musemend/features/auth/application/auth_providers.dart';
 import 'package:musemend/features/auth/presentation/auth_error_message.dart';
 import 'package:musemend/l10n/generated/app_localizations.dart';
 
+const publicWebAuthOrigin = 'https://musemend-app.vercel.app';
+
+String passwordResetRedirectUri() {
+  return '$publicWebAuthOrigin/reset-password';
+}
+
+String emailConfirmationRedirectUri() => '$publicWebAuthOrigin/email-confirmed';
+
 class SignInScreen extends ConsumerStatefulWidget {
-  const SignInScreen({super.key});
+  const SignInScreen({super.key, this.showPasswordResetSuccess = false});
+
+  final bool showPasswordResetSuccess;
 
   @override
   ConsumerState<SignInScreen> createState() => _SignInScreenState();
@@ -20,7 +31,26 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   var _isSignUp = false;
+  var _isResettingPassword = false;
+  var _passwordResetSent = false;
   var _obscurePassword = true;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.showPasswordResetSuccess) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context).authPasswordResetSuccess,
+            ),
+          ),
+        );
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -33,12 +63,26 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     final controller = ref.read(authControllerProvider.notifier);
+    if (_isResettingPassword) {
+      final succeeded = await controller.requestPasswordReset(
+        email: _emailController.text,
+        redirectTo: passwordResetRedirectUri(),
+      );
+      if (!mounted || !succeeded) return;
+      setState(() => _passwordResetSent = true);
+      return;
+    }
+    final languageCode = resolveSupportedLanguageCode(
+      Localizations.localeOf(context).languageCode,
+    );
     final succeeded =
         _isSignUp
             ? await controller.signUp(
               displayName: _displayNameController.text,
               email: _emailController.text,
               password: _passwordController.text,
+              languageCode: languageCode,
+              emailRedirectTo: emailConfirmationRedirectUri(),
             )
             : await controller.signIn(
               email: _emailController.text,
@@ -53,7 +97,29 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
   void _toggleMode() {
     FocusManager.instance.primaryFocus?.unfocus();
-    setState(() => _isSignUp = !_isSignUp);
+    setState(() {
+      _isSignUp = !_isSignUp;
+      _isResettingPassword = false;
+      _passwordResetSent = false;
+    });
+  }
+
+  void _showPasswordReset() {
+    FocusManager.instance.primaryFocus?.unfocus();
+    setState(() {
+      _isSignUp = false;
+      _isResettingPassword = true;
+      _passwordResetSent = false;
+    });
+  }
+
+  void _backToSignIn() {
+    FocusManager.instance.primaryFocus?.unfocus();
+    setState(() {
+      _isSignUp = false;
+      _isResettingPassword = false;
+      _passwordResetSent = false;
+    });
   }
 
   @override
@@ -96,6 +162,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                                       child: _AuthCard(
                                         formKey: _formKey,
                                         isSignUp: _isSignUp,
+                                        isResettingPassword:
+                                            _isResettingPassword,
+                                        passwordResetSent: _passwordResetSent,
                                         obscurePassword: _obscurePassword,
                                         operation: operation,
                                         displayNameController:
@@ -104,6 +173,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                                         passwordController: _passwordController,
                                         onSubmit: _submit,
                                         onToggleMode: _toggleMode,
+                                        onForgotPassword: _showPasswordReset,
+                                        onBackToSignIn: _backToSignIn,
                                         onTogglePassword:
                                             () => setState(
                                               () =>
@@ -126,6 +197,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                                       child: _AuthCard(
                                         formKey: _formKey,
                                         isSignUp: _isSignUp,
+                                        isResettingPassword:
+                                            _isResettingPassword,
+                                        passwordResetSent: _passwordResetSent,
                                         obscurePassword: _obscurePassword,
                                         operation: operation,
                                         displayNameController:
@@ -134,6 +208,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                                         passwordController: _passwordController,
                                         onSubmit: _submit,
                                         onToggleMode: _toggleMode,
+                                        onForgotPassword: _showPasswordReset,
+                                        onBackToSignIn: _backToSignIn,
                                         onTogglePassword:
                                             () => setState(
                                               () =>
@@ -391,6 +467,8 @@ class _AuthCard extends StatelessWidget {
   const _AuthCard({
     required this.formKey,
     required this.isSignUp,
+    required this.isResettingPassword,
+    required this.passwordResetSent,
     required this.obscurePassword,
     required this.operation,
     required this.displayNameController,
@@ -398,11 +476,15 @@ class _AuthCard extends StatelessWidget {
     required this.passwordController,
     required this.onSubmit,
     required this.onToggleMode,
+    required this.onForgotPassword,
+    required this.onBackToSignIn,
     required this.onTogglePassword,
   });
 
   final GlobalKey<FormState> formKey;
   final bool isSignUp;
+  final bool isResettingPassword;
+  final bool passwordResetSent;
   final bool obscurePassword;
   final AsyncValue<void> operation;
   final TextEditingController displayNameController;
@@ -410,6 +492,8 @@ class _AuthCard extends StatelessWidget {
   final TextEditingController passwordController;
   final VoidCallback onSubmit;
   final VoidCallback onToggleMode;
+  final VoidCallback onForgotPassword;
+  final VoidCallback onBackToSignIn;
   final VoidCallback onTogglePassword;
 
   @override
@@ -473,10 +557,12 @@ class _AuthCard extends StatelessWidget {
                   switchInCurve: Curves.easeOutCubic,
                   switchOutCurve: Curves.easeInCubic,
                   child: Column(
-                    key: ValueKey(isSignUp),
+                    key: ValueKey((isSignUp, isResettingPassword)),
                     children: [
                       Text(
-                        isSignUp
+                        isResettingPassword
+                            ? strings.authResetPasswordTitle
+                            : isSignUp
                             ? strings.authSignUpTitle
                             : strings.authSignInTitle,
                         textAlign: TextAlign.center,
@@ -489,7 +575,9 @@ class _AuthCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 7),
                       Text(
-                        isSignUp
+                        isResettingPassword
+                            ? strings.authResetPasswordSubtitle
+                            : isSignUp
                             ? strings.authSignUpSubtitle
                             : strings.authSignInSubtitle,
                         textAlign: TextAlign.center,
@@ -545,10 +633,17 @@ class _AuthCard extends StatelessWidget {
                       TextFormField(
                         controller: emailController,
                         keyboardType: TextInputType.emailAddress,
-                        textInputAction: TextInputAction.next,
+                        textInputAction:
+                            isResettingPassword
+                                ? TextInputAction.done
+                                : TextInputAction.next,
                         autofillHints: const [AutofillHints.email],
                         autocorrect: false,
                         style: const TextStyle(color: MuseColors.ink),
+                        onFieldSubmitted:
+                            isResettingPassword
+                                ? (_) => operation.isLoading ? null : onSubmit()
+                                : null,
                         decoration: InputDecoration(
                           labelText: strings.email,
                           prefixIcon: const Icon(Icons.alternate_email_rounded),
@@ -563,44 +658,71 @@ class _AuthCard extends StatelessWidget {
                           return null;
                         },
                       ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: passwordController,
-                        obscureText: obscurePassword,
-                        textInputAction: TextInputAction.done,
-                        autofillHints: [
-                          isSignUp
-                              ? AutofillHints.newPassword
-                              : AutofillHints.password,
-                        ],
-                        autocorrect: false,
-                        enableSuggestions: false,
-                        style: const TextStyle(color: MuseColors.ink),
-                        onFieldSubmitted:
-                            (_) => operation.isLoading ? null : onSubmit(),
-                        decoration: InputDecoration(
-                          labelText: strings.password,
-                          prefixIcon: const Icon(Icons.lock_outline_rounded),
-                          suffixIcon: IconButton(
-                            tooltip:
+                      if (!isResettingPassword) ...[
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: passwordController,
+                          obscureText: obscurePassword,
+                          textInputAction: TextInputAction.done,
+                          autofillHints: [
+                            isSignUp
+                                ? AutofillHints.newPassword
+                                : AutofillHints.password,
+                          ],
+                          autocorrect: false,
+                          enableSuggestions: false,
+                          style: const TextStyle(color: MuseColors.ink),
+                          onFieldSubmitted:
+                              (_) => operation.isLoading ? null : onSubmit(),
+                          decoration: InputDecoration(
+                            labelText: strings.password,
+                            prefixIcon: const Icon(Icons.lock_outline_rounded),
+                            suffixIcon: IconButton(
+                              tooltip:
+                                  obscurePassword
+                                      ? strings.authShowPassword
+                                      : strings.authHidePassword,
+                              onPressed: onTogglePassword,
+                              icon: Icon(
                                 obscurePassword
-                                    ? strings.authShowPassword
-                                    : strings.authHidePassword,
-                            onPressed: onTogglePassword,
-                            icon: Icon(
-                              obscurePassword
-                                  ? Icons.visibility_outlined
-                                  : Icons.visibility_off_outlined,
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                              ),
                             ),
                           ),
+                          validator: (value) {
+                            if ((value?.length ?? 0) < 8) {
+                              return strings.authPasswordMinLength;
+                            }
+                            return null;
+                          },
                         ),
-                        validator: (value) {
-                          if ((value?.length ?? 0) < 8) {
-                            return strings.authPasswordMinLength;
-                          }
-                          return null;
-                        },
-                      ),
+                        if (!isSignUp) ...[
+                          const SizedBox(height: 2),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed:
+                                  operation.isLoading ? null : onForgotPassword,
+                              child: Text(strings.authForgotPassword),
+                            ),
+                          ),
+                        ],
+                      ],
+                      if (passwordResetSent) ...[
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: MuseColors.mint.withValues(alpha: .32),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Text(
+                            strings.authResetLinkSent,
+                            style: const TextStyle(color: MuseColors.ink),
+                          ),
+                        ),
+                      ],
                       if (operation.hasError) ...[
                         const SizedBox(height: 12),
                         Container(
@@ -639,7 +761,9 @@ class _AuthCard extends StatelessWidget {
                                   ),
                                 )
                                 : Text(
-                                  isSignUp
+                                  isResettingPassword
+                                      ? strings.authSendResetLink
+                                      : isSignUp
                                       ? strings.authCreateAccount
                                       : strings.authSignIn,
                                   style: const TextStyle(
@@ -656,9 +780,16 @@ class _AuthCard extends StatelessWidget {
                     foregroundColor: MuseColors.teal,
                     minimumSize: const Size.fromHeight(48),
                   ),
-                  onPressed: operation.isLoading ? null : onToggleMode,
+                  onPressed:
+                      operation.isLoading
+                          ? null
+                          : isResettingPassword
+                          ? onBackToSignIn
+                          : onToggleMode,
                   child: Text(
-                    isSignUp
+                    isResettingPassword
+                        ? strings.authBackToSignIn
+                        : isSignUp
                         ? strings.authSwitchToSignIn
                         : strings.authSwitchToSignUp,
                     textAlign: TextAlign.center,

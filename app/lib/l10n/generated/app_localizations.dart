@@ -286,6 +286,36 @@ abstract class AppLocalizations {
   /// **'Your account has been created. Please check your email if confirmation is required.'**
   String get authAccountCreated;
 
+  /// No description provided for @webAuthLandingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This page is only for confirming your email or resetting your password. Open the latest link in your email to continue.'**
+  String get webAuthLandingBody;
+
+  /// No description provided for @authEmailConfirmedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Email confirmed'**
+  String get authEmailConfirmedTitle;
+
+  /// No description provided for @authEmailConfirmedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your email has been confirmed. Return to the MuseMend app to continue.'**
+  String get authEmailConfirmedBody;
+
+  /// No description provided for @authLinkInvalidTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This link is invalid or has expired'**
+  String get authLinkInvalidTitle;
+
+  /// No description provided for @authLinkInvalidBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the latest link in your email or request a new one in the MuseMend app.'**
+  String get authLinkInvalidBody;
+
   /// No description provided for @authMascotSemantics.
   ///
   /// In en, this message translates to:
@@ -412,6 +442,90 @@ abstract class AppLocalizations {
   /// **'This password does not meet the security requirements.'**
   String get authWeakPassword;
 
+  /// No description provided for @authForgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get authForgotPassword;
+
+  /// No description provided for @authResetPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset your password'**
+  String get authResetPasswordTitle;
+
+  /// No description provided for @authResetPasswordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email to receive a password reset link.'**
+  String get authResetPasswordSubtitle;
+
+  /// No description provided for @authCreateNewPasswordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a new password for your MuseMend account.'**
+  String get authCreateNewPasswordSubtitle;
+
+  /// No description provided for @authSendResetLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Send reset link'**
+  String get authSendResetLink;
+
+  /// No description provided for @authResetLinkSent.
+  ///
+  /// In en, this message translates to:
+  /// **'The link is on its way. Check your email.'**
+  String get authResetLinkSent;
+
+  /// No description provided for @authBackToSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to sign in'**
+  String get authBackToSignIn;
+
+  /// No description provided for @authNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get authNewPassword;
+
+  /// No description provided for @authConfirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password'**
+  String get authConfirmPassword;
+
+  /// No description provided for @authPasswordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The passwords do not match.'**
+  String get authPasswordMismatch;
+
+  /// No description provided for @authPasswordResetSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Your password has been changed. Sign in again.'**
+  String get authPasswordResetSuccess;
+
+  /// No description provided for @authPasswordResetSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Password changed'**
+  String get authPasswordResetSuccessTitle;
+
+  /// No description provided for @authPasswordResetFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reset your password. Please try again.'**
+  String get authPasswordResetFailed;
+
+  /// No description provided for @authUpdatePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Update password'**
+  String get authUpdatePassword;
+
   /// No description provided for @onboardingBackToSignIn.
   ///
   /// In en, this message translates to:
@@ -447,6 +561,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A place to listen to yourself,\nwith a little more gentleness.'**
   String get onboardingWelcomeHeadline;
+
+  /// No description provided for @onboardingWelcomeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Begin by noticing how you feel, writing what is on your mind, and caring for yourself one step at a time.'**
+  String get onboardingWelcomeBody;
 
   /// No description provided for @onboardingEmotionTitle.
   ///

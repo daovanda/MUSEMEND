@@ -11,6 +11,8 @@ chỉ điều phối Supabase Storage/Auth hoặc dịch vụ ngoài.
 
 - [`musemend-cleanup`](./musemend-cleanup.md): xóa vật lý object Storage và Auth
   user sau khi database đã tạo cleanup job.
+- [Auth email templates](./auth-email-templates.md): redirect production, locale
+  metadata và điều kiện cấu hình SMTP/Send Email Hook.
 
 Khi thêm function mới, tạo file `docs/be/<function-name>.md`, mô tả contract,
 authentication, quyền, retry/idempotency, timeout, logging, deploy và rollback,

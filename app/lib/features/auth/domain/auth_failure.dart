@@ -3,6 +3,7 @@ enum AuthFailureCode {
   emailAlreadyRegistered,
   emailNotConfirmed,
   weakPassword,
+  passwordResetFailed,
   unknown,
 }
 

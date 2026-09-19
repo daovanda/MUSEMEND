@@ -1,12 +1,13 @@
-# Flutter Web local QA
+# Flutter Web local QA và public callback pages
 
-**Trạng thái:** implemented
+**Trạng thái:** in-progress
 
 ## Mục đích
 
-Flutter Web được bật để kiểm tra nhanh giao diện, navigation và các luồng dữ
-liệu Supabase Development mà không phải khởi động Android Emulator. Đây là
-target QA cục bộ, không phải bản phát hành production.
+Flutter Web được bật để kiểm tra nhanh giao diện app và các luồng dữ liệu
+Supabase Development mà không phải khởi động Android Emulator. Production web
+không phải bản phát hành app: chỉ có landing trung tính, email-confirmed và
+reset-password cho callback email từ ứng dụng Android/iOS.
 
 ## Chạy local
 
@@ -27,6 +28,16 @@ thời gian QA; dừng bằng `q` hoặc `Ctrl+C`.
 - kiểm tra nhanh các tương tác chuột/pointer trước khi xác nhận trên Android.
 
 ## Giới hạn
+
+Vercel cần phục vụ `index.html` cho `/email-confirmed` và `/reset-password` theo
+cấu hình `vercel.json`. Nếu Vercel Project Root Directory là repo root, dùng
+`/vercel.json`; nếu đặt root là `app`, cấu hình tương ứng nằm tại
+`/app/vercel.json`. Cả hai file giữ cùng rewrite để không phụ thuộc cấu hình
+monorepo hiện tại. Supabase Auth allow-list phải có hai URL production.
+
+Web callback portal không cung cấp sign-in hay dữ liệu nghiệp vụ. Người dùng
+xác nhận email xong hoặc đổi mật khẩu xong sẽ quay lại ứng dụng MuseMend để
+tiếp tục.
 
 Web không thay thế Android/iOS QA. Permission native, local notification, image
 picker, back button, hiệu năng GPU và gesture cảm ứng phải được kiểm tra trên

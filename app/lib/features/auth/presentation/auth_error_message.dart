@@ -11,6 +11,7 @@ String authErrorMessage(AppLocalizations strings, Object error) {
       strings.authEmailAlreadyRegistered,
     AuthFailureCode.emailNotConfirmed => strings.authEmailNotConfirmed,
     AuthFailureCode.weakPassword => strings.authWeakPassword,
+    AuthFailureCode.passwordResetFailed => strings.authPasswordResetFailed,
     AuthFailureCode.unknown => strings.authNetworkError,
   };
 }

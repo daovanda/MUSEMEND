@@ -69,15 +69,58 @@ class SupabaseAuthRepository implements AuthRepository {
     required String displayName,
     required String email,
     required String password,
+    required String languageCode,
+    required String emailRedirectTo,
   }) async {
     try {
       await _client.auth.signUp(
         email: email.trim(),
         password: password,
-        data: {'display_name': displayName.trim()},
+        emailRedirectTo: emailRedirectTo,
+        data: {
+          'display_name': displayName.trim(),
+          // Auth email templates can use .Data.language_code to render the
+          // confirmation/recovery copy in the user's current language.
+          'language_code': languageCode,
+        },
       );
     } on AuthException catch (error) {
       throw _mapFailure(error);
+    }
+  }
+
+  @override
+  Future<void> requestPasswordReset({
+    required String email,
+    required String redirectTo,
+  }) async {
+    try {
+      await _client.auth.resetPasswordForEmail(
+        email.trim(),
+        redirectTo: redirectTo,
+      );
+    } on AuthException catch (_) {
+      throw AuthFailure(AuthFailureCode.passwordResetFailed);
+    }
+  }
+
+  @override
+  Future<void> updatePassword({required String password}) async {
+    try {
+      await _client.auth.updateUser(UserAttributes(password: password));
+    } on AuthException catch (_) {
+      throw AuthFailure(AuthFailureCode.passwordResetFailed);
+    }
+  }
+
+  @override
+  Future<void> updateLanguageCode({required String languageCode}) async {
+    try {
+      await _client.auth.updateUser(
+        UserAttributes(data: {'language_code': languageCode}),
+      );
+    } catch (_) {
+      // Email language metadata is helpful personalization, not an auth gate.
     }
   }
 

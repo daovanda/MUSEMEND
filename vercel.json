@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    { "source": "/email-confirmed", "destination": "/index.html" },
+    { "source": "/email-confirmed/", "destination": "/index.html" },
+    { "source": "/reset-password", "destination": "/index.html" },
+    { "source": "/reset-password/", "destination": "/index.html" }
+  ]
+}

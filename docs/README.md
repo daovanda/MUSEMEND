@@ -11,8 +11,10 @@ phải ghi rõ xung đột, thống nhất quyết định, rồi cập nhật t
 
 ## 1. Mục tiêu kiến trúc MVP
 
-MuseMend là ứng dụng Flutter chạy trên Android/iOS; Flutter Web được bật như
-target QA local cho giao diện. Backend MVP sử dụng Supabase:
+MuseMend là ứng dụng Flutter chạy trên Android/iOS. Bản Flutter Web public chỉ
+cung cấp callback email xác nhận và đặt lại mật khẩu; không thay thế giao diện
+đăng nhập, onboarding hay các màn nghiệp vụ của ứng dụng. Flutter Web vẫn được
+dùng làm target QA local cho các màn hình app. Backend MVP sử dụng Supabase:
 
 - Supabase Auth cho danh tính và phiên đăng nhập.
 - PostgreSQL cho dữ liệu nghiệp vụ.

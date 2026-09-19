@@ -96,6 +96,24 @@ class AppLocalizationsFr extends AppLocalizations {
       'Votre compte a été créé. Consultez vos e-mails si une confirmation est nécessaire.';
 
   @override
+  String get webAuthLandingBody =>
+      'Cette page sert uniquement à confirmer votre adresse e-mail ou à réinitialiser votre mot de passe. Ouvrez le lien le plus récent reçu par e-mail pour continuer.';
+
+  @override
+  String get authEmailConfirmedTitle => 'Adresse e-mail confirmée';
+
+  @override
+  String get authEmailConfirmedBody =>
+      'Votre adresse e-mail a bien été confirmée. Retournez dans l’application MuseMend pour continuer.';
+
+  @override
+  String get authLinkInvalidTitle => 'Ce lien est invalide ou a expiré';
+
+  @override
+  String get authLinkInvalidBody =>
+      'Ouvrez le lien le plus récent reçu par e-mail ou demandez-en un nouveau dans l’application MuseMend.';
+
+  @override
   String get authMascotSemantics => 'Mascotte nuage de MuseMend';
 
   @override
@@ -170,6 +188,53 @@ class AppLocalizationsFr extends AppLocalizations {
       'Ce mot de passe ne respecte pas les exigences de sécurité.';
 
   @override
+  String get authForgotPassword => 'Mot de passe oublié ?';
+
+  @override
+  String get authResetPasswordTitle => 'Réinitialiser le mot de passe';
+
+  @override
+  String get authResetPasswordSubtitle =>
+      'Saisissez votre e-mail pour recevoir un lien de réinitialisation.';
+
+  @override
+  String get authCreateNewPasswordSubtitle =>
+      'Choisissez un nouveau mot de passe pour votre compte MuseMend.';
+
+  @override
+  String get authSendResetLink => 'Envoyer le lien';
+
+  @override
+  String get authResetLinkSent =>
+      'Le lien a été envoyé. Consultez votre e-mail.';
+
+  @override
+  String get authBackToSignIn => 'Retour à la connexion';
+
+  @override
+  String get authNewPassword => 'Nouveau mot de passe';
+
+  @override
+  String get authConfirmPassword => 'Confirmer le mot de passe';
+
+  @override
+  String get authPasswordMismatch => 'Les mots de passe ne correspondent pas.';
+
+  @override
+  String get authPasswordResetSuccess =>
+      'Votre mot de passe a été modifié. Reconnectez-vous.';
+
+  @override
+  String get authPasswordResetSuccessTitle => 'Mot de passe modifié';
+
+  @override
+  String get authPasswordResetFailed =>
+      'Impossible de réinitialiser le mot de passe. Réessayez.';
+
+  @override
+  String get authUpdatePassword => 'Modifier le mot de passe';
+
+  @override
   String get onboardingBackToSignIn => 'Retour à la connexion';
 
   @override
@@ -189,6 +254,10 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get onboardingWelcomeHeadline =>
       'Un espace pour vous écouter,\navec un peu plus de douceur.';
+
+  @override
+  String get onboardingWelcomeBody =>
+      'Commencez par accueillir vos émotions, écrire vos pensées et prendre soin de vous, un petit pas à la fois.';
 
   @override
   String get onboardingEmotionTitle => 'Nommer vos émotions';
