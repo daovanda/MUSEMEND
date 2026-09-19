@@ -8,6 +8,7 @@ import 'package:musemend/features/onboarding/application/onboarding_providers.da
 import 'package:musemend/features/onboarding/domain/onboarding_profile.dart';
 import 'package:musemend/features/onboarding/domain/onboarding_repository.dart';
 import 'package:musemend/features/onboarding/presentation/onboarding_screen.dart';
+import 'package:musemend/core/presentation/muse_ui.dart';
 import 'package:musemend/l10n/generated/app_localizations.dart';
 
 void main() {
@@ -47,6 +48,12 @@ void main() {
     expect(find.text('Gọi tên cảm xúc'), findsOneWidget);
     expect(find.text('Viết cho riêng mình'), findsOneWidget);
     expect(find.text('Chăm sóc bằng bước nhỏ'), findsOneWidget);
+    expect(
+      find.text(
+        'Bắt đầu bằng việc nhận ra cảm xúc, viết xuống tâm tư và chăm sóc mình từng chút một.',
+      ),
+      findsOneWidget,
+    );
 
     await tester.tap(find.text('Tiếp tục'));
     await _pumpUi(tester);
@@ -59,14 +66,15 @@ void main() {
     await _pumpUi(tester);
     expect(find.text('Mây nên gọi bạn là gì?'), findsOneWidget);
     expect(find.text('Tên đăng ký'), findsOneWidget);
+    expect(find.text('Tên bạn muốn hiển thị'), findsOneWidget);
+    expect(find.text('CÁCH XƯNG HÔ'), findsNothing);
 
     await tester.enterText(find.byType(TextField), 'Tên trong onboarding');
-    await tester.tap(find.text('bạn / mình'));
     await tester.tap(find.text('Bắt đầu cùng Muse'));
     await _pumpUi(tester);
 
     expect(repository.savedDisplayName, 'Tên trong onboarding');
-    expect(repository.savedAddress, PreferredAddress.banMinh);
+    expect(repository.savedAddress, isNull);
   });
 
   testWidgets('skip keeps the existing display name and default address', (
@@ -179,6 +187,278 @@ void main() {
 
     expect(authRepository.didSignOut, isTrue);
   });
+
+  testWidgets(
+    'steps share card position and stay light on a compact dark device',
+    (tester) async {
+      final repository = _FakeOnboardingRepository(
+        const OnboardingProfile(
+          displayName: null,
+          preferredAddress: null,
+          completedAt: null,
+        ),
+      );
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            onboardingRepositoryProvider.overrideWithValue(repository),
+            onboardingProfileProvider.overrideWith(
+              (ref) async => repository.profile,
+            ),
+          ],
+          child: MaterialApp(
+            theme: ThemeData.dark(),
+            locale: const Locale('vi'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const OnboardingScreen(),
+          ),
+        ),
+      );
+      await _pumpUi(tester);
+      expect(
+        Theme.of(tester.element(find.text('Gọi tên cảm xúc'))).brightness,
+        Brightness.light,
+      );
+      final welcomeTop =
+          tester
+              .getTopLeft(
+                find
+                    .ancestor(
+                      of: find.text('Gọi tên cảm xúc'),
+                      matching: find.byType(MuseGlassCard),
+                    )
+                    .first,
+              )
+              .dy;
+      final welcomeSubtitleTop =
+          tester
+              .getTopLeft(
+                find.text(
+                  'Bắt đầu bằng việc nhận ra cảm xúc, viết xuống tâm tư và chăm sóc mình từng chút một.',
+                ),
+              )
+              .dy;
+      final welcomeHeadlineTop =
+          tester
+              .getTopLeft(
+                find.text(
+                  'Một nơi để bạn lắng nghe mình, theo cách nhẹ nhàng hơn.',
+                ),
+              )
+              .dy;
+      expect(tester.takeException(), isNull);
+
+      await tester.drag(find.byType(PageView), const Offset(-300, 0));
+      await _pumpUi(tester);
+      final privacyTop =
+          tester
+              .getTopLeft(
+                find
+                    .ancestor(
+                      of: find.text('Nhật ký lưu trên thiết bị'),
+                      matching: find.byType(MuseGlassCard),
+                    )
+                    .first,
+              )
+              .dy;
+      expect(privacyTop, closeTo(welcomeTop, 1));
+      expect(
+        tester
+            .getTopLeft(
+              find.text(
+                'MuseMend đang được xây dựng theo hướng riêng tư và chủ động.',
+              ),
+            )
+            .dy,
+        closeTo(welcomeSubtitleTop, 1),
+      );
+      expect(
+        tester
+            .getTopLeft(
+              find.text('Những điều riêng tư của bạn nên thuộc về bạn.'),
+            )
+            .dy,
+        closeTo(welcomeHeadlineTop, 1),
+      );
+      expect(tester.takeException(), isNull);
+
+      await tester.drag(find.byType(PageView), const Offset(-300, 0));
+      await _pumpUi(tester);
+      final nameTop =
+          tester
+              .getTopLeft(
+                find
+                    .ancestor(
+                      of: find.text('Tên bạn muốn hiển thị'),
+                      matching: find.byType(MuseGlassCard),
+                    )
+                    .first,
+              )
+              .dy;
+      expect(nameTop, closeTo(welcomeTop, 1));
+      expect(
+        tester
+            .getSize(
+              find
+                  .ancestor(
+                    of: find.text('Tên bạn muốn hiển thị'),
+                    matching: find.byType(MuseGlassCard),
+                  )
+                  .first,
+            )
+            .height,
+        closeTo(108, 1),
+      );
+      expect(
+        tester
+            .getTopLeft(
+              find.text(
+                'Bạn có thể đổi lại bất kỳ lúc nào trong trang Cá nhân.',
+              ),
+            )
+            .dy,
+        closeTo(welcomeSubtitleTop, 1),
+      );
+      expect(
+        tester.getTopLeft(find.text('Mây nên gọi bạn là gì?')).dy,
+        closeTo(welcomeHeadlineTop, 1),
+      );
+      expect(find.text('CÁCH XƯNG HÔ'), findsNothing);
+      expect(find.byType(MusePill), findsNothing);
+      expect(find.byIcon(Icons.waving_hand_outlined), findsOneWidget);
+      final greeting = find.text(
+        'Chào Bạn của Muse, rất vui được đồng hành cùng bạn!',
+      );
+      expect(greeting, findsOneWidget);
+      expect(
+        find.ancestor(of: greeting, matching: find.byType(MuseGlassCard)),
+        findsNothing,
+      );
+      expect(
+        tester.widget<Text>(greeting).style?.fontSize,
+        greaterThan(
+          Theme.of(tester.element(greeting)).textTheme.titleMedium?.fontSize ??
+              0,
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('keeps vertical anchors aligned during a partial swipe', (
+    tester,
+  ) async {
+    final repository = _FakeOnboardingRepository(
+      const OnboardingProfile(
+        displayName: null,
+        preferredAddress: null,
+        completedAt: null,
+      ),
+    );
+    tester.view.physicalSize = const Size(354, 879);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          onboardingRepositoryProvider.overrideWithValue(repository),
+          onboardingProfileProvider.overrideWith(
+            (ref) async => repository.profile,
+          ),
+        ],
+        child: const MaterialApp(
+          locale: Locale('vi'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: OnboardingScreen(),
+        ),
+      ),
+    );
+    await _pumpUi(tester);
+
+    final gesture = await tester.startGesture(const Offset(270, 420));
+    await gesture.moveBy(const Offset(-100, 0));
+    await tester.pump();
+    final welcomeCard =
+        find
+            .ancestor(
+              of: find.text('Gọi tên cảm xúc'),
+              matching: find.byType(MuseGlassCard),
+            )
+            .first;
+    final welcomeTop = tester.getTopLeft(welcomeCard).dy;
+    final welcomeHeight = tester.getSize(welcomeCard).height;
+    final privacyCard =
+        find
+            .ancestor(
+              of: find.text('Nhật ký lưu trên thiết bị'),
+              matching: find.byType(MuseGlassCard),
+            )
+            .first;
+    final privacyTop = tester.getTopLeft(privacyCard).dy;
+    expect(privacyTop, closeTo(welcomeTop, 1));
+    expect(tester.getSize(privacyCard).height, closeTo(welcomeHeight, 1));
+    final spaceBetweenCards =
+        tester.getTopLeft(privacyCard).dx - tester.getTopRight(welcomeCard).dx;
+    expect(spaceBetweenCards, greaterThanOrEqualTo(15));
+    await gesture.up();
+    await _pumpUi(tester);
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final locale in AppLocalizations.supportedLocales) {
+    testWidgets('all onboarding steps fit 360x800 in ${locale.languageCode}', (
+      tester,
+    ) async {
+      final repository = _FakeOnboardingRepository(
+        const OnboardingProfile(
+          displayName: null,
+          preferredAddress: null,
+          completedAt: null,
+        ),
+      );
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            onboardingRepositoryProvider.overrideWithValue(repository),
+            onboardingProfileProvider.overrideWith(
+              (ref) async => repository.profile,
+            ),
+          ],
+          child: MaterialApp(
+            locale: locale,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const OnboardingScreen(),
+          ),
+        ),
+      );
+      await _pumpUi(tester);
+      expect(tester.takeException(), isNull);
+      for (var step = 1; step < 3; step++) {
+        await tester.drag(find.byType(PageView), const Offset(-300, 0));
+        await _pumpUi(tester);
+        expect(
+          tester.takeException(),
+          isNull,
+          reason: 'step $step in ${locale.languageCode}',
+        );
+      }
+    });
+  }
 }
 
 Future<void> _pumpUi(WidgetTester tester) async {
@@ -231,7 +511,21 @@ class _FakeAuthRepository implements AuthRepository {
     required String displayName,
     required String email,
     required String password,
+    required String languageCode,
+    required String emailRedirectTo,
   }) async {}
+
+  @override
+  Future<void> requestPasswordReset({
+    required String email,
+    required String redirectTo,
+  }) async {}
+
+  @override
+  Future<void> updatePassword({required String password}) async {}
+
+  @override
+  Future<void> updateLanguageCode({required String languageCode}) async {}
 
   @override
   Stream<AuthSession?> watchSession() => Stream.value(null);

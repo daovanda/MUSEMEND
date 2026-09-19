@@ -96,6 +96,24 @@ class AppLocalizationsDe extends AppLocalizations {
       'Dein Konto wurde erstellt. Prüfe bitte deine E-Mails, falls eine Bestätigung erforderlich ist.';
 
   @override
+  String get webAuthLandingBody =>
+      'Diese Seite dient nur zur E-Mail-Bestätigung und zum Zurücksetzen des Passworts. Öffne den neuesten Link in deiner E-Mail, um fortzufahren.';
+
+  @override
+  String get authEmailConfirmedTitle => 'E-Mail bestätigt';
+
+  @override
+  String get authEmailConfirmedBody =>
+      'Deine E-Mail wurde bestätigt. Kehre zur MuseMend-App zurück, um fortzufahren.';
+
+  @override
+  String get authLinkInvalidTitle => 'Der Link ist ungültig oder abgelaufen';
+
+  @override
+  String get authLinkInvalidBody =>
+      'Öffne den neuesten Link in deiner E-Mail oder fordere in der MuseMend-App einen neuen an.';
+
+  @override
   String get authMascotSemantics => 'MuseMend-Wolkenmaskottchen';
 
   @override
@@ -170,6 +188,53 @@ class AppLocalizationsDe extends AppLocalizations {
       'Dieses Passwort erfüllt die Sicherheitsanforderungen nicht.';
 
   @override
+  String get authForgotPassword => 'Passwort vergessen?';
+
+  @override
+  String get authResetPasswordTitle => 'Passwort zurücksetzen';
+
+  @override
+  String get authResetPasswordSubtitle =>
+      'Gib deine E-Mail-Adresse ein, um einen Link zum Zurücksetzen zu erhalten.';
+
+  @override
+  String get authCreateNewPasswordSubtitle =>
+      'Lege ein neues Passwort für dein MuseMend-Konto fest.';
+
+  @override
+  String get authSendResetLink => 'Link zum Zurücksetzen senden';
+
+  @override
+  String get authResetLinkSent =>
+      'Der Link wurde gesendet. Prüfe deine E-Mails.';
+
+  @override
+  String get authBackToSignIn => 'Zurück zur Anmeldung';
+
+  @override
+  String get authNewPassword => 'Neues Passwort';
+
+  @override
+  String get authConfirmPassword => 'Passwort bestätigen';
+
+  @override
+  String get authPasswordMismatch => 'Die Passwörter stimmen nicht überein.';
+
+  @override
+  String get authPasswordResetSuccess =>
+      'Dein Passwort wurde geändert. Melde dich erneut an.';
+
+  @override
+  String get authPasswordResetSuccessTitle => 'Passwort erfolgreich geändert';
+
+  @override
+  String get authPasswordResetFailed =>
+      'Das Passwort konnte nicht zurückgesetzt werden. Bitte versuche es erneut.';
+
+  @override
+  String get authUpdatePassword => 'Passwort ändern';
+
+  @override
   String get onboardingBackToSignIn => 'Zurück zur Anmeldung';
 
   @override
@@ -189,6 +254,10 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get onboardingWelcomeHeadline =>
       'Ein Ort, an dem du dir selbst zuhörst –\nmit etwas mehr Sanftheit.';
+
+  @override
+  String get onboardingWelcomeBody =>
+      'Nimm wahr, wie du dich fühlst, halte deine Gedanken fest und sorge Schritt für Schritt für dich.';
 
   @override
   String get onboardingEmotionTitle => 'Gefühle benennen';

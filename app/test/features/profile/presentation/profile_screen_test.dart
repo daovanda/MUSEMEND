@@ -136,7 +136,21 @@ class _FakeAuthRepository implements AuthRepository {
     required String displayName,
     required String email,
     required String password,
+    required String languageCode,
+    required String emailRedirectTo,
   }) async {}
+
+  @override
+  Future<void> requestPasswordReset({
+    required String email,
+    required String redirectTo,
+  }) async {}
+
+  @override
+  Future<void> updatePassword({required String password}) async {}
+
+  @override
+  Future<void> updateLanguageCode({required String languageCode}) async {}
 
   @override
   Stream<AuthSession?> watchSession() => Stream.value(session);

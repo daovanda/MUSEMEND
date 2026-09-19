@@ -95,6 +95,25 @@ class AppLocalizationsMs extends AppLocalizations {
       'Akaun anda telah dicipta. Semak e-mel jika pengesahan diperlukan.';
 
   @override
+  String get webAuthLandingBody =>
+      'Halaman ini hanya untuk mengesahkan e-mel atau menetapkan semula kata laluan. Buka pautan terkini dalam e-mel anda untuk meneruskan.';
+
+  @override
+  String get authEmailConfirmedTitle => 'E-mel disahkan';
+
+  @override
+  String get authEmailConfirmedBody =>
+      'E-mel anda telah disahkan. Kembali ke aplikasi MuseMend untuk meneruskan.';
+
+  @override
+  String get authLinkInvalidTitle =>
+      'Pautan ini tidak sah atau telah tamat tempoh';
+
+  @override
+  String get authLinkInvalidBody =>
+      'Buka pautan terkini dalam e-mel atau minta pautan baharu dalam aplikasi MuseMend.';
+
+  @override
   String get authMascotSemantics => 'Maskot awan MuseMend';
 
   @override
@@ -165,6 +184,52 @@ class AppLocalizationsMs extends AppLocalizations {
       'Kata laluan ini tidak memenuhi keperluan keselamatan.';
 
   @override
+  String get authForgotPassword => 'Lupa kata laluan?';
+
+  @override
+  String get authResetPasswordTitle => 'Tetapkan semula kata laluan';
+
+  @override
+  String get authResetPasswordSubtitle =>
+      'Masukkan e-mel untuk menerima pautan tetapan semula.';
+
+  @override
+  String get authCreateNewPasswordSubtitle =>
+      'Pilih kata laluan baharu untuk akaun MuseMend anda.';
+
+  @override
+  String get authSendResetLink => 'Hantar pautan';
+
+  @override
+  String get authResetLinkSent => 'Pautan telah dihantar. Semak e-mel anda.';
+
+  @override
+  String get authBackToSignIn => 'Kembali ke log masuk';
+
+  @override
+  String get authNewPassword => 'Kata laluan baharu';
+
+  @override
+  String get authConfirmPassword => 'Sahkan kata laluan';
+
+  @override
+  String get authPasswordMismatch => 'Kata laluan tidak sepadan.';
+
+  @override
+  String get authPasswordResetSuccess =>
+      'Kata laluan anda telah ditukar. Sila log masuk semula.';
+
+  @override
+  String get authPasswordResetSuccessTitle => 'Kata laluan ditukar';
+
+  @override
+  String get authPasswordResetFailed =>
+      'Kata laluan tidak dapat ditetapkan semula. Sila cuba lagi.';
+
+  @override
+  String get authUpdatePassword => 'Tukar kata laluan';
+
+  @override
   String get onboardingBackToSignIn => 'Kembali ke log masuk';
 
   @override
@@ -183,6 +248,10 @@ class AppLocalizationsMs extends AppLocalizations {
   @override
   String get onboardingWelcomeHeadline =>
       'Ruang untuk mendengar diri,\ndengan sedikit lebih lembut.';
+
+  @override
+  String get onboardingWelcomeBody =>
+      'Mulakan dengan menyedari perasaan, menulis isi hati dan menjaga diri selangkah demi selangkah.';
 
   @override
   String get onboardingEmotionTitle => 'Namakan perasaan anda';

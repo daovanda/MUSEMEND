@@ -96,6 +96,24 @@ class AppLocalizationsPt extends AppLocalizations {
       'A sua conta foi criada. Consulte o e-mail caso seja necessária confirmação.';
 
   @override
+  String get webAuthLandingBody =>
+      'Esta página serve apenas para confirmar o e-mail ou repor a palavra-passe. Abra a ligação mais recente que recebeu por e-mail para continuar.';
+
+  @override
+  String get authEmailConfirmedTitle => 'E-mail confirmado';
+
+  @override
+  String get authEmailConfirmedBody =>
+      'O seu e-mail foi confirmado. Regresse à aplicação MuseMend para continuar.';
+
+  @override
+  String get authLinkInvalidTitle => 'Esta ligação é inválida ou expirou';
+
+  @override
+  String get authLinkInvalidBody =>
+      'Abra a ligação mais recente que recebeu por e-mail ou peça uma nova na aplicação MuseMend.';
+
+  @override
   String get authMascotSemantics => 'Mascote nuvem do MuseMend';
 
   @override
@@ -169,6 +187,53 @@ class AppLocalizationsPt extends AppLocalizations {
       'Esta palavra-passe não cumpre os requisitos de segurança.';
 
   @override
+  String get authForgotPassword => 'Esqueceu-se da palavra-passe?';
+
+  @override
+  String get authResetPasswordTitle => 'Repor a palavra-passe';
+
+  @override
+  String get authResetPasswordSubtitle =>
+      'Introduza o e-mail para receber uma ligação de reposição.';
+
+  @override
+  String get authCreateNewPasswordSubtitle =>
+      'Escolha uma nova palavra-passe para a sua conta MuseMend.';
+
+  @override
+  String get authSendResetLink => 'Enviar ligação';
+
+  @override
+  String get authResetLinkSent =>
+      'A ligação foi enviada. Consulte o seu e-mail.';
+
+  @override
+  String get authBackToSignIn => 'Voltar ao início de sessão';
+
+  @override
+  String get authNewPassword => 'Nova palavra-passe';
+
+  @override
+  String get authConfirmPassword => 'Confirmar palavra-passe';
+
+  @override
+  String get authPasswordMismatch => 'As palavras-passe não coincidem.';
+
+  @override
+  String get authPasswordResetSuccess =>
+      'A palavra-passe foi alterada. Inicie sessão novamente.';
+
+  @override
+  String get authPasswordResetSuccessTitle => 'Palavra-passe alterada';
+
+  @override
+  String get authPasswordResetFailed =>
+      'Não foi possível repor a palavra-passe. Tente novamente.';
+
+  @override
+  String get authUpdatePassword => 'Alterar palavra-passe';
+
+  @override
   String get onboardingBackToSignIn => 'Voltar ao início de sessão';
 
   @override
@@ -187,6 +252,10 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get onboardingWelcomeHeadline =>
       'Um espaço para se ouvir,\ncom um pouco mais de gentileza.';
+
+  @override
+  String get onboardingWelcomeBody =>
+      'Comece por reconhecer o que sente, escrever os seus pensamentos e cuidar de si, um pequeno passo de cada vez.';
 
   @override
   String get onboardingEmotionTitle => 'Dê nome ao que sente';

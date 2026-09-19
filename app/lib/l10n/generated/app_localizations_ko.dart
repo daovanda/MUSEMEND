@@ -94,6 +94,24 @@ class AppLocalizationsKo extends AppLocalizations {
   String get authAccountCreated => '계정이 만들어졌습니다. 확인이 필요하다면 이메일을 확인해 주세요.';
 
   @override
+  String get webAuthLandingBody =>
+      '이 페이지는 이메일 확인과 비밀번호 재설정에만 사용돼요. 계속하려면 이메일로 받은 최신 링크를 열어 주세요.';
+
+  @override
+  String get authEmailConfirmedTitle => '이메일이 확인됐어요';
+
+  @override
+  String get authEmailConfirmedBody =>
+      '이메일 확인이 완료됐어요. 계속하려면 MuseMend 앱으로 돌아가 주세요.';
+
+  @override
+  String get authLinkInvalidTitle => '링크가 유효하지 않거나 만료됐어요';
+
+  @override
+  String get authLinkInvalidBody =>
+      '이메일의 최신 링크를 열거나 MuseMend 앱에서 새 링크를 요청해 주세요.';
+
+  @override
   String get authMascotSemantics => 'MuseMend 구름 마스코트';
 
   @override
@@ -157,6 +175,49 @@ class AppLocalizationsKo extends AppLocalizations {
   String get authWeakPassword => '이 비밀번호는 보안 요구 사항을 충족하지 않습니다.';
 
   @override
+  String get authForgotPassword => '비밀번호를 잊으셨나요?';
+
+  @override
+  String get authResetPasswordTitle => '비밀번호 재설정';
+
+  @override
+  String get authResetPasswordSubtitle => '이메일을 입력하면 재설정 링크를 보내 드려요.';
+
+  @override
+  String get authCreateNewPasswordSubtitle =>
+      'MuseMend 계정에 사용할 새 비밀번호를 설정해 주세요.';
+
+  @override
+  String get authSendResetLink => '링크 보내기';
+
+  @override
+  String get authResetLinkSent => '링크를 보냈어요. 이메일을 확인해 주세요.';
+
+  @override
+  String get authBackToSignIn => '로그인으로 돌아가기';
+
+  @override
+  String get authNewPassword => '새 비밀번호';
+
+  @override
+  String get authConfirmPassword => '비밀번호 확인';
+
+  @override
+  String get authPasswordMismatch => '비밀번호가 일치하지 않아요.';
+
+  @override
+  String get authPasswordResetSuccess => '비밀번호를 변경했어요. 다시 로그인해 주세요.';
+
+  @override
+  String get authPasswordResetSuccessTitle => '비밀번호를 변경했어요';
+
+  @override
+  String get authPasswordResetFailed => '비밀번호를 재설정할 수 없어요. 다시 시도해 주세요.';
+
+  @override
+  String get authUpdatePassword => '비밀번호 변경';
+
+  @override
   String get onboardingBackToSignIn => '로그인 화면으로 돌아가기';
 
   @override
@@ -173,6 +234,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get onboardingWelcomeHeadline => '조금 더 다정하게,\n내 마음의 소리를 듣는 곳.';
+
+  @override
+  String get onboardingWelcomeBody =>
+      '지금의 감정을 알아차리고 마음을 적으며, 작은 걸음부터 나를 돌봐 주세요.';
 
   @override
   String get onboardingEmotionTitle => '감정에 이름 붙이기';

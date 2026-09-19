@@ -13,6 +13,7 @@ quyết định, hệ quả và trạng thái.
 - [ADR-0001 — Kiến trúc Flutter client](./adr-0001-mvp-client-architecture.md)
 - [ADR-0002 — Bầu trời làm neo thị giác](./adr-0002-sky-led-ui-direction.md)
 - [ADR-0003 — Mô hình điểm đến toàn cầu](./adr-0003-global-destination-model.md)
+- [ADR-0004 — Web chỉ phục vụ callback Auth](./adr-0004-web-auth-callback-portal.md)
 - [CI/CD](./ci-cd.md): workflow, quality gate, deploy Dev/Production và giới hạn hiện tại.
 - [GitHub Environments](./github-environments.md): variables, secrets và production approval.
 - [Android QA Release](./android-qa-release.md): ký APK, GitHub Release và phân phối QA.
@@ -20,6 +21,7 @@ quyết định, hệ quả và trạng thái.
 - [Android QA 1.6](./release-v1-6.md): đồng bộ giao diện, responsive và nền mây chuyển động.
 - [Android QA 1.8](./release-v1-8.md): giới hạn gợi ý Muse và làm mới nội dung catalog đa ngôn ngữ.
 - [Android QA 1.8.1](./release-v1-8-1.md): đồng bộ logo mascot ở onboarding.
+- [Android QA 1.8.2](./release-v1-8-2.md): auth callback web, khôi phục mật khẩu và hoàn thiện onboarding.
 - [Nghiệm thu Android trên thiết bị thật](./android-device-qa-acceptance.md):
   checklist P0, bảo mật, lỗi mạng và biên bản PASS/FAIL.
 - [Android Internal Testing cũ](./android-internal-testing.md): phương án Google Play đã deprecated.

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <body style="margin:0;padding:32px 16px;background:#f3f8f7;font-family:Arial,Helvetica,sans-serif;color:#24344f">
+    <div style="max-width:560px;margin:auto;background:#fff;border-radius:24px;padding:32px">
+      <strong style="font-size:24px;color:#477685">MuseMend</strong>
+      <div style="height:4px;width:56px;margin:16px 0 24px;background:#9cc9b2"></div>
+      {{ if eq .Data.language_code "vi" }}
+      <h1>Chào mừng bạn đến với MuseMend</h1>
+      <p>Chỉ còn một bước nhỏ để xác nhận email và bắt đầu chăm sóc bản thân theo cách nhẹ nhàng của riêng bạn.</p>
+      <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:13px 22px;border-radius:999px;background:#477685;color:#fff;text-decoration:none;font-weight:700">Xác nhận email</a>
+      <p>Liên kết chỉ dùng một lần và hết hạn sau 1 giờ. Nếu bạn không tạo tài khoản MuseMend, hãy bỏ qua email này.</p>
+      {{ else if eq .Data.language_code "ja" }}
+      <h1>MuseMendへようこそ</h1>
+      <p>メールアドレスを確認して、自分をいたわる小さな一歩を始めましょう。</p>
+      <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:13px 22px;border-radius:999px;background:#477685;color:#fff;text-decoration:none;font-weight:700">メールアドレスを確認</a>
+      <p>リンクは1回のみ使用でき、1時間で期限切れになります。登録した覚えがない場合は無視してください。</p>
+      {{ else if eq .Data.language_code "fr" }}
+      <h1>Bienvenue sur MuseMend</h1>
+      <p>Encore un petit pas : confirmez votre adresse e-mail pour commencer à prendre soin de vous à votre rythme.</p>
+      <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:13px 22px;border-radius:999px;background:#477685;color:#fff;text-decoration:none;font-weight:700">Confirmer mon e-mail</a>
+      <p>Ce lien est à usage unique et expire dans une heure. Si vous n’avez rien demandé, ignorez cet e-mail.</p>
+      {{ else if eq .Data.language_code "es" }}
+      <h1>Te damos la bienvenida a MuseMend</h1>
+      <p>Solo falta un pequeño paso: confirma tu correo y empieza a cuidarte a tu propio ritmo.</p>
+      <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:13px 22px;border-radius:999px;background:#477685;color:#fff;text-decoration:none;font-weight:700">Confirmar mi correo</a>
+      <p>Este enlace se puede usar una vez y vence en 1 hora. Si no te registraste, ignora este correo.</p>
+      {{ else if eq .Data.language_code "it" }}
+      <h1>Benvenuto su MuseMend</h1>
+      <p>Manca solo un piccolo passo: conferma la tua email e inizia a prenderti cura di te con i tuoi tempi.</p>
+      <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:13px 22px;border-radius:999px;background:#477685;color:#fff;text-decoration:none;font-weight:700">Conferma la mia email</a>
+      <p>Questo link è monouso e scade dopo 1 ora. Se non ti sei registrato, ignora questa email.</p>
+      {{ else if eq .Data.language_code "de" }}
+      <h1>Willkommen bei MuseMend</h1>
+      <p>Nur noch ein kleiner Schritt: Bestätige deine E-Mail-Adresse und beginne, gut für dich zu sorgen – in deinem Tempo.</p>
+      <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:13px 22px;border-radius:999px;background:#477685;color:#fff;text-decoration:none;font-weight:700">E-Mail-Adresse bestätigen</a>
+      <p>Dieser Link ist einmal verwendbar und läuft nach 1 Stunde ab. Wenn du dich nicht registriert hast, ignoriere diese E-Mail.</p>
+      {{ else if eq .Data.language_code "ko" }}
+      <h1>MuseMend에 오신 것을 환영해요</h1>
+      <p>이메일을 확인하면 나만의 속도로 나를 돌보는 여정을 시작할 수 있어요.</p>
+      <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:13px 22px;border-radius:999px;background:#477685;color:#fff;text-decoration:none;font-weight:700">이메일 확인하기</a>
+      <p>이 링크는 한 번만 사용할 수 있으며 1시간 후 만료됩니다. 가입하지 않았다면 무시해 주세요.</p>
+      {{ else if eq .Data.language_code "pt" }}
+      <h1>Boas-vindas à MuseMend</h1>
+      <p>Falta só um pequeno passo: confirme seu e-mail e comece a cuidar de si no seu próprio ritmo.</p>
+      <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:13px 22px;border-radius:999px;background:#477685;color:#fff;text-decoration:none;font-weight:700">Confirmar meu e-mail</a>
+      <p>Este link é de uso único e expira em 1 hora. Se você não se cadastrou, ignore este e-mail.</p>
+      {{ else if eq .Data.language_code "ms" }}
+      <h1>Selamat datang ke MuseMend</h1>
+      <p>Satu langkah kecil lagi: sahkan e-mel anda dan mulakan perjalanan menjaga diri mengikut rentak sendiri.</p>
+      <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:13px 22px;border-radius:999px;background:#477685;color:#fff;text-decoration:none;font-weight:700">Sahkan e-mel saya</a>
+      <p>Pautan ini boleh digunakan sekali dan tamat tempoh dalam 1 jam. Jika anda tidak mendaftar, abaikan e-mel ini.</p>
+      {{ else if eq .Data.language_code "id" }}
+      <h1>Selamat datang di MuseMend</h1>
+      <p>Satu langkah kecil lagi: konfirmasi emailmu dan mulai merawat diri dengan ritmemu sendiri.</p>
+      <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:13px 22px;border-radius:999px;background:#477685;color:#fff;text-decoration:none;font-weight:700">Konfirmasi email</a>
+      <p>Tautan ini hanya dapat digunakan sekali dan kedaluwarsa dalam 1 jam. Jika tidak mendaftar, abaikan email ini.</p>
+      {{ else if eq .Data.language_code "th" }}
+      <h1>ยินดีต้อนรับสู่ MuseMend</h1>
+      <p>อีกเพียงก้าวเล็ก ๆ ยืนยันอีเมลเพื่อเริ่มดูแลตัวเองในจังหวะที่เหมาะกับคุณ</p>
+      <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:13px 22px;border-radius:999px;background:#477685;color:#fff;text-decoration:none;font-weight:700">ยืนยันอีเมล</a>
+      <p>ลิงก์นี้ใช้ได้ครั้งเดียวและหมดอายุใน 1 ชั่วโมง หากไม่ได้สมัคร โปรดละเว้นอีเมลนี้</p>
+      {{ else }}
+      <h1>Welcome to MuseMend</h1>
+      <p>Just one small step left: confirm your email and begin caring for yourself at your own pace.</p>
+      <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:13px 22px;border-radius:999px;background:#477685;color:#fff;text-decoration:none;font-weight:700">Confirm my email</a>
+      <p>This one-time link expires in 1 hour. If you did not create a MuseMend account, ignore this email.</p>
+      {{ end }}
+      <p style="color:#66758a;font-size:13px">MuseMend · One small step at a time.</p>
+    </div>
+  </body>
+</html>

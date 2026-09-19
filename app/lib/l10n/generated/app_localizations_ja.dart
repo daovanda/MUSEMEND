@@ -93,6 +93,24 @@ class AppLocalizationsJa extends AppLocalizations {
   String get authAccountCreated => 'アカウントを作成しました。確認が必要な場合はメールをご確認ください。';
 
   @override
+  String get webAuthLandingBody =>
+      'このページはメールアドレスの確認とパスワードの再設定専用です。続行するには、メールで受け取った最新のリンクを開いてください。';
+
+  @override
+  String get authEmailConfirmedTitle => 'メールアドレスを確認しました';
+
+  @override
+  String get authEmailConfirmedBody =>
+      'メールアドレスの確認が完了しました。続きはMuseMendアプリでお楽しみください。';
+
+  @override
+  String get authLinkInvalidTitle => 'リンクが無効か、有効期限が切れています';
+
+  @override
+  String get authLinkInvalidBody =>
+      'メールの最新リンクを開くか、MuseMendアプリから新しいリンクをリクエストしてください。';
+
+  @override
   String get authMascotSemantics => 'MuseMendの雲のマスコット';
 
   @override
@@ -156,6 +174,49 @@ class AppLocalizationsJa extends AppLocalizations {
   String get authWeakPassword => 'このパスワードはセキュリティ要件を満たしていません。';
 
   @override
+  String get authForgotPassword => 'パスワードをお忘れですか？';
+
+  @override
+  String get authResetPasswordTitle => 'パスワードを再設定';
+
+  @override
+  String get authResetPasswordSubtitle => 'メールアドレスを入力すると、再設定用リンクが届きます。';
+
+  @override
+  String get authCreateNewPasswordSubtitle =>
+      'MuseMendアカウントの新しいパスワードを設定してください。';
+
+  @override
+  String get authSendResetLink => 'リンクを送信';
+
+  @override
+  String get authResetLinkSent => 'リンクを送信しました。メールを確認してください。';
+
+  @override
+  String get authBackToSignIn => 'ログインに戻る';
+
+  @override
+  String get authNewPassword => '新しいパスワード';
+
+  @override
+  String get authConfirmPassword => 'パスワードを確認';
+
+  @override
+  String get authPasswordMismatch => 'パスワードが一致しません。';
+
+  @override
+  String get authPasswordResetSuccess => 'パスワードを変更しました。もう一度ログインしてください。';
+
+  @override
+  String get authPasswordResetSuccessTitle => 'パスワードを変更しました';
+
+  @override
+  String get authPasswordResetFailed => 'パスワードを再設定できませんでした。もう一度お試しください。';
+
+  @override
+  String get authUpdatePassword => 'パスワードを変更';
+
+  @override
   String get onboardingBackToSignIn => 'ログイン画面に戻る';
 
   @override
@@ -172,6 +233,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get onboardingWelcomeHeadline => 'もう少しやさしく、\n自分の声に耳を傾ける場所。';
+
+  @override
+  String get onboardingWelcomeBody => '気持ちに気づき、心の中を書き留めて、小さな一歩から自分をいたわりましょう。';
 
   @override
   String get onboardingEmotionTitle => '気持ちに名前をつける';

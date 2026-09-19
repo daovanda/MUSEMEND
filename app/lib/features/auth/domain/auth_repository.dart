@@ -11,7 +11,18 @@ abstract interface class AuthRepository {
     required String displayName,
     required String email,
     required String password,
+    required String languageCode,
+    required String emailRedirectTo,
   });
+
+  Future<void> requestPasswordReset({
+    required String email,
+    required String redirectTo,
+  });
+
+  Future<void> updatePassword({required String password});
+
+  Future<void> updateLanguageCode({required String languageCode});
 
   Future<void> signOut();
 }

@@ -1,8 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:musemend/core/supabase/supabase_client_provider.dart';
 import 'package:musemend/features/auth/data/supabase_auth_repository.dart';
 import 'package:musemend/features/auth/domain/auth_repository.dart';
 import 'package:musemend/features/auth/domain/auth_session.dart';
+
+final publicAuthPortalModeProvider = Provider<bool>((ref) => kIsWeb);
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return SupabaseAuthRepository(ref.watch(supabaseClientProvider));
@@ -31,11 +34,36 @@ class AuthController extends Notifier<AsyncValue<void>> {
     required String displayName,
     required String email,
     required String password,
+    required String languageCode,
+    required String emailRedirectTo,
   }) async {
     return _run(
       () => ref
           .read(authRepositoryProvider)
-          .signUp(displayName: displayName, email: email, password: password),
+          .signUp(
+            displayName: displayName,
+            email: email,
+            password: password,
+            languageCode: languageCode,
+            emailRedirectTo: emailRedirectTo,
+          ),
+    );
+  }
+
+  Future<bool> requestPasswordReset({
+    required String email,
+    required String redirectTo,
+  }) async {
+    return _run(
+      () => ref
+          .read(authRepositoryProvider)
+          .requestPasswordReset(email: email, redirectTo: redirectTo),
+    );
+  }
+
+  Future<bool> updatePassword({required String password}) async {
+    return _run(
+      () => ref.read(authRepositoryProvider).updatePassword(password: password),
     );
   }
 

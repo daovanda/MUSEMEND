@@ -16,6 +16,7 @@ accessibility, bảo mật dữ liệu trên thiết bị và kiểm thử.
 - [Application foundation](./application-foundation.md) — implemented
 - [Localization Flutter](./localization.md) — implemented
 - [Authentication](./authentication.md) — in-progress
+- [Web authentication callback portal](./authentication.md#web-callback-portal) — in-progress
 - [Onboarding tài khoản mới](./new-user-onboarding.md) — implemented
 - [Daily check-in và streak](./daily-checkin.md) — in-progress
 - [Màn Bầu trời (Reflect)](./sky-screen.md) — in-progress
@@ -26,5 +27,5 @@ accessibility, bảo mật dữ liệu trên thiết bị và kiểm thử.
 - [Journal editor toàn màn hình](./journal-editor.md) — in-progress
 - [Notification cục bộ và inbox](./notifications-inbox.md) — in-progress
 - [Profile overview](./profile-overview.md) — in-progress
-- [Flutter Web local QA](./flutter-web-local.md) — implemented
+- [Flutter Web local QA và public callback pages](./flutter-web-local.md) — in-progress
 - [Android build versioning](./android-build-versioning.md) — implemented
