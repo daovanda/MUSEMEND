@@ -14,8 +14,7 @@ String passwordResetRedirectUri() {
   return '$publicWebAuthOrigin/reset-password';
 }
 
-String emailConfirmationRedirectUri() =>
-    '$publicWebAuthOrigin/email-confirmed';
+String emailConfirmationRedirectUri() => '$publicWebAuthOrigin/email-confirmed';
 
 class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key, this.showPasswordResetSuccess = false});

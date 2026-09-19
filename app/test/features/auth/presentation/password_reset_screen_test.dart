@@ -47,8 +47,14 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Tạo mật khẩu mới cho tài khoản MuseMend của bạn.'), findsOneWidget);
-    expect(find.text('Nhập email để nhận liên kết đặt lại mật khẩu.'), findsNothing);
+    expect(
+      find.text('Tạo mật khẩu mới cho tài khoản MuseMend của bạn.'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('Nhập email để nhận liên kết đặt lại mật khẩu.'),
+      findsNothing,
+    );
     final fields = find.byType(TextFormField);
     await tester.enterText(fields.at(0), 'MuseMend-QA-passphrase');
     await tester.enterText(fields.at(1), 'MuseMend-QA-passphrase');

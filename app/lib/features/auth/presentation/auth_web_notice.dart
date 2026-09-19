@@ -32,20 +32,19 @@ class AuthWebNotice extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Center(
-                        child: MuseBrandMark(width: 88, height: 62),
-                      ),
+                      const Center(child: MuseBrandMark(width: 88, height: 62)),
                       const SizedBox(height: 18),
                       Icon(icon, color: MuseColors.teal, size: 36),
                       const SizedBox(height: 12),
                       Text(
                         title,
                         textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.headlineSmall
-                            ?.copyWith(
-                              color: MuseColors.ink,
-                              fontWeight: FontWeight.w800,
-                            ),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.headlineSmall?.copyWith(
+                          color: MuseColors.ink,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       Text(
