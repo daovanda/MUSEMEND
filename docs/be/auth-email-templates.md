@@ -22,7 +22,8 @@ khi yêu cầu được gửi từ app local hoặc app di động.
   production khi đó còn 11 CTA `{{ .ConfirmationURL }}`. Đã thay các CTA đó bằng
   callback `#token_hash={{ .TokenHash }}&amp;type=recovery`, lưu và tải lại trang
   để xác nhận không còn `{{ .ConfirmationURL }}` trong hosted template. Template
-  xác nhận đăng ký production chưa được kiểm tra hoặc đồng bộ trong lần xử lý này.
+  Ngày 2026-09-19, cả Reset Password và Confirm Sign Up production đã được đổi
+  sang mẫu OTP 6 số; tải lại trang xác nhận Save changes đã hoàn tất.
 - Client gửi `language_code` khi đăng ký. Template chọn `vi`, `en`, `ja`, `fr`,
   `es`, `it`, `de`, `ko`, `pt`, `ms`, `id`, `th`; mã khác fallback về tiếng Anh.
 - Email mới hiển thị `{{ .Token }}` (OTP 6 số). CTA chỉ mở `/email-confirmed`
@@ -99,8 +100,7 @@ nội dung. Về lâu dài vẫn nên tắt click tracking hoặc dùng provider
   phần template mặc định nối thêm hoặc text HTML thô.
 - Hosted Supabase templates cần được đồng bộ thủ công từ file source tương ứng;
   CI/Vercel deploy không tự cập nhật email template trên Supabase. Reset Password
-  production đã được đồng bộ thủ công ngày 2026-09-19; Confirm Sign Up vẫn cần
-  đối chiếu với `supabase/templates/confirm-sign-up.html` trước QA xác nhận email.
+  và Confirm Sign Up production đã được đồng bộ sang OTP ngày 2026-09-19.
 - URL QA dạng `/reset-password?code=...` là kết quả của PKCE redirect và không
   dùng cho flow đa thiết bị. Email mới phải có OTP 6 số và CTA chỉ mở pathname
   không credential; trang chỉ xác minh sau khi người dùng nhập email, OTP và bấm
