@@ -237,6 +237,24 @@ class AppLocalizationsIt extends AppLocalizations {
       'Non è stato possibile reimpostare la password. Riprova.';
 
   @override
+  String get authRecoveryOtpPrompt =>
+      'Inserisci l\'email e il codice di 6 cifre nell\'ultimo messaggio di MuseMend.';
+
+  @override
+  String get authEmailOtpPrompt =>
+      'Inserisci l\'email e il codice di 6 cifre dell\'email di conferma MuseMend.';
+
+  @override
+  String get authOtpCode => 'Codice di 6 cifre';
+
+  @override
+  String get authOtpInvalid =>
+      'Inserisci il codice valido di 6 cifre dell\'ultima email.';
+
+  @override
+  String get authVerifyOtp => 'Continua';
+
+  @override
   String get authUpdatePassword => 'Cambia password';
 
   @override

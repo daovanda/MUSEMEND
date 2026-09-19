@@ -102,6 +102,60 @@ void main() {
     expect(find.text('Liên kết không hợp lệ hoặc đã hết hạn'), findsOneWidget);
     expect(find.byType(TextFormField), findsNothing);
   });
+
+  testWidgets('public portal verifies email OTP before showing password form', (
+    tester,
+  ) async {
+    tester.binding.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures(disableAnimations: true);
+    addTearDown(
+      tester.binding.platformDispatcher.clearAccessibilityFeaturesTestValue,
+    );
+    final repository = _FakeAuthRepository(withSession: false);
+    final router = GoRouter(
+      initialLocation: '/reset-password',
+      routes: [
+        GoRoute(
+          path: '/reset-password',
+          builder: (context, state) => const PasswordResetScreen(),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          publicAuthPortalModeProvider.overrideWithValue(true),
+          authRepositoryProvider.overrideWithValue(repository),
+        ],
+        child: MaterialApp.router(
+          locale: const Locale('vi'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: router,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Nhập email và mã 6 số trong email MuseMend mới nhất.'),
+      findsOneWidget,
+    );
+    var fields = find.byType(TextFormField);
+    expect(fields, findsNWidgets(2));
+    await tester.enterText(fields.at(0), 'qa@example.com');
+    await tester.enterText(fields.at(1), '123456');
+    await tester.tap(find.widgetWithText(FilledButton, 'Tiếp tục'));
+    await tester.pumpAndSettle();
+
+    expect(repository.recoveryOtpEmail, 'qa@example.com');
+    expect(repository.recoveryOtp, '123456');
+    fields = find.byType(TextFormField);
+    expect(fields, findsNWidgets(2));
+    expect(find.text('Mật khẩu mới'), findsOneWidget);
+  });
 }
 
 class _FakeAuthRepository implements AuthRepository {
@@ -113,6 +167,8 @@ class _FakeAuthRepository implements AuthRepository {
     email: 'qa@example.com',
   );
   String? updatedPassword;
+  String? recoveryOtpEmail;
+  String? recoveryOtp;
   var didSignOut = false;
 
   @override
@@ -129,6 +185,21 @@ class _FakeAuthRepository implements AuthRepository {
 
   @override
   Future<void> verifyPasswordRecovery({required String tokenHash}) async {}
+
+  @override
+  Future<void> verifyEmailOtp({
+    required String email,
+    required String otp,
+  }) async {}
+
+  @override
+  Future<void> verifyPasswordRecoveryOtp({
+    required String email,
+    required String otp,
+  }) async {
+    recoveryOtpEmail = email;
+    recoveryOtp = otp;
+  }
 
   @override
   Future<void> signIn({

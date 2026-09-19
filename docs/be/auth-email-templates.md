@@ -16,18 +16,21 @@ khi yêu cầu được gửi từ app local hoặc app di động.
 - Source template chuẩn trong repository:
   - `supabase/templates/confirm-sign-up.html`
   - `supabase/templates/reset-password.html`
-- Hosted template của Supabase được quản lý riêng tại Authentication → Emails.
-  Hai template trong repository chưa tự cập nhật lên Supabase; cần đồng bộ sau
-  khi được duyệt và kiểm tra nội dung Preview trước khi QA email thật.
+- Hosted template của Supabase được quản lý riêng tại Authentication → Emails;
+  Vercel/Git deploy không tự cập nhật các template này. Ngày 2026-09-19, QA một
+  email reset cho thấy link cuối có query `?code=...`; template Reset Password
+  production khi đó còn 11 CTA `{{ .ConfirmationURL }}`. Đã thay các CTA đó bằng
+  callback `#token_hash={{ .TokenHash }}&amp;type=recovery`, lưu và tải lại trang
+  để xác nhận không còn `{{ .ConfirmationURL }}` trong hosted template. Template
+  xác nhận đăng ký production chưa được kiểm tra hoặc đồng bộ trong lần xử lý này.
 - Client gửi `language_code` khi đăng ký. Template chọn `vi`, `en`, `ja`, `fr`,
   `es`, `it`, `de`, `ko`, `pt`, `ms`, `id`, `th`; mã khác fallback về tiếng Anh.
-- CTA dùng `{{ .TokenHash }}` trong URL fragment của callback public. Signup gửi
-  `type=email`, recovery gửi `type=recovery`. Web chỉ gọi `verifyOTP` sau khi
-  người dùng chủ động nhấn nút; scanner/prefetch chỉ mở trang GET nên không thể
-  tự tiêu thụ token.
-- Không đặt token trong query string: fragment không được gửi trong HTTP request
-  tới Vercel/CDN. Client chỉ giữ hash tạm trong bộ nhớ, không log/lưu DB, và xóa
-  fragment khỏi URL sau khi xác minh thành công.
+- Email mới hiển thị `{{ .Token }}` (OTP 6 số). CTA chỉ mở `/email-confirmed`
+  hoặc `/reset-password` và không mang credential, nên click tracking hoặc
+  scanner của SMTP không thể làm biến dạng hay dùng trước OTP.
+- Người dùng nhập email và OTP trên web. Client chỉ gửi chúng trực tiếp tới
+  Supabase `verifyOTP` sau thao tác xác nhận; không lưu OTP trong URL, log, DB
+  hoặc persistent storage. Callback `TokenHash` cũ vẫn được hỗ trợ tạm thời.
 - Subject giữ ngắn, ổn định; nội dung và CTA được bản địa hoá trong body.
 - Email reset và confirmation là hai mẫu độc lập, mỗi mẫu chỉ có một CTA và
   một khối HTML hoàn chỉnh.
@@ -36,11 +39,10 @@ khi yêu cầu được gửi từ app local hoặc app di động.
 
 Supabase Auth tạo recovery token cho mỗi yêu cầu. Link/token có thể dùng một lần;
 Email OTP Expiration trong production được xác minh là `3600` giây (1 giờ). Hạn
-này cũng áp dụng cho confirmation link. Template dựng link có dạng
-`https://musemend-app.vercel.app/reset-password#token_hash={{ .TokenHash }}&type=recovery`
-hoặc `/email-confirmed#token_hash=...&type=email`. Link mở trang trước; người dùng
-nhấn nút trên trang mới gửi POST `verifyOTP` đến đúng Supabase project. Recovery
-chỉ mở form khi verify trả session hợp lệ, sau đó `updateUser` mới ghi mật khẩu.
+này cũng áp dụng cho confirmation. Template hiển thị OTP `{{ .Token }}` và CTA
+không credential tới `/reset-password` hoặc `/email-confirmed`. Người dùng nhập
+email cùng mã; trang gửi POST `verifyOTP` đến đúng Supabase project. Recovery chỉ
+mở form khi verify trả session hợp lệ, sau đó `updateUser` mới ghi mật khẩu.
 
 Public Flutter Web chỉ cung cấp ba trạng thái: trang hướng dẫn trung tính ở `/`,
 thành công xác nhận tại `/email-confirmed`, và form recovery tại `/reset-password`.
@@ -65,13 +67,10 @@ Link reset luôn đi đến web utility
 trên mọi nền tảng, không về trang sign-in web.
 
 Supabase khuyến nghị không để SMTP provider rewrite link trong email Auth. Mục
-Brevo Transactional → Settings → Tracking hiện chỉ cho chọn tracking ẩn danh;
-trạng thái đang là `No` (tracking vẫn hoạt động, không ẩn danh) và không có công
-tắc tắt click tracking ở màn hình đó. Vì vậy chưa thể xác nhận Brevo giữ nguyên
-liên kết Supabase trong email thực gửi. Một số email scanner cũng có thể mở link
-dùng một lần trước người dùng. Cần gửi email QA và kiểm tra link đích; nếu
-Brevo rewrite hoặc prefetch gây lỗi, phải dùng SMTP không rewrite link hoặc nhờ
-Brevo xác nhận cách tắt click tracking cho Auth email trước khi phát hành.
+Brevo Transactional → Settings → Tracking hiện chỉ cho chọn tracking ẩn danh và
+không có công tắc tắt click tracking trên gói hiện tại. Vì vậy credential đã được
+tách khỏi CTA: Brevo có thể bọc URL mở portal nhưng không thể thay đổi OTP trong
+nội dung. Về lâu dài vẫn nên tắt click tracking hoặc dùng provider giữ nguyên link.
 
 ## Bảo mật và lỗi
 
@@ -98,8 +97,16 @@ Brevo xác nhận cách tắt click tracking cho Auth email trước khi phát h
 - Supabase UI hiện Email OTP Expiration `3600`; không thay đổi nếu đã đúng.
 - Hosted templates phải được kiểm tra source và Preview để chắc chắn không còn
   phần template mặc định nối thêm hoặc text HTML thô.
-- Hosted Supabase templates cần được đồng bộ thủ công từ hai file source sau khi
-  được duyệt; CI/Vercel deploy không tự cập nhật email template trên Supabase.
+- Hosted Supabase templates cần được đồng bộ thủ công từ file source tương ứng;
+  CI/Vercel deploy không tự cập nhật email template trên Supabase. Reset Password
+  production đã được đồng bộ thủ công ngày 2026-09-19; Confirm Sign Up vẫn cần
+  đối chiếu với `supabase/templates/confirm-sign-up.html` trước QA xác nhận email.
+- URL QA dạng `/reset-password?code=...` là kết quả của PKCE redirect và không
+  dùng cho flow đa thiết bị. Email mới phải có OTP 6 số và CTA chỉ mở pathname
+  không credential; trang chỉ xác minh sau khi người dùng nhập email, OTP và bấm
+  xác nhận. Auth Logs production chưa có dữ liệu tại lúc kiểm tra;
+  tính năng ghi audit log trong Auth đang tắt nên không thể suy ra mã lỗi server
+  hoặc thời điểm hết hạn chỉ từ log.
 - QA thủ công với email test: mỗi request tạo email/link mới; cùng link thứ hai
   không dùng lại được; link quá 1 giờ bị từ chối; link còn hạn mở form, đổi mật
   khẩu thành công, rồi đăng nhập được bằng mật khẩu mới. Không xem bước này là

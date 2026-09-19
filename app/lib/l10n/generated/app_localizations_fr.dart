@@ -242,6 +242,24 @@ class AppLocalizationsFr extends AppLocalizations {
       'Impossible de réinitialiser le mot de passe. Réessayez.';
 
   @override
+  String get authRecoveryOtpPrompt =>
+      'Saisissez votre e-mail et le code à 6 chiffres du dernier message MuseMend.';
+
+  @override
+  String get authEmailOtpPrompt =>
+      'Saisissez votre e-mail et le code à 6 chiffres de l\'e-mail de confirmation MuseMend.';
+
+  @override
+  String get authOtpCode => 'Code à 6 chiffres';
+
+  @override
+  String get authOtpInvalid =>
+      'Saisissez le code à 6 chiffres valide de votre dernier e-mail.';
+
+  @override
+  String get authVerifyOtp => 'Continuer';
+
+  @override
   String get authUpdatePassword => 'Modifier le mot de passe';
 
   @override

@@ -78,6 +78,22 @@ class AuthController extends Notifier<AsyncValue<void>> {
         .verifyPasswordRecovery(tokenHash: tokenHash),
   );
 
+  Future<bool> verifyEmailOtp({required String email, required String otp}) =>
+      _run(
+        () => ref
+            .read(authRepositoryProvider)
+            .verifyEmailOtp(email: email, otp: otp),
+      );
+
+  Future<bool> verifyPasswordRecoveryOtp({
+    required String email,
+    required String otp,
+  }) => _run(
+    () => ref
+        .read(authRepositoryProvider)
+        .verifyPasswordRecoveryOtp(email: email, otp: otp),
+  );
+
   Future<bool> updatePassword({required String password}) async {
     return _run(
       () => ref.read(authRepositoryProvider).updatePassword(password: password),

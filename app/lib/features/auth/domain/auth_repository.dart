@@ -24,6 +24,14 @@ abstract interface class AuthRepository {
 
   Future<void> verifyPasswordRecovery({required String tokenHash});
 
+  Future<void> verifyEmailOtp({required String email, required String otp}) =>
+      throw UnimplementedError();
+
+  Future<void> verifyPasswordRecoveryOtp({
+    required String email,
+    required String otp,
+  }) => throw UnimplementedError();
+
   Future<void> updatePassword({required String password});
 
   Future<void> updateLanguageCode({required String languageCode});

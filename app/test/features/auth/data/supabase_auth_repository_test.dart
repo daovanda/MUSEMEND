@@ -34,6 +34,37 @@ void main() {
     expect(requests.single['type'], 'recovery');
   });
 
+  test('password recovery OTP sends email, code and recovery type', () async {
+    final requests = <Map<String, dynamic>>[];
+    final repository = _repositoryForInvalidToken(requests);
+
+    await expectLater(
+      repository.verifyPasswordRecoveryOtp(
+        email: 'qa@example.com',
+        otp: '123456',
+      ),
+      throwsA(isA<AuthFailure>()),
+    );
+
+    expect(requests.single['email'], 'qa@example.com');
+    expect(requests.single['token'], '123456');
+    expect(requests.single['type'], 'recovery');
+  });
+
+  test('email confirmation OTP sends email, code and email type', () async {
+    final requests = <Map<String, dynamic>>[];
+    final repository = _repositoryForInvalidToken(requests);
+
+    await expectLater(
+      repository.verifyEmailOtp(email: 'qa@example.com', otp: '654321'),
+      throwsA(isA<AuthFailure>()),
+    );
+
+    expect(requests.single['email'], 'qa@example.com');
+    expect(requests.single['token'], '654321');
+    expect(requests.single['type'], 'email');
+  });
+
   group('shouldClearRestoredSession', () {
     test('clears sessions rejected by the Auth server', () {
       expect(

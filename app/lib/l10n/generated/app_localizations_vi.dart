@@ -233,6 +233,23 @@ class AppLocalizationsVi extends AppLocalizations {
       'Chưa thể đặt lại mật khẩu. Vui lòng thử lại.';
 
   @override
+  String get authRecoveryOtpPrompt =>
+      'Nhập email và mã 6 số trong email MuseMend mới nhất.';
+
+  @override
+  String get authEmailOtpPrompt =>
+      'Nhập email và mã 6 số trong email xác nhận từ MuseMend.';
+
+  @override
+  String get authOtpCode => 'Mã 6 số';
+
+  @override
+  String get authOtpInvalid => 'Hãy nhập đúng mã 6 số trong email mới nhất.';
+
+  @override
+  String get authVerifyOtp => 'Tiếp tục';
+
+  @override
   String get authUpdatePassword => 'Đổi mật khẩu';
 
   @override

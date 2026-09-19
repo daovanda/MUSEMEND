@@ -242,6 +242,24 @@ class AppLocalizationsDe extends AppLocalizations {
       'Das Passwort konnte nicht zurückgesetzt werden. Bitte versuche es erneut.';
 
   @override
+  String get authRecoveryOtpPrompt =>
+      'Gib deine E-Mail-Adresse und den sechsstelligen Code aus der neuesten MuseMend-E-Mail ein.';
+
+  @override
+  String get authEmailOtpPrompt =>
+      'Gib deine E-Mail-Adresse und den sechsstelligen Code aus der MuseMend-Bestätigungsmail ein.';
+
+  @override
+  String get authOtpCode => 'Sechsstelliger Code';
+
+  @override
+  String get authOtpInvalid =>
+      'Gib den gültigen sechsstelligen Code aus deiner neuesten E-Mail ein.';
+
+  @override
+  String get authVerifyOtp => 'Weiter';
+
+  @override
   String get authUpdatePassword => 'Passwort ändern';
 
   @override

@@ -234,6 +234,23 @@ class AppLocalizationsTh extends AppLocalizations {
       'ยังตั้งรหัสผ่านใหม่ไม่ได้ โปรดลองอีกครั้ง';
 
   @override
+  String get authRecoveryOtpPrompt =>
+      'กรอกอีเมลและรหัส 6 หลักจากอีเมล MuseMend ฉบับล่าสุด';
+
+  @override
+  String get authEmailOtpPrompt =>
+      'กรอกอีเมลและรหัส 6 หลักจากอีเมลยืนยันของ MuseMend';
+
+  @override
+  String get authOtpCode => 'รหัส 6 หลัก';
+
+  @override
+  String get authOtpInvalid => 'กรอกรหัส 6 หลักที่ถูกต้องจากอีเมลฉบับล่าสุด';
+
+  @override
+  String get authVerifyOtp => 'ดำเนินการต่อ';
+
+  @override
   String get authUpdatePassword => 'เปลี่ยนรหัสผ่าน';
 
   @override

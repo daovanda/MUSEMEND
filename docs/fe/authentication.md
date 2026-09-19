@@ -89,22 +89,24 @@ lệ, không hiển thị form có thể submit vô ích.
 Màn đặt lại yêu cầu mật khẩu mới và nhập lại mật khẩu, sau đó gọi
 `supabase.auth.updateUser`. Đây là lần ghi mật khẩu thật lên Supabase Auth, không
 chỉ đổi trạng thái giao diện. Khi thành công app đăng xuất phiên recovery và
-đưa người dùng về đăng nhập với thông báo đã đổi mật khẩu. Link recovery dùng
-`{{ .ConfirmationURL }}` do Supabase tạo: token riêng cho yêu cầu, dùng một lần;
-Email OTP Expiration đặt 3600 giây (1 giờ).
+đưa người dùng về đăng nhập với thông báo đã đổi mật khẩu. Email mới hiển thị OTP
+6 số và CTA chỉ mở `/reset-password` không chứa credential. Người dùng nhập email
+cùng OTP; web chỉ gọi `verifyOTP` sau thao tác xác nhận. Cách này không phụ thuộc
+PKCE verifier và không bị click tracking làm biến dạng token. Callback fragment
+`TokenHash` cũ vẫn được hỗ trợ tạm thời. OTP dùng một lần; Email OTP Expiration
+được đặt 3600 giây (1 giờ).
 
-Email xác nhận đăng ký có template riêng, cũng dùng `{{ .ConfirmationURL }}` và
-chọn nội dung theo `language_code`; callback hợp lệ mở trang web báo xác nhận
-thành công và hướng người dùng quay lại app. Hai HTML source được giữ trong
-`supabase/templates/confirm-sign-up.html` và
-`supabase/templates/reset-password.html`; nội dung được đồng bộ thủ công với
-Supabase Dashboard hosted.
+Email xác nhận đăng ký có template riêng, source hiển thị OTP 6 số và chọn nội
+dung theo `language_code`; callback hợp lệ mở trang web để nhập email cùng OTP,
+sau đó báo xác nhận thành công và hướng người dùng quay lại app. Hai HTML
+source được giữ trong `supabase/templates/confirm-sign-up.html` và
+`supabase/templates/reset-password.html`; từng template phải được đồng bộ thủ
+công với Supabase Dashboard hosted.
 
 Supabase Auth phải allow-list URL production `/email-confirmed` và
 `/reset-password`. Không cần allow-list từng origin local cho luồng email vì
-liên kết luôn trỏ tới domain public. Không lưu token vào DB, log
-hoặc repository. Email recovery và confirmation không được đi qua click tracking
-có thể viết lại/xử lý trước token.
+liên kết luôn trỏ tới domain public. Không lưu token vào DB, log hoặc repository.
+CTA không chứa credential nên SMTP có thể bọc link tracking mà không chạm tới OTP.
 
 ## Validation và lỗi
 

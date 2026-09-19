@@ -24,6 +24,8 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
   final _formKey = GlobalKey<FormState>();
   final _passwordController = TextEditingController();
   final _confirmationController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _otpController = TextEditingController();
   var _obscurePassword = true;
   var _obscureConfirmation = true;
   var _completed = false;
@@ -34,6 +36,8 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
   void dispose() {
     _passwordController.dispose();
     _confirmationController.dispose();
+    _emailController.dispose();
+    _otpController.dispose();
     super.dispose();
   }
 
@@ -70,6 +74,23 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
       _recoveryTokenVerified = verified;
     });
     if (verified) context.replace('/reset-password');
+  }
+
+  Future<void> _verifyRecoveryOtp() async {
+    if (!_formKey.currentState!.validate()) return;
+    FocusManager.instance.primaryFocus?.unfocus();
+    setState(() => _isVerifyingRecovery = true);
+    final verified = await ref
+        .read(authControllerProvider.notifier)
+        .verifyPasswordRecoveryOtp(
+          email: _emailController.text,
+          otp: _otpController.text,
+        );
+    if (!mounted) return;
+    setState(() {
+      _isVerifyingRecovery = false;
+      _recoveryTokenVerified = verified;
+    });
   }
 
   void _returnToSignIn() {
@@ -117,11 +138,13 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
               : session.when(
                 data: (value) {
                   if (value == null) {
-                    return AuthWebNotice(
-                      title: strings.authLinkInvalidTitle,
-                      body: strings.authLinkInvalidBody,
-                      icon: Icons.link_off_rounded,
-                    );
+                    return publicPortal
+                        ? _buildOtpForm(context, strings)
+                        : AuthWebNotice(
+                          title: strings.authLinkInvalidTitle,
+                          body: strings.authLinkInvalidBody,
+                          icon: Icons.link_off_rounded,
+                        );
                   }
                   return _buildForm(context, strings, operation, publicPortal);
                 },
@@ -144,6 +167,121 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
                       ),
                     ),
               ),
+    );
+  }
+
+  Widget _buildOtpForm(BuildContext context, AppLocalizations strings) {
+    return Scaffold(
+      backgroundColor: MuseColors.cream,
+      body: MusePageBackground(
+        accent: MuseColors.mint,
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 440),
+                child: MuseGlassCard(
+                  padding: const EdgeInsets.fromLTRB(24, 26, 24, 22),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Center(
+                          child: MuseBrandMark(width: 82, height: 58),
+                        ),
+                        const SizedBox(height: 14),
+                        Text(
+                          strings.authResetPasswordTitle,
+                          textAlign: TextAlign.center,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.headlineSmall?.copyWith(
+                            color: MuseColors.ink,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          strings.authRecoveryOtpPrompt,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 22),
+                        TextFormField(
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          autofillHints: const [AutofillHints.email],
+                          decoration: InputDecoration(
+                            labelText: strings.email,
+                            prefixIcon: const Icon(
+                              Icons.alternate_email_rounded,
+                            ),
+                          ),
+                          validator:
+                              (value) =>
+                                  RegExp(
+                                        r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
+                                      ).hasMatch(value?.trim() ?? '')
+                                      ? null
+                                      : strings.authEmailInvalid,
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: _otpController,
+                          keyboardType: TextInputType.number,
+                          textInputAction: TextInputAction.done,
+                          maxLength: 6,
+                          autofillHints: const [AutofillHints.oneTimeCode],
+                          decoration: InputDecoration(
+                            labelText: strings.authOtpCode,
+                            prefixIcon: const Icon(Icons.password_rounded),
+                            counterText: '',
+                          ),
+                          validator:
+                              (value) =>
+                                  RegExp(
+                                        r'^\d{6}$',
+                                      ).hasMatch(value?.trim() ?? '')
+                                      ? null
+                                      : strings.authOtpInvalid,
+                          onFieldSubmitted:
+                              (_) =>
+                                  _isVerifyingRecovery
+                                      ? null
+                                      : _verifyRecoveryOtp(),
+                        ),
+                        if (ref.watch(authControllerProvider).hasError) ...[
+                          const SizedBox(height: 12),
+                          Text(
+                            strings.authOtpInvalid,
+                            style: const TextStyle(color: Color(0xFF9A473D)),
+                          ),
+                        ],
+                        const SizedBox(height: 20),
+                        FilledButton(
+                          onPressed:
+                              _isVerifyingRecovery ? null : _verifyRecoveryOtp,
+                          child:
+                              _isVerifyingRecovery
+                                  ? const SizedBox.square(
+                                    dimension: 22,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                  : Text(strings.authVerifyOtp),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 

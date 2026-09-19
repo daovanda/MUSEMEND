@@ -237,6 +237,24 @@ class AppLocalizationsEs extends AppLocalizations {
       'No hemos podido restablecer la contraseña. Inténtalo de nuevo.';
 
   @override
+  String get authRecoveryOtpPrompt =>
+      'Introduce tu correo y el código de 6 dígitos del último mensaje de MuseMend.';
+
+  @override
+  String get authEmailOtpPrompt =>
+      'Introduce tu correo y el código de 6 dígitos del mensaje de confirmación de MuseMend.';
+
+  @override
+  String get authOtpCode => 'Código de 6 dígitos';
+
+  @override
+  String get authOtpInvalid =>
+      'Introduce el código válido de 6 dígitos de tu último correo.';
+
+  @override
+  String get authVerifyOtp => 'Continuar';
+
+  @override
   String get authUpdatePassword => 'Cambiar contraseña';
 
   @override

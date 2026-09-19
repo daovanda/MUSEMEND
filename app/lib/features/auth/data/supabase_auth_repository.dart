@@ -129,6 +129,41 @@ class SupabaseAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<void> verifyEmailOtp({
+    required String email,
+    required String otp,
+  }) async {
+    try {
+      await _client.auth.verifyOTP(
+        email: email.trim(),
+        token: otp.trim(),
+        type: OtpType.email,
+      );
+    } on AuthException {
+      throw const AuthFailure(AuthFailureCode.emailConfirmationFailed);
+    }
+  }
+
+  @override
+  Future<void> verifyPasswordRecoveryOtp({
+    required String email,
+    required String otp,
+  }) async {
+    try {
+      final response = await _client.auth.verifyOTP(
+        email: email.trim(),
+        token: otp.trim(),
+        type: OtpType.recovery,
+      );
+      if (response.session == null) {
+        throw const AuthFailure(AuthFailureCode.passwordResetFailed);
+      }
+    } on AuthException {
+      throw const AuthFailure(AuthFailureCode.passwordResetFailed);
+    }
+  }
+
+  @override
   Future<void> updatePassword({required String password}) async {
     try {
       await _client.auth.updateUser(UserAttributes(password: password));
