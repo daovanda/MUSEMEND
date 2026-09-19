@@ -10,6 +10,7 @@ String authErrorMessage(AppLocalizations strings, Object error) {
     AuthFailureCode.emailAlreadyRegistered =>
       strings.authEmailAlreadyRegistered,
     AuthFailureCode.emailNotConfirmed => strings.authEmailNotConfirmed,
+    AuthFailureCode.emailConfirmationFailed => strings.authLinkInvalidBody,
     AuthFailureCode.weakPassword => strings.authWeakPassword,
     AuthFailureCode.passwordResetFailed => strings.authPasswordResetFailed,
     AuthFailureCode.unknown => strings.authNetworkError,

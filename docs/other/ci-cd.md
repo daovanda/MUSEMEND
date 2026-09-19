@@ -15,6 +15,10 @@ archive iOS lên App Store Connect chưa được triển khai vì còn cần
 signing/account/protection tương ứng. Không được hiểu artifact APK debug hoặc
 GitHub Release QA là bản production.
 
+Flutter Web callback portal trên Vercel có pipeline riêng, được mô tả tại
+[vercel-auth-callback-portal.md](./vercel-auth-callback-portal.md). Pipeline này
+không thay thế các workflow Android/iOS/Supabase bên dưới.
+
 ## 2. Luồng nhánh và môi trường
 
 ```text

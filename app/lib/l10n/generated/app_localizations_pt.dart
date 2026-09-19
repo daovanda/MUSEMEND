@@ -107,6 +107,16 @@ class AppLocalizationsPt extends AppLocalizations {
       'O seu e-mail foi confirmado. Regresse à aplicação MuseMend para continuar.';
 
   @override
+  String get authConfirmEmailTitle => 'Confirme o seu e-mail';
+
+  @override
+  String get authConfirmEmailPrompt =>
+      'Toque no botão abaixo para confirmar este endereço de e-mail.';
+
+  @override
+  String get authConfirmEmailAction => 'Confirmar e-mail';
+
+  @override
   String get authLinkInvalidTitle => 'Esta ligação é inválida ou expirou';
 
   @override

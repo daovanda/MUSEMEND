@@ -304,6 +304,24 @@ abstract class AppLocalizations {
   /// **'Your email has been confirmed. Return to the MuseMend app to continue.'**
   String get authEmailConfirmedBody;
 
+  /// No description provided for @authConfirmEmailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm your email'**
+  String get authConfirmEmailTitle;
+
+  /// No description provided for @authConfirmEmailPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the button below to confirm this email address.'**
+  String get authConfirmEmailPrompt;
+
+  /// No description provided for @authConfirmEmailAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm email'**
+  String get authConfirmEmailAction;
+
   /// No description provided for @authLinkInvalidTitle.
   ///
   /// In en, this message translates to:

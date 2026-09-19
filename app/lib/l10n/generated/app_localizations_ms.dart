@@ -106,6 +106,16 @@ class AppLocalizationsMs extends AppLocalizations {
       'E-mel anda telah disahkan. Kembali ke aplikasi MuseMend untuk meneruskan.';
 
   @override
+  String get authConfirmEmailTitle => 'Sahkan e-mel anda';
+
+  @override
+  String get authConfirmEmailPrompt =>
+      'Tekan butang di bawah untuk mengesahkan alamat e-mel ini.';
+
+  @override
+  String get authConfirmEmailAction => 'Sahkan e-mel';
+
+  @override
   String get authLinkInvalidTitle =>
       'Pautan ini tidak sah atau telah tamat tempoh';
 

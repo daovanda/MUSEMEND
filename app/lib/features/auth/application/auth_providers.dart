@@ -1,11 +1,16 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:musemend/core/supabase/supabase_client_provider.dart';
 import 'package:musemend/features/auth/data/supabase_auth_repository.dart';
 import 'package:musemend/features/auth/domain/auth_repository.dart';
 import 'package:musemend/features/auth/domain/auth_session.dart';
 
-final publicAuthPortalModeProvider = Provider<bool>((ref) => kIsWeb);
+/// Enables the callback-only experience for the public Vercel deployment.
+/// Flutter Web local remains the full app by default so it can still be used
+/// for QA; hosted callback builds opt in explicitly at compile time.
+final publicAuthPortalModeProvider = Provider<bool>(
+  (ref) =>
+      const bool.fromEnvironment('PUBLIC_AUTH_PORTAL', defaultValue: false),
+);
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return SupabaseAuthRepository(ref.watch(supabaseClientProvider));
@@ -60,6 +65,18 @@ class AuthController extends Notifier<AsyncValue<void>> {
           .requestPasswordReset(email: email, redirectTo: redirectTo),
     );
   }
+
+  Future<bool> verifyEmailConfirmation({required String tokenHash}) => _run(
+    () => ref
+        .read(authRepositoryProvider)
+        .verifyEmailConfirmation(tokenHash: tokenHash),
+  );
+
+  Future<bool> verifyPasswordRecovery({required String tokenHash}) => _run(
+    () => ref
+        .read(authRepositoryProvider)
+        .verifyPasswordRecovery(tokenHash: tokenHash),
+  );
 
   Future<bool> updatePassword({required String password}) async {
     return _run(

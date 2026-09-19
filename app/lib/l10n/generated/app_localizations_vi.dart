@@ -106,6 +106,16 @@ class AppLocalizationsVi extends AppLocalizations {
       'Email của bạn đã được xác nhận thành công. Hãy quay lại ứng dụng MuseMend để tiếp tục.';
 
   @override
+  String get authConfirmEmailTitle => 'Xác nhận email';
+
+  @override
+  String get authConfirmEmailPrompt =>
+      'Nhấn nút bên dưới để xác nhận địa chỉ email này.';
+
+  @override
+  String get authConfirmEmailAction => 'Xác nhận email';
+
+  @override
   String get authLinkInvalidTitle => 'Liên kết không hợp lệ hoặc đã hết hạn';
 
   @override

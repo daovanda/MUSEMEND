@@ -72,6 +72,12 @@ class _SignedOutRepository implements AuthRepository {
   }) async {}
 
   @override
+  Future<void> verifyEmailConfirmation({required String tokenHash}) async {}
+
+  @override
+  Future<void> verifyPasswordRecovery({required String tokenHash}) async {}
+
+  @override
   Future<void> updatePassword({required String password}) async {}
 
   @override
