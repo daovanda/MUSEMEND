@@ -107,10 +107,7 @@ class SupabaseAuthRepository implements AuthRepository {
   @override
   Future<void> verifyEmailConfirmation({required String tokenHash}) async {
     try {
-      await _client.auth.verifyOTP(
-        tokenHash: tokenHash,
-        type: OtpType.email,
-      );
+      await _client.auth.verifyOTP(tokenHash: tokenHash, type: OtpType.email);
     } on AuthException {
       throw const AuthFailure(AuthFailureCode.emailConfirmationFailed);
     }

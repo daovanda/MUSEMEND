@@ -97,7 +97,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/reset-password',
-        builder: (context, state) => PasswordResetScreen(callbackUri: state.uri),
+        builder:
+            (context, state) => PasswordResetScreen(callbackUri: state.uri),
       ),
       GoRoute(
         path: '/onboarding',

@@ -8,10 +8,8 @@ import 'package:musemend/features/auth/domain/auth_session.dart';
 /// Flutter Web local remains the full app by default so it can still be used
 /// for QA; hosted callback builds opt in explicitly at compile time.
 final publicAuthPortalModeProvider = Provider<bool>(
-  (ref) => const bool.fromEnvironment(
-    'PUBLIC_AUTH_PORTAL',
-    defaultValue: false,
-  ),
+  (ref) =>
+      const bool.fromEnvironment('PUBLIC_AUTH_PORTAL', defaultValue: false),
 );
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
