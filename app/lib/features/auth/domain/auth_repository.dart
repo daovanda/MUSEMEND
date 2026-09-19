@@ -20,6 +20,10 @@ abstract interface class AuthRepository {
     required String redirectTo,
   });
 
+  Future<void> verifyEmailConfirmation({required String tokenHash});
+
+  Future<void> verifyPasswordRecovery({required String tokenHash});
+
   Future<void> updatePassword({required String password});
 
   Future<void> updateLanguageCode({required String languageCode});

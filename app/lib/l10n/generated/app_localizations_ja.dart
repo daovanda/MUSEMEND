@@ -104,6 +104,15 @@ class AppLocalizationsJa extends AppLocalizations {
       'メールアドレスの確認が完了しました。続きはMuseMendアプリでお楽しみください。';
 
   @override
+  String get authConfirmEmailTitle => 'メールアドレスの確認';
+
+  @override
+  String get authConfirmEmailPrompt => '下のボタンをタップして、このメールアドレスを確認してください。';
+
+  @override
+  String get authConfirmEmailAction => 'メールアドレスを確認';
+
+  @override
   String get authLinkInvalidTitle => 'リンクが無効か、有効期限が切れています';
 
   @override

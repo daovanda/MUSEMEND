@@ -16,13 +16,18 @@ khi yêu cầu được gửi từ app local hoặc app di động.
 - Source template chuẩn trong repository:
   - `supabase/templates/confirm-sign-up.html`
   - `supabase/templates/reset-password.html`
-- Hosted template của Supabase được quản lý tại Authentication → Emails. Hai
-  mẫu production đã được thay thế hoàn chỉnh ngày 2026-09-19 bằng nội dung tương
-  ứng; không nối thêm vào HTML mặc định.
+- Hosted template của Supabase được quản lý riêng tại Authentication → Emails.
+  Hai template trong repository chưa tự cập nhật lên Supabase; cần đồng bộ sau
+  khi được duyệt và kiểm tra nội dung Preview trước khi QA email thật.
 - Client gửi `language_code` khi đăng ký. Template chọn `vi`, `en`, `ja`, `fr`,
   `es`, `it`, `de`, `ko`, `pt`, `ms`, `id`, `th`; mã khác fallback về tiếng Anh.
-- CTA dùng `{{ .ConfirmationURL }}` để Supabase tạo và xác thực token. Không tự
-  ghép token, không đưa token/session/password/PII vào HTML, log hay repository.
+- CTA dùng `{{ .TokenHash }}` trong URL fragment của callback public. Signup gửi
+  `type=email`, recovery gửi `type=recovery`. Web chỉ gọi `verifyOTP` sau khi
+  người dùng chủ động nhấn nút; scanner/prefetch chỉ mở trang GET nên không thể
+  tự tiêu thụ token.
+- Không đặt token trong query string: fragment không được gửi trong HTTP request
+  tới Vercel/CDN. Client chỉ giữ hash tạm trong bộ nhớ, không log/lưu DB, và xóa
+  fragment khỏi URL sau khi xác minh thành công.
 - Subject giữ ngắn, ổn định; nội dung và CTA được bản địa hoá trong body.
 - Email reset và confirmation là hai mẫu độc lập, mỗi mẫu chỉ có một CTA và
   một khối HTML hoàn chỉnh.
@@ -31,15 +36,19 @@ khi yêu cầu được gửi từ app local hoặc app di động.
 
 Supabase Auth tạo recovery token cho mỗi yêu cầu. Link/token có thể dùng một lần;
 Email OTP Expiration trong production được xác minh là `3600` giây (1 giờ). Hạn
-này cũng áp dụng cho confirmation link. Link reset dùng URL `.ConfirmationURL`
-của Supabase, trong đó đích cuối nhận redirect đã allow-list.
+này cũng áp dụng cho confirmation link. Template dựng link có dạng
+`https://musemend-app.vercel.app/reset-password#token_hash={{ .TokenHash }}&type=recovery`
+hoặc `/email-confirmed#token_hash=...&type=email`. Link mở trang trước; người dùng
+nhấn nút trên trang mới gửi POST `verifyOTP` đến đúng Supabase project. Recovery
+chỉ mở form khi verify trả session hợp lệ, sau đó `updateUser` mới ghi mật khẩu.
 
 Public Flutter Web chỉ cung cấp ba trạng thái: trang hướng dẫn trung tính ở `/`,
 thành công xác nhận tại `/email-confirmed`, và form recovery tại `/reset-password`.
 Không có đăng nhập, onboarding hay màn nghiệp vụ trên web. Hai redirect được
 truyền trực tiếp trong `signUp(emailRedirectTo: ...)` và
-`resetPasswordForEmail(redirectTo: ...)`; mẫu email tiếp tục dùng
-`{{ .ConfirmationURL }}` để Supabase xác minh token. Web dùng Path URL strategy.
+`resetPasswordForEmail(redirectTo: ...)`; template email dùng token hash và OTP
+type cụ thể để callback có thể xác minh cả khi email được gửi từ app native rồi
+mở trên trình duyệt/thiết bị khác. Web dùng Path URL strategy.
 
 Vercel cần rewrite hai pathname callback về `index.html`. Repository đặt cấu hình
 tại `vercel.json` và `app/vercel.json` để khớp cấu hình project root dù được đặt
@@ -48,10 +57,11 @@ root. Supabase Site URL là `https://musemend-app.vercel.app`; URL allow-list ph
 có origin, `/email-confirmed` và `/reset-password`. Không dùng URL hash cũ cho
 luồng email mới.
 
-Trang xác nhận chỉ báo thành công khi Auth SDK nhận được session từ callback;
-thiếu session/lỗi sẽ hiện trạng thái link không hợp lệ/hết hạn. Trang reset cũng
-chỉ hiện form khi có recovery session. Sau đổi mật khẩu web hiển thị xác nhận và
-đăng xuất; người dùng quay lại app để tiếp tục. Link reset luôn đi đến web utility
+Trang xác nhận chỉ báo thành công sau khi Supabase chấp nhận token hash; trang
+reset chỉ hiện form sau khi Supabase chấp nhận recovery token và trả session.
+Callback cũ có session vẫn được đọc trong giai đoạn chuyển tiếp. Sau đổi mật
+khẩu web hiển thị xác nhận và đăng xuất; người dùng quay lại app để tiếp tục.
+Link reset luôn đi đến web utility
 trên mọi nền tảng, không về trang sign-in web.
 
 Supabase khuyến nghị không để SMTP provider rewrite link trong email Auth. Mục
@@ -67,8 +77,9 @@ Brevo xác nhận cách tắt click tracking cho Auth email trước khi phát h
 
 - Reset endpoint luôn trả thông báo thành công chung để không tiết lộ email có
   tồn tại hay không.
-- Token chỉ do Supabase phát hành, có thời hạn, dùng một lần; client không lưu
-  token vào DB hoặc log.
+- Token chỉ do Supabase phát hành, có thời hạn, dùng một lần; không đặt trong
+  query string, không gửi tới server qua HTTP, và client không lưu token vào DB,
+  persistent storage hoặc log.
 - Chỉ sau callback hợp lệ, màn reset gọi `supabase.auth.updateUser` để ghi mật
   khẩu mới thực sự vào Auth. Sau thành công app đóng recovery session và đưa
   người dùng về đăng nhập.
@@ -87,6 +98,8 @@ Brevo xác nhận cách tắt click tracking cho Auth email trước khi phát h
 - Supabase UI hiện Email OTP Expiration `3600`; không thay đổi nếu đã đúng.
 - Hosted templates phải được kiểm tra source và Preview để chắc chắn không còn
   phần template mặc định nối thêm hoặc text HTML thô.
+- Hosted Supabase templates cần được đồng bộ thủ công từ hai file source sau khi
+  được duyệt; CI/Vercel deploy không tự cập nhật email template trên Supabase.
 - QA thủ công với email test: mỗi request tạo email/link mới; cùng link thứ hai
   không dùng lại được; link quá 1 giờ bị từ chối; link còn hạn mở form, đổi mật
   khẩu thành công, rồi đăng nhập được bằng mật khẩu mới. Không xem bước này là

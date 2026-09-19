@@ -56,15 +56,22 @@ personalization cho email.
 
 ### Web callback portal
 
-Trên Flutter Web, router chỉ mở landing trung tính, `/email-confirmed` và
+Build callback public trên Vercel bật `PUBLIC_AUTH_PORTAL=true`, khi đó router
+chỉ mở landing trung tính, `/email-confirmed` và
 `/reset-password`. Trang web không phải bản web của app: các route sign-in,
 onboarding và nghiệp vụ không render giao diện ứng dụng. Android/iOS giữ nguyên
 flow đăng nhập và onboarding native. Đăng ký truyền
 `emailRedirectTo=https://musemend-app.vercel.app/email-confirmed`; recovery từ
 bất kỳ nền tảng nào dùng web `/reset-password`. Trang xác nhận chỉ hiển thị
-thành công sau khi callback hợp lệ khôi phục session; nếu link sai/hết hạn thì
-hiện hướng dẫn mở link mới. Root chỉ hướng dẫn mở email, không giả làm trang xác
-nhận thành công.
+thành công sau khi người dùng nhấn nút xác nhận và Supabase chấp nhận `TokenHash`.
+Recovery cũng cần thao tác xác minh rõ ràng; chỉ sau khi Supabase trả recovery
+session hợp lệ mới mở form đặt mật khẩu. Cách này không phụ thuộc PKCE verifier
+được lưu trên thiết bị đã gửi email. Nếu link sai/hết hạn thì hiện hướng dẫn mở
+link mới. Root chỉ hướng dẫn mở email, không giả làm trang xác nhận thành công.
+
+Flutter Web local mặc định không bật callback portal để tiếp tục QA các màn app
+trên localhost. Khi cần xem giao diện callback local, chạy với
+`--dart-define=PUBLIC_AUTH_PORTAL=true`.
 
 ### Khôi phục mật khẩu
 

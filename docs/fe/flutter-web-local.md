@@ -4,10 +4,11 @@
 
 ## Mục đích
 
-Flutter Web target hiện là portal công khai chỉ xử lý callback email xác nhận và
-đặt lại mật khẩu; nó không phải bản web để đăng nhập hay QA nghiệp vụ. Cùng
-target này có thể chạy local để kiểm tra giao diện callback với Supabase
-Development. Dùng Android Emulator hoặc thiết bị thật để QA toàn bộ app.
+Flutter Web public trên Vercel chỉ xử lý callback email xác nhận và đặt lại mật
+khẩu; nó không phải bản web để đăng nhập hay sử dụng nghiệp vụ. Flutter Web
+local mặc định chạy app đầy đủ để QA; có thể bật callback portal riêng bằng
+`--dart-define=PUBLIC_AUTH_PORTAL=true`. Dùng Android Emulator hoặc thiết bị thật
+để QA permission và tích hợp native.
 
 ## Chạy local
 
@@ -19,11 +20,13 @@ flutter run -d chrome --dart-define-from-file=config/dev.json
 ```
 
 Flutter sẽ mở một URL `http://localhost:<port>`. Giữ terminal chạy trong suốt
-thời gian QA; dừng bằng `q` hoặc `Ctrl+C`.
+thời gian QA; dừng bằng `q` hoặc `Ctrl+C`. Muốn chạy callback portal local thì
+thêm `--dart-define=PUBLIC_AUTH_PORTAL=true` vào lệnh trên.
 
 ## Phạm vi phù hợp
 
-- kiểm tra giao diện responsive của trang xác nhận email và đặt lại mật khẩu;
+- kiểm tra giao diện responsive của trang xác nhận email và đặt lại mật khẩu
+  khi bật callback portal;
 - xác minh callback URL mở đúng route và token/session được xử lý bởi Supabase
   Development;
 - kiểm tra form đổi mật khẩu, trạng thái thành công và lỗi.

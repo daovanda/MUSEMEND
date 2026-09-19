@@ -21,7 +21,7 @@ repo root cũng hỗ trợ cấu hình root directory tại repo. Cả hai dùng
 `app/tool/vercel_build.sh`, giữ rewrite cho `/email-confirmed` và
 `/reset-password`, và publish `build/web` của Flutter.
 
-Script đọc phiên bản Flutter từ `app/.fvmrc`, tìm đúng release stable trong
+Script bật `PUBLIC_AUTH_PORTAL=true`, đọc phiên bản Flutter từ `app/.fvmrc`, tìm đúng release stable trong
 manifest chính thức của Flutter, xác minh SHA-256 từ manifest trước khi giải nén,
 cài dependencies theo `pubspec.lock`, rồi build release. `APP_ENV` phải được đặt
 tường minh là `development` hoặc `production`; không suy ra từ `VERCEL_ENV` vì

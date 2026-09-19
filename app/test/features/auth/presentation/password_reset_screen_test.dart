@@ -125,6 +125,12 @@ class _FakeAuthRepository implements AuthRepository {
   }) async {}
 
   @override
+  Future<void> verifyEmailConfirmation({required String tokenHash}) async {}
+
+  @override
+  Future<void> verifyPasswordRecovery({required String tokenHash}) async {}
+
+  @override
   Future<void> signIn({
     required String email,
     required String password,

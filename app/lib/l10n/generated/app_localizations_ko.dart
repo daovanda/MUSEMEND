@@ -105,6 +105,15 @@ class AppLocalizationsKo extends AppLocalizations {
       '이메일 확인이 완료됐어요. 계속하려면 MuseMend 앱으로 돌아가 주세요.';
 
   @override
+  String get authConfirmEmailTitle => '이메일 확인';
+
+  @override
+  String get authConfirmEmailPrompt => '아래 버튼을 눌러 이 이메일 주소를 확인해 주세요.';
+
+  @override
+  String get authConfirmEmailAction => '이메일 확인';
+
+  @override
   String get authLinkInvalidTitle => '링크가 유효하지 않거나 만료됐어요';
 
   @override

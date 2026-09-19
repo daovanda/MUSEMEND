@@ -7,10 +7,13 @@ import 'package:musemend/core/presentation/muse_ui.dart';
 import 'package:musemend/features/auth/application/auth_providers.dart';
 import 'package:musemend/features/auth/presentation/auth_error_message.dart';
 import 'package:musemend/features/auth/presentation/auth_web_notice.dart';
+import 'package:musemend/features/auth/domain/auth_callback_token.dart';
 import 'package:musemend/l10n/generated/app_localizations.dart';
 
 class PasswordResetScreen extends ConsumerStatefulWidget {
-  const PasswordResetScreen({super.key});
+  const PasswordResetScreen({this.callbackUri, super.key});
+
+  final Uri? callbackUri;
 
   @override
   ConsumerState<PasswordResetScreen> createState() =>
@@ -24,6 +27,8 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
   var _obscurePassword = true;
   var _obscureConfirmation = true;
   var _completed = false;
+  var _isVerifyingRecovery = false;
+  bool? _recoveryTokenVerified;
 
   @override
   void dispose() {
@@ -34,7 +39,10 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    if (ref.read(authSessionProvider).asData?.value == null) return;
+    if (_recoveryTokenVerified != true &&
+        ref.read(authSessionProvider).asData?.value == null) {
+      return;
+    }
     FocusManager.instance.primaryFocus?.unfocus();
     final controller = ref.read(authControllerProvider.notifier);
     final updated = await controller.updatePassword(
@@ -51,6 +59,19 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
     context.go('/sign-in?reset=success');
   }
 
+  Future<void> _verifyRecovery(AuthCallbackToken token) async {
+    setState(() => _isVerifyingRecovery = true);
+    final verified = await ref
+        .read(authControllerProvider.notifier)
+        .verifyPasswordRecovery(tokenHash: token.hash);
+    if (!mounted) return;
+    setState(() {
+      _isVerifyingRecovery = false;
+      _recoveryTokenVerified = verified;
+    });
+    if (verified) context.replace('/reset-password');
+  }
+
   void _returnToSignIn() {
     FocusManager.instance.primaryFocus?.unfocus();
     context.go('/sign-in');
@@ -62,6 +83,26 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
     final operation = ref.watch(authControllerProvider);
     final session = ref.watch(authSessionProvider);
     final publicPortal = ref.watch(publicAuthPortalModeProvider);
+    final callback = AuthCallbackToken.fromUri(widget.callbackUri ?? Uri.base);
+    if (callback?.type == AuthCallbackType.recovery &&
+        _recoveryTokenVerified == null) {
+      return AuthWebNotice(
+        title: strings.authResetPasswordTitle,
+        body: strings.authCreateNewPasswordSubtitle,
+        icon: Icons.lock_reset_rounded,
+        actionLabel: strings.authUpdatePassword,
+        onAction: () => _verifyRecovery(callback!),
+        isLoading: _isVerifyingRecovery,
+      );
+    }
+    if (callback?.type == AuthCallbackType.recovery &&
+        _recoveryTokenVerified == false) {
+      return AuthWebNotice(
+        title: strings.authLinkInvalidTitle,
+        body: strings.authLinkInvalidBody,
+        icon: Icons.link_off_rounded,
+      );
+    }
     return Theme(
       data: buildMuseTheme(),
       child:
@@ -71,6 +112,8 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
                 body: strings.authPasswordResetSuccess,
                 icon: Icons.lock_reset_rounded,
               )
+              : _recoveryTokenVerified == true
+              ? _buildForm(context, strings, operation, publicPortal)
               : session.when(
                 data: (value) {
                   if (value == null) {

@@ -106,6 +106,16 @@ class AppLocalizationsTh extends AppLocalizations {
       'ยืนยันอีเมลเรียบร้อยแล้ว กลับไปที่แอป MuseMend เพื่อดำเนินการต่อ';
 
   @override
+  String get authConfirmEmailTitle => 'ยืนยันอีเมลของคุณ';
+
+  @override
+  String get authConfirmEmailPrompt =>
+      'แตะปุ่มด้านล่างเพื่อยืนยันที่อยู่อีเมลนี้';
+
+  @override
+  String get authConfirmEmailAction => 'ยืนยันอีเมล';
+
+  @override
   String get authLinkInvalidTitle => 'ลิงก์นี้ไม่ถูกต้องหรือหมดอายุแล้ว';
 
   @override

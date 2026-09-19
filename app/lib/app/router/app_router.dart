@@ -27,11 +27,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ),
         GoRoute(
           path: '/email-confirmed',
-          builder: (context, state) => const EmailConfirmationScreen(),
+          builder:
+              (context, state) =>
+                  EmailConfirmationScreen(callbackUri: state.uri),
         ),
         GoRoute(
           path: '/reset-password',
-          builder: (context, state) => const PasswordResetScreen(),
+          builder:
+              (context, state) => PasswordResetScreen(callbackUri: state.uri),
         ),
       ],
     );
@@ -94,7 +97,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/reset-password',
-        builder: (context, state) => const PasswordResetScreen(),
+        builder: (context, state) => PasswordResetScreen(callbackUri: state.uri),
       ),
       GoRoute(
         path: '/onboarding',

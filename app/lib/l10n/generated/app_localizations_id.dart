@@ -106,6 +106,16 @@ class AppLocalizationsId extends AppLocalizations {
       'Email Anda telah dikonfirmasi. Kembali ke aplikasi MuseMend untuk melanjutkan.';
 
   @override
+  String get authConfirmEmailTitle => 'Konfirmasi email Anda';
+
+  @override
+  String get authConfirmEmailPrompt =>
+      'Ketuk tombol di bawah untuk mengonfirmasi alamat email ini.';
+
+  @override
+  String get authConfirmEmailAction => 'Konfirmasi email';
+
+  @override
   String get authLinkInvalidTitle =>
       'Tautan ini tidak valid atau sudah kedaluwarsa';
 

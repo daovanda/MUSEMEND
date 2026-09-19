@@ -21,9 +21,12 @@ nghiệp vụ. App Android/iOS tiếp tục sở hữu các luồng đó.
 `https://musemend-app.vercel.app/email-confirmed`; recovery luôn truyền
 `https://musemend-app.vercel.app/reset-password`. Vercel rewrite hai đường dẫn
 về Flutter `index.html`, Flutter dùng path URL strategy, và Supabase URL
-allow-list phải khai báo đúng cả hai callback. Callback thành công phải có
-session do Supabase Auth khôi phục; không có session thì giao diện báo link lỗi
-hoặc hết hạn, không tự nhận thành công.
+allow-list phải khai báo đúng cả hai callback. Template chuyển `TokenHash` trong
+URL fragment; portal chỉ gọi `verifyOTP` sau thao tác của người dùng để tránh
+phụ thuộc PKCE verifier ở thiết bị khác và hạn chế email-scanner tiêu thụ link.
+Chỉ báo thành công sau khi Supabase xác thực token; reset chỉ hiện form khi có
+recovery session hợp lệ. Callback cũ có session vẫn được chấp nhận trong giai
+đoạn chuyển tiếp.
 
 ## Hệ quả
 
@@ -33,7 +36,8 @@ hoặc hết hạn, không tự nhận thành công.
 - Supabase Auth Redirect URLs cần thêm `/email-confirmed` và giữ
   `/reset-password`; thay đổi cấu hình hosted phải được xác minh riêng.
 - Email links tiếp tục dùng token một lần của Supabase; không đưa token vào app
-  logs, database nghiệp vụ hoặc tài liệu.
+  logs, database nghiệp vụ hoặc tài liệu. Token nằm trong URL fragment để không
+  được gửi cùng HTTP request; portal xóa fragment sau xác thực.
 - Các test web cần xác minh không có sign-in route, callback thành công/lỗi và
   reset form chỉ xuất hiện khi có recovery session.
 

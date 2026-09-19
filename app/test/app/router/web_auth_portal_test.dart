@@ -8,13 +8,21 @@ import 'package:musemend/features/auth/domain/auth_session.dart';
 import 'package:musemend/l10n/generated/app_localizations.dart';
 
 void main() {
+  test('public callback portal is opt-in, preserving local web app QA', () {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    expect(container.read(publicAuthPortalModeProvider), isFalse);
+  });
+
   testWidgets('public web routes show email callbacks, never sign-in', (
     tester,
   ) async {
+    final repository = _FakeAuthRepository();
     final container = ProviderContainer(
       overrides: [
         publicAuthPortalModeProvider.overrideWithValue(true),
-        authRepositoryProvider.overrideWithValue(_FakeAuthRepository()),
+        authRepositoryProvider.overrideWithValue(repository),
       ],
     );
     addTearDown(container.dispose);
@@ -50,13 +58,23 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Đăng nhập'), findsNothing);
 
-    router.go('/email-confirmed');
+    router.go('/email-confirmed#token_hash=signup-token&type=email');
     await tester.pumpAndSettle();
+    expect(find.text('Xác nhận email'), findsNWidgets(2));
+    expect(repository.emailConfirmationTokenHash, isNull);
+    await tester.tap(find.widgetWithText(FilledButton, 'Xác nhận email'));
+    await tester.pumpAndSettle();
+    expect(repository.emailConfirmationTokenHash, 'signup-token');
     expect(find.text('Email đã được xác nhận'), findsOneWidget);
     expect(find.text('Đăng nhập'), findsNothing);
 
-    router.go('/reset-password');
+    router.go('/reset-password#token_hash=recovery-token&type=recovery');
     await tester.pumpAndSettle();
+    expect(find.byType(TextFormField), findsNothing);
+    expect(repository.passwordRecoveryTokenHash, isNull);
+    await tester.tap(find.widgetWithText(FilledButton, 'Đổi mật khẩu'));
+    await tester.pumpAndSettle();
+    expect(repository.passwordRecoveryTokenHash, 'recovery-token');
     final passwordFields = find.byType(TextFormField);
     expect(passwordFields, findsNWidgets(2));
     await tester.enterText(passwordFields.at(0), 'MuseMend-new-password');
@@ -74,6 +92,8 @@ class _FakeAuthRepository implements AuthRepository {
     userId: '00000000-0000-4000-8000-000000000001',
     email: 'qa@example.com',
   );
+  String? emailConfirmationTokenHash;
+  String? passwordRecoveryTokenHash;
 
   @override
   AuthSession? get currentSession => _session;
@@ -98,6 +118,16 @@ class _FakeAuthRepository implements AuthRepository {
     required String email,
     required String redirectTo,
   }) async {}
+
+  @override
+  Future<void> verifyEmailConfirmation({required String tokenHash}) async {
+    emailConfirmationTokenHash = tokenHash;
+  }
+
+  @override
+  Future<void> verifyPasswordRecovery({required String tokenHash}) async {
+    passwordRecoveryTokenHash = tokenHash;
+  }
 
   @override
   Future<void> updatePassword({required String password}) async {}

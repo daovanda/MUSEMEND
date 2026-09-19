@@ -7,12 +7,18 @@ class AuthWebNotice extends StatelessWidget {
     required this.title,
     required this.body,
     required this.icon,
+    this.actionLabel,
+    this.onAction,
+    this.isLoading = false,
     super.key,
   });
 
   final String title;
   final String body;
   final IconData icon;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +61,22 @@ class AuthWebNotice extends StatelessWidget {
                           height: 1.45,
                         ),
                       ),
+                      if (actionLabel != null && onAction != null) ...[
+                        const SizedBox(height: 22),
+                        FilledButton(
+                          onPressed: isLoading ? null : onAction,
+                          child:
+                              isLoading
+                                  ? const SizedBox.square(
+                                    dimension: 22,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                  : Text(actionLabel!),
+                        ),
+                      ],
                     ],
                   ),
                 ),

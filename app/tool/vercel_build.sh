@@ -82,6 +82,7 @@ fi
 "$flutter_bin" config --no-analytics --enable-web
 "$flutter_bin" pub get --enforce-lockfile
 "$flutter_bin" build web --release --no-pub \
+  --dart-define=PUBLIC_AUTH_PORTAL=true \
   --dart-define="APP_ENV=$APP_ENV" \
   --dart-define="SUPABASE_URL=$SUPABASE_URL" \
   --dart-define="SUPABASE_PUBLISHABLE_KEY=$SUPABASE_PUBLISHABLE_KEY"
