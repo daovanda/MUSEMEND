@@ -92,7 +92,7 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get authAccountCreated =>
-      'สร้างบัญชีแล้ว โปรดตรวจสอบอีเมลหากจำเป็นต้องยืนยัน';
+      'สร้างบัญชีแล้ว กรุณากรอกรหัส 6 หลักที่ส่งไปยังอีเมลเพื่อยืนยัน';
 
   @override
   String get webAuthLandingBody =>
@@ -110,7 +110,7 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get authConfirmEmailPrompt =>
-      'แตะปุ่มด้านล่างเพื่อยืนยันที่อยู่อีเมลนี้';
+      'กรอกรหัส 6 หลักในอีเมลเพื่อยืนยันบัญชีของคุณ';
 
   @override
   String get authConfirmEmailAction => 'ยืนยันอีเมล';
@@ -169,6 +169,12 @@ class AppLocalizationsTh extends AppLocalizations {
   String get authSignIn => 'เข้าสู่ระบบ';
 
   @override
+  String get authOr => 'หรือ';
+
+  @override
+  String get authContinueWithGoogle => 'ดำเนินการต่อด้วย Google';
+
+  @override
   String get authSwitchToSignIn => 'มีบัญชีแล้วใช่ไหม? เข้าสู่ระบบ';
 
   @override
@@ -198,17 +204,17 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get authResetPasswordSubtitle =>
-      'กรอกอีเมลเพื่อรับลิงก์ตั้งรหัสผ่านใหม่';
+      'กรอกอีเมลเพื่อรับรหัสตั้งรหัสผ่านใหม่ 6 หลัก';
 
   @override
   String get authCreateNewPasswordSubtitle =>
       'ตั้งรหัสผ่านใหม่สำหรับบัญชี MuseMend ของคุณ';
 
   @override
-  String get authSendResetLink => 'ส่งลิงก์';
+  String get authSendResetLink => 'ส่งรหัส';
 
   @override
-  String get authResetLinkSent => 'ส่งลิงก์แล้ว โปรดตรวจสอบอีเมลของคุณ';
+  String get authResetLinkSent => 'ส่งรหัสแล้ว โปรดตรวจสอบอีเมลของคุณ';
 
   @override
   String get authBackToSignIn => 'กลับไปเข้าสู่ระบบ';
@@ -249,6 +255,17 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get authVerifyOtp => 'ดำเนินการต่อ';
+
+  @override
+  String get authResendCode => 'ส่งรหัสอีกครั้ง';
+
+  @override
+  String authResendCodeCountdown(int seconds) {
+    return 'ส่งรหัสอีกครั้งใน $seconds วินาที';
+  }
+
+  @override
+  String get authResendCodeFailed => 'ส่งรหัสอีกครั้งไม่สำเร็จ โปรดลองใหม่';
 
   @override
   String get authUpdatePassword => 'เปลี่ยนรหัสผ่าน';
@@ -1163,4 +1180,18 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get defaultCloudName => 'ก้อนเมฆ';
+
+  @override
+  String get webAuthHomeTitle => 'MuseMend — พื้นที่สงบสำหรับคุณ';
+
+  @override
+  String get webAuthHomeBody =>
+      'MuseMend เป็นแอปสำหรับการเขียนและดูแลสุขภาวะทางอารมณ์ เมื่อคุณเลือกเข้าสู่ระบบด้วย Google เราจะใช้เพียงชื่อ อีเมล และรูปโปรไฟล์เพื่อสร้างบัญชีเท่านั้น และจะไม่อ่านเนื้อหา Gmail รายชื่อติดต่อ หรือ Google Drive ของคุณ';
+
+  @override
+  String get webAuthPrivacyGoogleData =>
+      'ข้อมูล Google ใช้เพื่อยืนยันตัวตนและสร้างโปรไฟล์ MuseMend ของคุณเท่านั้น เราไม่เข้าถึงหรือแชร์เนื้อหา Gmail รายชื่อติดต่อ หรือ Google Drive ของคุณ';
+
+  @override
+  String get webAuthBackHome => 'กลับไปที่ MuseMend';
 }

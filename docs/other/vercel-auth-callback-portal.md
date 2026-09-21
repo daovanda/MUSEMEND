@@ -1,14 +1,18 @@
-# Vercel auth callback portal
+# Vercel public auth portal
 
 **Trạng thái:** `in-progress`
-**Cập nhật:** 2026-09-19
+**Cập nhật:** 2026-09-21
+
+> Theo [ADR-0005](./adr-0005-in-app-email-otp.md), email mới chỉ gửi OTP 6 số
+> và hoàn tất xác nhận/đặt lại mật khẩu trong ứng dụng. Portal không còn là đích
+> của email mới, nhưng là homepage công khai cho Google OAuth branding.
 
 ## 1. Mục tiêu và phạm vi
 
-Deploy Flutter Web auth callback portal vào project Vercel hiện có
-`musemend-app`, giữ nguyên domain `https://musemend-app.vercel.app`. Portal chỉ
-phục vụ callback email xác nhận và khôi phục mật khẩu; không phải bản web để
-đăng nhập hoặc sử dụng nghiệp vụ.
+Deploy Flutter Web public information portal vào project Vercel hiện có
+`musemend-app`, giữ nguyên domain `https://musemend-app.vercel.app`. Portal
+phục vụ homepage, Privacy, Terms và callback email lịch sử; không phải bản web
+để đăng nhập hoặc sử dụng nghiệp vụ.
 
 Không xóa project hiện tại để sửa nội dung sai. Project hiện tại sở hữu domain;
 xóa project sẽ làm domain mất liên kết nhưng không sửa source hoặc callback. Thay
@@ -18,8 +22,8 @@ vào đó kết nối GitHub repository `daovanda/MUSEMEND` vào đúng project 
 
 `app/vercel.json` phù hợp khi Project Root Directory là `app`; `vercel.json` ở
 repo root cũng hỗ trợ cấu hình root directory tại repo. Cả hai dùng cùng script
-`app/tool/vercel_build.sh`, giữ rewrite cho `/email-confirmed` và
-`/reset-password`, và publish `build/web` của Flutter.
+`app/tool/vercel_build.sh`, giữ rewrite cho `/email-confirmed`,
+`/reset-password`, `/privacy`, `/terms`, và publish `build/web` của Flutter.
 
 Script bật `PUBLIC_AUTH_PORTAL=true`, đọc phiên bản Flutter từ `app/.fvmrc`, tìm đúng release stable trong
 manifest chính thức của Flutter, xác minh SHA-256 từ manifest trước khi giải nén,
@@ -77,8 +81,9 @@ không tái sử dụng token đã mở.
 - Flutter analyze, test và `flutter build web --release` kiểm tra ứng dụng.
 - Kiểm tra artifact chứa `index.html`, `vercel.json` routing và route
   `/email-confirmed`, `/reset-password`, nhưng không có file cấu hình cục bộ.
-- Preview URL phải xác nhận trang root không có sign-in; route confirmation/reset
-  phải tải Flutter portal, không trả 404/login.
+- Preview URL phải xác nhận trang root mô tả MuseMend, liên kết được tới Privacy
+  và Terms, không có sign-in; route confirmation/reset phải tải Flutter portal,
+  không trả 404/login.
 - Với cấu hình QA tạm thời, tạo email Dev thử mới để kiểm tra xác nhận và reset;
   token phải còn hạn, chưa sử dụng, và được phát từ cùng Supabase Development.
 

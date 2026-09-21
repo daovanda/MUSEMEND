@@ -5,65 +5,29 @@
       <strong style="font-size:24px;color:#477685">MuseMend</strong>
       <div style="height:4px;width:56px;margin:16px 0 24px;background:#9cc9b2"></div>
       {{ if eq .Data.language_code "vi" }}
-      <h1>Chào mừng bạn đến với MuseMend</h1>
-      <p>Chỉ còn một bước nhỏ để xác nhận email và bắt đầu chăm sóc bản thân theo cách nhẹ nhàng của riêng bạn.</p>
-      <p style="font-size:28px;font-weight:800;letter-spacing:6px">{{ .Token }}</p><a href="https://musemend-app.vercel.app/email-confirmed" style="display:inline-block;padding:13px 22px;border-radius:999px;background:#477685;color:#fff;text-decoration:none;font-weight:700">Mở trang xác nhận</a>
-      <p>Liên kết chỉ dùng một lần và hết hạn sau 1 giờ. Nếu bạn không tạo tài khoản MuseMend, hãy bỏ qua email này.</p>
+      <h1>Chào mừng bạn đến với MuseMend</h1><p>Hãy quay lại ứng dụng MuseMend và nhập mã bên dưới để xác nhận email.</p><p style="font-size:28px;font-weight:800;letter-spacing:6px">{{ .Token }}</p><p>Mã chỉ dùng một lần và hết hạn sau 1 giờ. Nếu bạn không tạo tài khoản MuseMend, hãy bỏ qua email này.</p>
       {{ else if eq .Data.language_code "ja" }}
-      <h1>MuseMendへようこそ</h1>
-      <p>メールアドレスを確認して、自分をいたわる小さな一歩を始めましょう。</p>
-      <p style="font-size:28px;font-weight:800;letter-spacing:6px">{{ .Token }}</p><a href="https://musemend-app.vercel.app/email-confirmed" style="display:inline-block;padding:13px 22px;border-radius:999px;background:#477685;color:#fff;text-decoration:none;font-weight:700">確認ページを開く</a>
-      <p>リンクは1回のみ使用でき、1時間で期限切れになります。登録した覚えがない場合は無視してください。</p>
+      <h1>MuseMendへようこそ</h1><p>MuseMendアプリに戻り、下のコードを入力してメールアドレスを確認してください。</p><p style="font-size:28px;font-weight:800;letter-spacing:6px">{{ .Token }}</p><p>コードは1回のみ使用でき、1時間で期限切れになります。登録した覚えがない場合は無視してください。</p>
       {{ else if eq .Data.language_code "fr" }}
-      <h1>Bienvenue sur MuseMend</h1>
-      <p>Encore un petit pas : confirmez votre adresse e-mail pour commencer à prendre soin de vous à votre rythme.</p>
-      <p style="font-size:28px;font-weight:800;letter-spacing:6px">{{ .Token }}</p><a href="https://musemend-app.vercel.app/email-confirmed" style="display:inline-block;padding:13px 22px;border-radius:999px;background:#477685;color:#fff;text-decoration:none;font-weight:700">Ouvrir la page de confirmation</a>
-      <p>Ce lien est à usage unique et expire dans une heure. Si vous n’avez rien demandé, ignorez cet e-mail.</p>
+      <h1>Bienvenue sur MuseMend</h1><p>Retournez dans l’application MuseMend et saisissez le code ci-dessous pour confirmer votre e-mail.</p><p style="font-size:28px;font-weight:800;letter-spacing:6px">{{ .Token }}</p><p>Ce code à usage unique expire dans une heure. Si vous n’avez pas créé de compte MuseMend, ignorez cet e-mail.</p>
       {{ else if eq .Data.language_code "es" }}
-      <h1>Te damos la bienvenida a MuseMend</h1>
-      <p>Solo falta un pequeño paso: confirma tu correo y empieza a cuidarte a tu propio ritmo.</p>
-      <p style="font-size:28px;font-weight:800;letter-spacing:6px">{{ .Token }}</p><a href="https://musemend-app.vercel.app/email-confirmed" style="display:inline-block;padding:13px 22px;border-radius:999px;background:#477685;color:#fff;text-decoration:none;font-weight:700">Abrir la página de confirmación</a>
-      <p>Este enlace se puede usar una vez y vence en 1 hora. Si no te registraste, ignora este correo.</p>
+      <h1>Te damos la bienvenida a MuseMend</h1><p>Vuelve a la aplicación MuseMend e introduce el código de abajo para confirmar tu correo.</p><p style="font-size:28px;font-weight:800;letter-spacing:6px">{{ .Token }}</p><p>Este código se puede usar una vez y vence en 1 hora. Si no creaste una cuenta de MuseMend, ignora este correo.</p>
       {{ else if eq .Data.language_code "it" }}
-      <h1>Benvenuto su MuseMend</h1>
-      <p>Manca solo un piccolo passo: conferma la tua email e inizia a prenderti cura di te con i tuoi tempi.</p>
-      <p style="font-size:28px;font-weight:800;letter-spacing:6px">{{ .Token }}</p><a href="https://musemend-app.vercel.app/email-confirmed" style="display:inline-block;padding:13px 22px;border-radius:999px;background:#477685;color:#fff;text-decoration:none;font-weight:700">Apri la pagina di conferma</a>
-      <p>Questo link è monouso e scade dopo 1 ora. Se non ti sei registrato, ignora questa email.</p>
+      <h1>Benvenuto su MuseMend</h1><p>Torna nell’app MuseMend e inserisci il codice qui sotto per confermare la tua email.</p><p style="font-size:28px;font-weight:800;letter-spacing:6px">{{ .Token }}</p><p>Questo codice monouso scade dopo un’ora. Se non hai creato un account MuseMend, ignora questa email.</p>
       {{ else if eq .Data.language_code "de" }}
-      <h1>Willkommen bei MuseMend</h1>
-      <p>Nur noch ein kleiner Schritt: Bestätige deine E-Mail-Adresse und beginne, gut für dich zu sorgen – in deinem Tempo.</p>
-      <p style="font-size:28px;font-weight:800;letter-spacing:6px">{{ .Token }}</p><a href="https://musemend-app.vercel.app/email-confirmed" style="display:inline-block;padding:13px 22px;border-radius:999px;background:#477685;color:#fff;text-decoration:none;font-weight:700">Bestätigungsseite öffnen</a>
-      <p>Dieser Link ist einmal verwendbar und läuft nach 1 Stunde ab. Wenn du dich nicht registriert hast, ignoriere diese E-Mail.</p>
+      <h1>Willkommen bei MuseMend</h1><p>Kehre zur MuseMend-App zurück und gib den unten stehenden Code ein, um deine E-Mail-Adresse zu bestätigen.</p><p style="font-size:28px;font-weight:800;letter-spacing:6px">{{ .Token }}</p><p>Dieser Code kann einmal verwendet werden und läuft nach 1 Stunde ab. Wenn du kein MuseMend-Konto erstellt hast, ignoriere diese E-Mail.</p>
       {{ else if eq .Data.language_code "ko" }}
-      <h1>MuseMend에 오신 것을 환영해요</h1>
-      <p>이메일을 확인하면 나만의 속도로 나를 돌보는 여정을 시작할 수 있어요.</p>
-      <p style="font-size:28px;font-weight:800;letter-spacing:6px">{{ .Token }}</p><a href="https://musemend-app.vercel.app/email-confirmed" style="display:inline-block;padding:13px 22px;border-radius:999px;background:#477685;color:#fff;text-decoration:none;font-weight:700">확인 페이지 열기</a>
-      <p>이 링크는 한 번만 사용할 수 있으며 1시간 후 만료됩니다. 가입하지 않았다면 무시해 주세요.</p>
+      <h1>MuseMend에 오신 것을 환영해요</h1><p>MuseMend 앱으로 돌아가 아래 코드를 입력해 이메일을 확인해 주세요.</p><p style="font-size:28px;font-weight:800;letter-spacing:6px">{{ .Token }}</p><p>이 코드는 한 번만 사용할 수 있으며 1시간 후 만료됩니다. MuseMend 계정을 만들지 않았다면 무시해 주세요.</p>
       {{ else if eq .Data.language_code "pt" }}
-      <h1>Boas-vindas à MuseMend</h1>
-      <p>Falta só um pequeno passo: confirme seu e-mail e comece a cuidar de si no seu próprio ritmo.</p>
-      <p style="font-size:28px;font-weight:800;letter-spacing:6px">{{ .Token }}</p><a href="https://musemend-app.vercel.app/email-confirmed" style="display:inline-block;padding:13px 22px;border-radius:999px;background:#477685;color:#fff;text-decoration:none;font-weight:700">Abrir página de confirmação</a>
-      <p>Este link é de uso único e expira em 1 hora. Se você não se cadastrou, ignore este e-mail.</p>
+      <h1>Boas-vindas à MuseMend</h1><p>Volte à aplicação MuseMend e introduza o código abaixo para confirmar o seu e-mail.</p><p style="font-size:28px;font-weight:800;letter-spacing:6px">{{ .Token }}</p><p>Este código de uso único expira em 1 hora. Se não criou uma conta MuseMend, ignore este e-mail.</p>
       {{ else if eq .Data.language_code "ms" }}
-      <h1>Selamat datang ke MuseMend</h1>
-      <p>Satu langkah kecil lagi: sahkan e-mel anda dan mulakan perjalanan menjaga diri mengikut rentak sendiri.</p>
-      <p style="font-size:28px;font-weight:800;letter-spacing:6px">{{ .Token }}</p><a href="https://musemend-app.vercel.app/email-confirmed" style="display:inline-block;padding:13px 22px;border-radius:999px;background:#477685;color:#fff;text-decoration:none;font-weight:700">Buka halaman pengesahan</a>
-      <p>Pautan ini boleh digunakan sekali dan tamat tempoh dalam 1 jam. Jika anda tidak mendaftar, abaikan e-mel ini.</p>
+      <h1>Selamat datang ke MuseMend</h1><p>Kembali ke aplikasi MuseMend dan masukkan kod di bawah untuk mengesahkan e-mel anda.</p><p style="font-size:28px;font-weight:800;letter-spacing:6px">{{ .Token }}</p><p>Kod sekali guna ini tamat tempoh dalam 1 jam. Jika anda tidak mencipta akaun MuseMend, abaikan e-mel ini.</p>
       {{ else if eq .Data.language_code "id" }}
-      <h1>Selamat datang di MuseMend</h1>
-      <p>Satu langkah kecil lagi: konfirmasi emailmu dan mulai merawat diri dengan ritmemu sendiri.</p>
-      <p style="font-size:28px;font-weight:800;letter-spacing:6px">{{ .Token }}</p><a href="https://musemend-app.vercel.app/email-confirmed" style="display:inline-block;padding:13px 22px;border-radius:999px;background:#477685;color:#fff;text-decoration:none;font-weight:700">Buka halaman konfirmasi</a>
-      <p>Tautan ini hanya dapat digunakan sekali dan kedaluwarsa dalam 1 jam. Jika tidak mendaftar, abaikan email ini.</p>
+      <h1>Selamat datang di MuseMend</h1><p>Kembali ke aplikasi MuseMend dan masukkan kode di bawah untuk mengonfirmasi emailmu.</p><p style="font-size:28px;font-weight:800;letter-spacing:6px">{{ .Token }}</p><p>Kode sekali pakai ini kedaluwarsa dalam 1 jam. Jika kamu tidak membuat akun MuseMend, abaikan email ini.</p>
       {{ else if eq .Data.language_code "th" }}
-      <h1>ยินดีต้อนรับสู่ MuseMend</h1>
-      <p>อีกเพียงก้าวเล็ก ๆ ยืนยันอีเมลเพื่อเริ่มดูแลตัวเองในจังหวะที่เหมาะกับคุณ</p>
-      <p style="font-size:28px;font-weight:800;letter-spacing:6px">{{ .Token }}</p><a href="https://musemend-app.vercel.app/email-confirmed" style="display:inline-block;padding:13px 22px;border-radius:999px;background:#477685;color:#fff;text-decoration:none;font-weight:700">เปิดหน้าการยืนยัน</a>
-      <p>ลิงก์นี้ใช้ได้ครั้งเดียวและหมดอายุใน 1 ชั่วโมง หากไม่ได้สมัคร โปรดละเว้นอีเมลนี้</p>
+      <h1>ยินดีต้อนรับสู่ MuseMend</h1><p>กลับไปที่แอป MuseMend แล้วกรอกรหัสด้านล่างเพื่อยืนยันอีเมลของคุณ</p><p style="font-size:28px;font-weight:800;letter-spacing:6px">{{ .Token }}</p><p>รหัสนี้ใช้ได้ครั้งเดียวและหมดอายุใน 1 ชั่วโมง หากคุณไม่ได้สร้างบัญชี MuseMend โปรดละเว้นอีเมลนี้</p>
       {{ else }}
-      <h1>Welcome to MuseMend</h1>
-      <p>Just one small step left: confirm your email and begin caring for yourself at your own pace.</p>
-      <p style="font-size:28px;font-weight:800;letter-spacing:6px">{{ .Token }}</p><a href="https://musemend-app.vercel.app/email-confirmed" style="display:inline-block;padding:13px 22px;border-radius:999px;background:#477685;color:#fff;text-decoration:none;font-weight:700">Open confirmation page</a>
-      <p>This one-time link expires in 1 hour. If you did not create a MuseMend account, ignore this email.</p>
+      <h1>Welcome to MuseMend</h1><p>Return to the MuseMend app and enter the code below to confirm your email.</p><p style="font-size:28px;font-weight:800;letter-spacing:6px">{{ .Token }}</p><p>This one-time code expires in 1 hour. If you did not create a MuseMend account, ignore this email.</p>
       {{ end }}
       <p style="color:#66758a;font-size:13px">MuseMend · One small step at a time.</p>
     </div>

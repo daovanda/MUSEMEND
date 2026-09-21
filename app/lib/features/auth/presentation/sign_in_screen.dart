@@ -2,19 +2,13 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:musemend/app/theme/muse_colors.dart';
 import 'package:musemend/core/localization/supported_locales.dart';
 import 'package:musemend/features/auth/application/auth_providers.dart';
+import 'package:musemend/features/auth/presentation/auth_input_decoration_theme.dart';
 import 'package:musemend/features/auth/presentation/auth_error_message.dart';
 import 'package:musemend/l10n/generated/app_localizations.dart';
-
-const publicWebAuthOrigin = 'https://musemend-app.vercel.app';
-
-String passwordResetRedirectUri() {
-  return '$publicWebAuthOrigin/reset-password';
-}
-
-String emailConfirmationRedirectUri() => '$publicWebAuthOrigin/email-confirmed';
 
 class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key, this.showPasswordResetSuccess = false});
@@ -32,7 +26,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   final _passwordController = TextEditingController();
   var _isSignUp = false;
   var _isResettingPassword = false;
-  var _passwordResetSent = false;
   var _obscurePassword = true;
 
   @override
@@ -66,10 +59,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     if (_isResettingPassword) {
       final succeeded = await controller.requestPasswordReset(
         email: _emailController.text,
-        redirectTo: passwordResetRedirectUri(),
       );
       if (!mounted || !succeeded) return;
-      setState(() => _passwordResetSent = true);
+      context.go('/reset-password', extra: _emailController.text.trim());
       return;
     }
     final languageCode = resolveSupportedLanguageCode(
@@ -82,17 +74,20 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
               email: _emailController.text,
               password: _passwordController.text,
               languageCode: languageCode,
-              emailRedirectTo: emailConfirmationRedirectUri(),
             )
             : await controller.signIn(
               email: _emailController.text,
               password: _passwordController.text,
             );
     if (!mounted || !succeeded || !_isSignUp) return;
-    final strings = AppLocalizations.of(context);
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(strings.authAccountCreated)));
+    context.go('/confirm-email', extra: _emailController.text.trim());
+  }
+
+  Future<void> _signInWithGoogle() async {
+    FocusManager.instance.primaryFocus?.unfocus();
+    await ref.read(authControllerProvider.notifier).signInWithGoogle();
+    // A successful OAuth hand-off updates authSessionProvider. The router then
+    // takes new users to onboarding and returning users into the app.
   }
 
   void _toggleMode() {
@@ -100,7 +95,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     setState(() {
       _isSignUp = !_isSignUp;
       _isResettingPassword = false;
-      _passwordResetSent = false;
     });
   }
 
@@ -109,7 +103,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     setState(() {
       _isSignUp = false;
       _isResettingPassword = true;
-      _passwordResetSent = false;
     });
   }
 
@@ -118,7 +111,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     setState(() {
       _isSignUp = false;
       _isResettingPassword = false;
-      _passwordResetSent = false;
     });
   }
 
@@ -164,7 +156,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                                         isSignUp: _isSignUp,
                                         isResettingPassword:
                                             _isResettingPassword,
-                                        passwordResetSent: _passwordResetSent,
                                         obscurePassword: _obscurePassword,
                                         operation: operation,
                                         displayNameController:
@@ -172,6 +163,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                                         emailController: _emailController,
                                         passwordController: _passwordController,
                                         onSubmit: _submit,
+                                        onContinueWithGoogle:
+                                            _signInWithGoogle,
                                         onToggleMode: _toggleMode,
                                         onForgotPassword: _showPasswordReset,
                                         onBackToSignIn: _backToSignIn,
@@ -199,7 +192,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                                         isSignUp: _isSignUp,
                                         isResettingPassword:
                                             _isResettingPassword,
-                                        passwordResetSent: _passwordResetSent,
                                         obscurePassword: _obscurePassword,
                                         operation: operation,
                                         displayNameController:
@@ -207,6 +199,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                                         emailController: _emailController,
                                         passwordController: _passwordController,
                                         onSubmit: _submit,
+                                        onContinueWithGoogle:
+                                            _signInWithGoogle,
                                         onToggleMode: _toggleMode,
                                         onForgotPassword: _showPasswordReset,
                                         onBackToSignIn: _backToSignIn,
@@ -468,13 +462,13 @@ class _AuthCard extends StatelessWidget {
     required this.formKey,
     required this.isSignUp,
     required this.isResettingPassword,
-    required this.passwordResetSent,
     required this.obscurePassword,
     required this.operation,
     required this.displayNameController,
     required this.emailController,
     required this.passwordController,
     required this.onSubmit,
+    required this.onContinueWithGoogle,
     required this.onToggleMode,
     required this.onForgotPassword,
     required this.onBackToSignIn,
@@ -484,13 +478,13 @@ class _AuthCard extends StatelessWidget {
   final GlobalKey<FormState> formKey;
   final bool isSignUp;
   final bool isResettingPassword;
-  final bool passwordResetSent;
   final bool obscurePassword;
   final AsyncValue<void> operation;
   final TextEditingController displayNameController;
   final TextEditingController emailController;
   final TextEditingController passwordController;
   final VoidCallback onSubmit;
+  final VoidCallback onContinueWithGoogle;
   final VoidCallback onToggleMode;
   final VoidCallback onForgotPassword;
   final VoidCallback onBackToSignIn;
@@ -499,34 +493,6 @@ class _AuthCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context);
-    final fieldDecoration = InputDecorationTheme(
-      filled: true,
-      fillColor: Colors.white.withValues(alpha: .68),
-      labelStyle: const TextStyle(color: MuseColors.mutedInk),
-      prefixIconColor: MuseColors.teal,
-      suffixIconColor: MuseColors.mutedInk,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: BorderSide(
-          color: Colors.white.withValues(alpha: .86),
-          width: 1.2,
-        ),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: const BorderSide(color: MuseColors.leaf, width: 1.5),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: const BorderSide(color: MuseColors.coral),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: const BorderSide(color: MuseColors.coral, width: 1.5),
-      ),
-    );
-
     return ClipRRect(
       borderRadius: BorderRadius.circular(30),
       child: BackdropFilter(
@@ -546,10 +512,7 @@ class _AuthCard extends StatelessWidget {
             ],
           ),
           child: Theme(
-            data: Theme.of(context).copyWith(
-              brightness: Brightness.light,
-              inputDecorationTheme: fieldDecoration,
-            ),
+            data: buildAuthFormTheme(Theme.of(context)),
             child: Column(
               children: [
                 AnimatedSwitcher(
@@ -709,20 +672,6 @@ class _AuthCard extends StatelessWidget {
                           ),
                         ],
                       ],
-                      if (passwordResetSent) ...[
-                        const SizedBox(height: 12),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: MuseColors.mint.withValues(alpha: .32),
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: Text(
-                            strings.authResetLinkSent,
-                            style: const TextStyle(color: MuseColors.ink),
-                          ),
-                        ),
-                      ],
                       if (operation.hasError) ...[
                         const SizedBox(height: 12),
                         Container(
@@ -771,6 +720,46 @@ class _AuthCard extends StatelessWidget {
                                   ),
                                 ),
                       ),
+                      if (!isResettingPassword) ...[
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            const Expanded(child: Divider()),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
+                              child: Text(
+                                strings.authOr,
+                                style: const TextStyle(
+                                  color: MuseColors.mutedInk,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            const Expanded(child: Divider()),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: MuseColors.ink,
+                            minimumSize: const Size.fromHeight(52),
+                            side: BorderSide(
+                              color: MuseColors.teal.withValues(alpha: .35),
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                          ),
+                          onPressed:
+                              operation.isLoading ? null : onContinueWithGoogle,
+                          child: Text(
+                            strings.authContinueWithGoogle,
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

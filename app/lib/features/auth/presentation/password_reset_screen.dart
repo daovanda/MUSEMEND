@@ -6,14 +6,17 @@ import 'package:musemend/app/theme/muse_theme.dart';
 import 'package:musemend/core/presentation/muse_ui.dart';
 import 'package:musemend/features/auth/application/auth_providers.dart';
 import 'package:musemend/features/auth/presentation/auth_error_message.dart';
+import 'package:musemend/features/auth/presentation/auth_input_decoration_theme.dart';
+import 'package:musemend/features/auth/presentation/auth_otp_resend_button.dart';
 import 'package:musemend/features/auth/presentation/auth_web_notice.dart';
 import 'package:musemend/features/auth/domain/auth_callback_token.dart';
 import 'package:musemend/l10n/generated/app_localizations.dart';
 
 class PasswordResetScreen extends ConsumerStatefulWidget {
-  const PasswordResetScreen({this.callbackUri, super.key});
+  const PasswordResetScreen({this.callbackUri, this.initialEmail, super.key});
 
   final Uri? callbackUri;
+  final String? initialEmail;
 
   @override
   ConsumerState<PasswordResetScreen> createState() =>
@@ -22,6 +25,7 @@ class PasswordResetScreen extends ConsumerStatefulWidget {
 
 class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _emailFieldKey = GlobalKey<FormFieldState<String>>();
   final _passwordController = TextEditingController();
   final _confirmationController = TextEditingController();
   final _emailController = TextEditingController();
@@ -30,7 +34,15 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
   var _obscureConfirmation = true;
   var _completed = false;
   var _isVerifyingRecovery = false;
+  var _hasOtpError = false;
+  var _resendFailed = false;
   bool? _recoveryTokenVerified;
+
+  @override
+  void initState() {
+    super.initState();
+    _emailController.text = widget.initialEmail?.trim() ?? '';
+  }
 
   @override
   void dispose() {
@@ -43,10 +55,7 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_recoveryTokenVerified != true &&
-        ref.read(authSessionProvider).asData?.value == null) {
-      return;
-    }
+    if (_recoveryTokenVerified != true) return;
     FocusManager.instance.primaryFocus?.unfocus();
     final controller = ref.read(authControllerProvider.notifier);
     final updated = await controller.updatePassword(
@@ -79,7 +88,11 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
   Future<void> _verifyRecoveryOtp() async {
     if (!_formKey.currentState!.validate()) return;
     FocusManager.instance.primaryFocus?.unfocus();
-    setState(() => _isVerifyingRecovery = true);
+    setState(() {
+      _isVerifyingRecovery = true;
+      _hasOtpError = false;
+      _resendFailed = false;
+    });
     final verified = await ref
         .read(authControllerProvider.notifier)
         .verifyPasswordRecoveryOtp(
@@ -90,7 +103,22 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
     setState(() {
       _isVerifyingRecovery = false;
       _recoveryTokenVerified = verified;
+      _hasOtpError = !verified;
     });
+  }
+
+  Future<bool> _resendRecoveryOtp() async {
+    if (!(_emailFieldKey.currentState?.validate() ?? false)) return false;
+    setState(() {
+      _resendFailed = false;
+      _hasOtpError = false;
+    });
+    final resent = await ref
+        .read(authControllerProvider.notifier)
+        .resendPasswordRecoveryOtp(email: _emailController.text);
+    if (!mounted) return false;
+    setState(() => _resendFailed = !resent);
+    return resent;
   }
 
   void _returnToSignIn() {
@@ -102,8 +130,13 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context);
     final operation = ref.watch(authControllerProvider);
-    final session = ref.watch(authSessionProvider);
     final publicPortal = ref.watch(publicAuthPortalModeProvider);
+    if (!publicPortal && _recoveryTokenVerified != true) {
+      return Theme(
+        data: buildMuseTheme(),
+        child: _buildOtpForm(context, strings),
+      );
+    }
     final callback = AuthCallbackToken.fromUri(widget.callbackUri ?? Uri.base);
     if (callback?.type == AuthCallbackType.recovery &&
         _recoveryTokenVerified == null) {
@@ -136,38 +169,45 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
               )
               : _recoveryTokenVerified == true
               ? _buildForm(context, strings, operation, publicPortal)
-              : session.when(
-                data: (value) {
-                  if (value == null) {
-                    return publicPortal
-                        ? _buildOtpForm(context, strings)
-                        : AuthWebNotice(
+              : ref
+                  .watch(authSessionProvider)
+                  .when(
+                    data: (value) {
+                      if (value == null) {
+                        return publicPortal
+                            ? _buildOtpForm(context, strings)
+                            : AuthWebNotice(
+                              title: strings.authLinkInvalidTitle,
+                              body: strings.authLinkInvalidBody,
+                              icon: Icons.link_off_rounded,
+                            );
+                      }
+                      return _buildForm(
+                        context,
+                        strings,
+                        operation,
+                        publicPortal,
+                      );
+                    },
+                    error:
+                        (_, _) => AuthWebNotice(
                           title: strings.authLinkInvalidTitle,
                           body: strings.authLinkInvalidBody,
                           icon: Icons.link_off_rounded,
-                        );
-                  }
-                  return _buildForm(context, strings, operation, publicPortal);
-                },
-                error:
-                    (_, _) => AuthWebNotice(
-                      title: strings.authLinkInvalidTitle,
-                      body: strings.authLinkInvalidBody,
-                      icon: Icons.link_off_rounded,
-                    ),
-                loading:
-                    () => Scaffold(
-                      backgroundColor: MuseColors.cream,
-                      body: MusePageBackground(
-                        accent: MuseColors.mint,
-                        child: const Center(
-                          child: CircularProgressIndicator(
-                            color: MuseColors.teal,
+                        ),
+                    loading:
+                        () => Scaffold(
+                          backgroundColor: MuseColors.cream,
+                          body: MusePageBackground(
+                            accent: MuseColors.mint,
+                            child: const Center(
+                              child: CircularProgressIndicator(
+                                color: MuseColors.teal,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-              ),
+                  ),
     );
   }
 
@@ -184,97 +224,117 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
                 constraints: const BoxConstraints(maxWidth: 440),
                 child: MuseGlassCard(
                   padding: const EdgeInsets.fromLTRB(24, 26, 24, 22),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const Center(
-                          child: MuseBrandMark(width: 82, height: 58),
-                        ),
-                        const SizedBox(height: 14),
-                        Text(
-                          strings.authResetPasswordTitle,
-                          textAlign: TextAlign.center,
-                          style: Theme.of(
-                            context,
-                          ).textTheme.headlineSmall?.copyWith(
-                            color: MuseColors.ink,
-                            fontWeight: FontWeight.w800,
+                  child: Theme(
+                    data: buildAuthFormTheme(Theme.of(context)),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const Center(
+                            child: MuseBrandMark(width: 82, height: 58),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          strings.authRecoveryOtpPrompt,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 22),
-                        TextFormField(
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          autofillHints: const [AutofillHints.email],
-                          decoration: InputDecoration(
-                            labelText: strings.email,
-                            prefixIcon: const Icon(
-                              Icons.alternate_email_rounded,
+                          const SizedBox(height: 14),
+                          Text(
+                            strings.authResetPasswordTitle,
+                            textAlign: TextAlign.center,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.headlineSmall?.copyWith(
+                              color: MuseColors.ink,
+                              fontWeight: FontWeight.w800,
                             ),
                           ),
-                          validator:
-                              (value) =>
-                                  RegExp(
-                                        r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
-                                      ).hasMatch(value?.trim() ?? '')
-                                      ? null
-                                      : strings.authEmailInvalid,
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _otpController,
-                          keyboardType: TextInputType.number,
-                          textInputAction: TextInputAction.done,
-                          maxLength: 6,
-                          autofillHints: const [AutofillHints.oneTimeCode],
-                          decoration: InputDecoration(
-                            labelText: strings.authOtpCode,
-                            prefixIcon: const Icon(Icons.password_rounded),
-                            counterText: '',
-                          ),
-                          validator:
-                              (value) =>
-                                  RegExp(
-                                        r'^\d{6}$',
-                                      ).hasMatch(value?.trim() ?? '')
-                                      ? null
-                                      : strings.authOtpInvalid,
-                          onFieldSubmitted:
-                              (_) =>
-                                  _isVerifyingRecovery
-                                      ? null
-                                      : _verifyRecoveryOtp(),
-                        ),
-                        if (ref.watch(authControllerProvider).hasError) ...[
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 8),
                           Text(
-                            strings.authOtpInvalid,
-                            style: const TextStyle(color: Color(0xFF9A473D)),
+                            strings.authRecoveryOtpPrompt,
+                            textAlign: TextAlign.center,
                           ),
+                          const SizedBox(height: 22),
+                          TextFormField(
+                            key: _emailFieldKey,
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            autofillHints: const [AutofillHints.email],
+                            decoration: InputDecoration(
+                              labelText: strings.email,
+                              prefixIcon: const Icon(
+                                Icons.alternate_email_rounded,
+                              ),
+                            ),
+                            validator:
+                                (value) =>
+                                    RegExp(
+                                          r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
+                                        ).hasMatch(value?.trim() ?? '')
+                                        ? null
+                                        : strings.authEmailInvalid,
+                          ),
+                          const SizedBox(height: 12),
+                          TextFormField(
+                            controller: _otpController,
+                            keyboardType: TextInputType.number,
+                            textInputAction: TextInputAction.done,
+                            maxLength: 6,
+                            autofillHints: const [AutofillHints.oneTimeCode],
+                            decoration: InputDecoration(
+                              labelText: strings.authOtpCode,
+                              prefixIcon: const Icon(Icons.password_rounded),
+                              counterText: '',
+                            ),
+                            validator:
+                                (value) =>
+                                    RegExp(
+                                          r'^\d{6}$',
+                                        ).hasMatch(value?.trim() ?? '')
+                                        ? null
+                                        : strings.authOtpInvalid,
+                            onFieldSubmitted:
+                                (_) =>
+                                    _isVerifyingRecovery
+                                        ? null
+                                        : _verifyRecoveryOtp(),
+                          ),
+                          if (_hasOtpError) ...[
+                            const SizedBox(height: 12),
+                            Text(
+                              strings.authOtpInvalid,
+                              style: const TextStyle(color: Color(0xFF9A473D)),
+                            ),
+                          ],
+                          const SizedBox(height: 20),
+                          FilledButton(
+                            onPressed:
+                                _isVerifyingRecovery
+                                    ? null
+                                    : _verifyRecoveryOtp,
+                            child:
+                                _isVerifyingRecovery
+                                    ? const SizedBox.square(
+                                      dimension: 22,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                    : Text(strings.authVerifyOtp),
+                          ),
+                          AuthOtpResendButton(
+                            enabled: !_isVerifyingRecovery,
+                            label: strings.authResendCode,
+                            countdownLabel: strings.authResendCodeCountdown,
+                            onResend: _resendRecoveryOtp,
+                          ),
+                          if (_resendFailed) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              strings.authResendCodeFailed,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(color: Color(0xFF9A473D)),
+                            ),
+                          ],
                         ],
-                        const SizedBox(height: 20),
-                        FilledButton(
-                          onPressed:
-                              _isVerifyingRecovery ? null : _verifyRecoveryOtp,
-                          child:
-                              _isVerifyingRecovery
-                                  ? const SizedBox.square(
-                                    dimension: 22,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                  : Text(strings.authVerifyOtp),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
@@ -304,136 +364,144 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
                 constraints: const BoxConstraints(maxWidth: 440),
                 child: MuseGlassCard(
                   padding: const EdgeInsets.fromLTRB(24, 26, 24, 22),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const Center(
-                          child: MuseBrandMark(width: 82, height: 58),
-                        ),
-                        const SizedBox(height: 14),
-                        Text(
-                          strings.authResetPasswordTitle,
-                          textAlign: TextAlign.center,
-                          style: Theme.of(
-                            context,
-                          ).textTheme.headlineSmall?.copyWith(
-                            color: MuseColors.ink,
-                            fontWeight: FontWeight.w800,
+                  child: Theme(
+                    data: buildAuthFormTheme(Theme.of(context)),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const Center(
+                            child: MuseBrandMark(width: 82, height: 58),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          strings.authCreateNewPasswordSubtitle,
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                        const SizedBox(height: 22),
-                        TextFormField(
-                          controller: _passwordController,
-                          obscureText: _obscurePassword,
-                          textInputAction: TextInputAction.next,
-                          autofillHints: const [AutofillHints.newPassword],
-                          decoration: InputDecoration(
-                            labelText: strings.authNewPassword,
-                            prefixIcon: const Icon(Icons.lock_outline_rounded),
-                            suffixIcon: IconButton(
-                              tooltip:
-                                  _obscurePassword
-                                      ? strings.authShowPassword
-                                      : strings.authHidePassword,
-                              onPressed:
-                                  () => setState(
-                                    () => _obscurePassword = !_obscurePassword,
-                                  ),
-                              icon: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility_outlined
-                                    : Icons.visibility_off_outlined,
+                          const SizedBox(height: 14),
+                          Text(
+                            strings.authResetPasswordTitle,
+                            textAlign: TextAlign.center,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.headlineSmall?.copyWith(
+                              color: MuseColors.ink,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            strings.authCreateNewPasswordSubtitle,
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                          const SizedBox(height: 22),
+                          TextFormField(
+                            controller: _passwordController,
+                            obscureText: _obscurePassword,
+                            textInputAction: TextInputAction.next,
+                            autofillHints: const [AutofillHints.newPassword],
+                            decoration: InputDecoration(
+                              labelText: strings.authNewPassword,
+                              prefixIcon: const Icon(
+                                Icons.lock_outline_rounded,
                               ),
-                            ),
-                          ),
-                          validator: (value) {
-                            if ((value?.length ?? 0) < 8) {
-                              return strings.authPasswordMinLength;
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _confirmationController,
-                          obscureText: _obscureConfirmation,
-                          textInputAction: TextInputAction.done,
-                          autofillHints: const [AutofillHints.newPassword],
-                          onFieldSubmitted:
-                              (_) => operation.isLoading ? null : _submit(),
-                          decoration: InputDecoration(
-                            labelText: strings.authConfirmPassword,
-                            prefixIcon: const Icon(Icons.lock_reset_rounded),
-                            suffixIcon: IconButton(
-                              tooltip:
-                                  _obscureConfirmation
-                                      ? strings.authShowPassword
-                                      : strings.authHidePassword,
-                              onPressed:
-                                  () => setState(
-                                    () =>
-                                        _obscureConfirmation =
-                                            !_obscureConfirmation,
-                                  ),
-                              icon: Icon(
-                                _obscureConfirmation
-                                    ? Icons.visibility_outlined
-                                    : Icons.visibility_off_outlined,
-                              ),
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value != _passwordController.text) {
-                              return strings.authPasswordMismatch;
-                            }
-                            return null;
-                          },
-                        ),
-                        if (operation.hasError) ...[
-                          const SizedBox(height: 12),
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: MuseColors.coral.withValues(alpha: .12),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Text(
-                              authErrorMessage(strings, operation.error!),
-                              style: const TextStyle(color: Color(0xFF9A473D)),
-                            ),
-                          ),
-                        ],
-                        const SizedBox(height: 20),
-                        FilledButton(
-                          onPressed: operation.isLoading ? null : _submit,
-                          child:
-                              operation.isLoading
-                                  ? const SizedBox.square(
-                                    dimension: 22,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
+                              suffixIcon: IconButton(
+                                tooltip:
+                                    _obscurePassword
+                                        ? strings.authShowPassword
+                                        : strings.authHidePassword,
+                                onPressed:
+                                    () => setState(
+                                      () =>
+                                          _obscurePassword = !_obscurePassword,
                                     ),
-                                  )
-                                  : Text(strings.authUpdatePassword),
-                        ),
-                        if (!publicPortal) ...[
-                          const SizedBox(height: 4),
-                          TextButton(
-                            onPressed:
-                                operation.isLoading ? null : _returnToSignIn,
-                            child: Text(strings.authBackToSignIn),
+                                icon: Icon(
+                                  _obscurePassword
+                                      ? Icons.visibility_outlined
+                                      : Icons.visibility_off_outlined,
+                                ),
+                              ),
+                            ),
+                            validator: (value) {
+                              if ((value?.length ?? 0) < 8) {
+                                return strings.authPasswordMinLength;
+                              }
+                              return null;
+                            },
                           ),
+                          const SizedBox(height: 12),
+                          TextFormField(
+                            controller: _confirmationController,
+                            obscureText: _obscureConfirmation,
+                            textInputAction: TextInputAction.done,
+                            autofillHints: const [AutofillHints.newPassword],
+                            onFieldSubmitted:
+                                (_) => operation.isLoading ? null : _submit(),
+                            decoration: InputDecoration(
+                              labelText: strings.authConfirmPassword,
+                              prefixIcon: const Icon(Icons.lock_reset_rounded),
+                              suffixIcon: IconButton(
+                                tooltip:
+                                    _obscureConfirmation
+                                        ? strings.authShowPassword
+                                        : strings.authHidePassword,
+                                onPressed:
+                                    () => setState(
+                                      () =>
+                                          _obscureConfirmation =
+                                              !_obscureConfirmation,
+                                    ),
+                                icon: Icon(
+                                  _obscureConfirmation
+                                      ? Icons.visibility_outlined
+                                      : Icons.visibility_off_outlined,
+                                ),
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value != _passwordController.text) {
+                                return strings.authPasswordMismatch;
+                              }
+                              return null;
+                            },
+                          ),
+                          if (operation.hasError) ...[
+                            const SizedBox(height: 12),
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: MuseColors.coral.withValues(alpha: .12),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Text(
+                                authErrorMessage(strings, operation.error!),
+                                style: const TextStyle(
+                                  color: Color(0xFF9A473D),
+                                ),
+                              ),
+                            ),
+                          ],
+                          const SizedBox(height: 20),
+                          FilledButton(
+                            onPressed: operation.isLoading ? null : _submit,
+                            child:
+                                operation.isLoading
+                                    ? const SizedBox.square(
+                                      dimension: 22,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                    : Text(strings.authUpdatePassword),
+                          ),
+                          if (!publicPortal) ...[
+                            const SizedBox(height: 4),
+                            TextButton(
+                              onPressed:
+                                  operation.isLoading ? null : _returnToSignIn,
+                              child: Text(strings.authBackToSignIn),
+                            ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
                   ),
                 ),

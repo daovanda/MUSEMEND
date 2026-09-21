@@ -92,7 +92,7 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get authAccountCreated =>
-      'Akaun anda telah dicipta. Semak e-mel jika pengesahan diperlukan.';
+      'Akaun anda telah dicipta. Masukkan kod 6 digit yang dihantar ke e-mel anda untuk mengesahkannya.';
 
   @override
   String get webAuthLandingBody =>
@@ -110,7 +110,7 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get authConfirmEmailPrompt =>
-      'Tekan butang di bawah untuk mengesahkan alamat e-mel ini.';
+      'Masukkan kod 6 digit dalam e-mel anda untuk mengesahkan akaun.';
 
   @override
   String get authConfirmEmailAction => 'Sahkan e-mel';
@@ -171,6 +171,12 @@ class AppLocalizationsMs extends AppLocalizations {
   String get authSignIn => 'Log masuk';
 
   @override
+  String get authOr => 'atau';
+
+  @override
+  String get authContinueWithGoogle => 'Teruskan dengan Google';
+
+  @override
   String get authSwitchToSignIn => 'Sudah mempunyai akaun? Log masuk';
 
   @override
@@ -201,17 +207,17 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get authResetPasswordSubtitle =>
-      'Masukkan e-mel untuk menerima pautan tetapan semula.';
+      'Masukkan e-mel untuk menerima kod tetapan semula 6 digit.';
 
   @override
   String get authCreateNewPasswordSubtitle =>
       'Pilih kata laluan baharu untuk akaun MuseMend anda.';
 
   @override
-  String get authSendResetLink => 'Hantar pautan';
+  String get authSendResetLink => 'Hantar kod';
 
   @override
-  String get authResetLinkSent => 'Pautan telah dihantar. Semak e-mel anda.';
+  String get authResetLinkSent => 'Kod telah dihantar. Semak e-mel anda.';
 
   @override
   String get authBackToSignIn => 'Kembali ke log masuk';
@@ -253,6 +259,18 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get authVerifyOtp => 'Teruskan';
+
+  @override
+  String get authResendCode => 'Hantar semula kod';
+
+  @override
+  String authResendCodeCountdown(int seconds) {
+    return 'Hantar semula kod dalam $seconds saat';
+  }
+
+  @override
+  String get authResendCodeFailed =>
+      'Kod tidak dapat dihantar semula. Cuba lagi.';
 
   @override
   String get authUpdatePassword => 'Tukar kata laluan';
@@ -1195,4 +1213,18 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get defaultCloudName => 'Awan';
+
+  @override
+  String get webAuthHomeTitle => 'MuseMend — ruang tenang untuk anda';
+
+  @override
+  String get webAuthHomeBody =>
+      'MuseMend ialah aplikasi penulisan dan kesejahteraan emosi. Apabila anda memilih log masuk dengan Google, kami hanya menggunakan nama, alamat e-mel dan foto profil anda untuk mencipta akaun; kami tidak pernah membaca kandungan Gmail, kenalan atau Google Drive anda.';
+
+  @override
+  String get webAuthPrivacyGoogleData =>
+      'Data Google hanya digunakan untuk mengesahkan anda dan mencipta profil MuseMend anda. Kami tidak mengakses atau berkongsi kandungan Gmail, kenalan atau Google Drive anda.';
+
+  @override
+  String get webAuthBackHome => 'Kembali ke MuseMend';
 }

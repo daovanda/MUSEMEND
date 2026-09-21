@@ -14,8 +14,12 @@ quyết định, hệ quả và trạng thái.
 - [ADR-0002 — Bầu trời làm neo thị giác](./adr-0002-sky-led-ui-direction.md)
 - [ADR-0003 — Mô hình điểm đến toàn cầu](./adr-0003-global-destination-model.md)
 - [ADR-0004 — Web chỉ phục vụ callback Auth](./adr-0004-web-auth-callback-portal.md)
+- [ADR-0005 — OTP email trong ứng dụng](./adr-0005-in-app-email-otp.md)
+- [Google OAuth qua Supabase](./google-oauth.md): cấu hình provider, deep link,
+  security và QA checklist.
 - [CI/CD](./ci-cd.md): workflow, quality gate, deploy Dev/Production và giới hạn hiện tại.
-- [Vercel auth callback portal](./vercel-auth-callback-portal.md): liên kết GitHub, build Flutter Web và giữ domain callback.
+- [Vercel public auth portal](./vercel-auth-callback-portal.md): landing, Privacy,
+  Terms, callback lịch sử, liên kết GitHub và build Flutter Web.
 - [GitHub Environments](./github-environments.md): variables, secrets và production approval.
 - [Android QA Release](./android-qa-release.md): ký APK, GitHub Release và phân phối QA.
 - [Android QA 1.5](./release-v1-5.md): migration transform ảnh và checklist phát hành bản 1.5.

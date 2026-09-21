@@ -6,6 +6,10 @@
     { "source": "/email-confirmed", "destination": "/index.html" },
     { "source": "/email-confirmed/", "destination": "/index.html" },
     { "source": "/reset-password", "destination": "/index.html" },
-    { "source": "/reset-password/", "destination": "/index.html" }
+    { "source": "/reset-password/", "destination": "/index.html" },
+    { "source": "/privacy", "destination": "/index.html" },
+    { "source": "/privacy/", "destination": "/index.html" },
+    { "source": "/terms", "destination": "/index.html" },
+    { "source": "/terms/", "destination": "/index.html" }
   ]
 }

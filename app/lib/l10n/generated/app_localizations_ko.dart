@@ -91,7 +91,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get retry => '다시 시도';
 
   @override
-  String get authAccountCreated => '계정이 만들어졌습니다. 확인이 필요하다면 이메일을 확인해 주세요.';
+  String get authAccountCreated => '계정이 만들어졌어요. 이메일로 받은 6자리 코드를 입력해 확인해 주세요.';
 
   @override
   String get webAuthLandingBody =>
@@ -108,7 +108,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get authConfirmEmailTitle => '이메일 확인';
 
   @override
-  String get authConfirmEmailPrompt => '아래 버튼을 눌러 이 이메일 주소를 확인해 주세요.';
+  String get authConfirmEmailPrompt => '이메일로 받은 6자리 코드를 입력해 계정을 확인해 주세요.';
 
   @override
   String get authConfirmEmailAction => '이메일 확인';
@@ -163,6 +163,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get authSignIn => '로그인';
 
   @override
+  String get authOr => '또는';
+
+  @override
+  String get authContinueWithGoogle => 'Google로 계속하기';
+
+  @override
   String get authSwitchToSignIn => '이미 계정이 있나요? 로그인';
 
   @override
@@ -190,17 +196,17 @@ class AppLocalizationsKo extends AppLocalizations {
   String get authResetPasswordTitle => '비밀번호 재설정';
 
   @override
-  String get authResetPasswordSubtitle => '이메일을 입력하면 재설정 링크를 보내 드려요.';
+  String get authResetPasswordSubtitle => '이메일을 입력하면 6자리 비밀번호 재설정 코드를 보내 드려요.';
 
   @override
   String get authCreateNewPasswordSubtitle =>
       'MuseMend 계정에 사용할 새 비밀번호를 설정해 주세요.';
 
   @override
-  String get authSendResetLink => '링크 보내기';
+  String get authSendResetLink => '재설정 코드 보내기';
 
   @override
-  String get authResetLinkSent => '링크를 보냈어요. 이메일을 확인해 주세요.';
+  String get authResetLinkSent => '코드를 보냈어요. 이메일을 확인해 주세요.';
 
   @override
   String get authBackToSignIn => '로그인으로 돌아가기';
@@ -238,6 +244,17 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get authVerifyOtp => '계속';
+
+  @override
+  String get authResendCode => '코드 다시 받기';
+
+  @override
+  String authResendCodeCountdown(int seconds) {
+    return '$seconds초 후 코드 다시 받기';
+  }
+
+  @override
+  String get authResendCodeFailed => '코드를 다시 보낼 수 없어요. 다시 시도해 주세요.';
 
   @override
   String get authUpdatePassword => '비밀번호 변경';
@@ -1126,4 +1143,18 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get defaultCloudName => '구름';
+
+  @override
+  String get webAuthHomeTitle => 'MuseMend — 당신을 위한 고요한 공간';
+
+  @override
+  String get webAuthHomeBody =>
+      'MuseMend는 글쓰기와 정서적 안녕을 돕는 앱입니다. Google 로그인을 선택하면 계정 생성을 위해 이름, 이메일 주소, 프로필 사진만 사용합니다. Gmail 내용, 연락처 또는 Google Drive를 읽지 않습니다.';
+
+  @override
+  String get webAuthPrivacyGoogleData =>
+      'Google 데이터는 본인 인증과 MuseMend 프로필 생성에만 사용됩니다. Gmail 내용, 연락처 또는 Google Drive에 접근하거나 이를 공유하지 않습니다.';
+
+  @override
+  String get webAuthBackHome => 'MuseMend로 돌아가기';
 }

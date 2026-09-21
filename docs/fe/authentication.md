@@ -1,159 +1,137 @@
 # Authentication client
 
 **Trạng thái:** `in-progress`
-**Cập nhật:** 2026-09-19
+**Cập nhật:** 2026-09-21
 
 ## Mục tiêu và phạm vi
 
-Lát cắt P0.1 hỗ trợ đăng ký, đăng nhập email/mật khẩu, khôi phục session qua SDK,
-đăng xuất và khôi phục mật khẩu qua email. Profile/settings bootstrap phía DB vẫn
-là nguồn sự thật.
+MuseMend là ứng dụng di động. Đăng ký, xác nhận email, đăng nhập, quên mật
+khẩu và đặt mật khẩu mới đều hoàn tất trong Flutter app. Email Auth chỉ mang
+OTP 6 số; không có URL callback, CTA hoặc trang đăng nhập web trong luồng mới.
 
-## Luồng và trách nhiệm
+## Thiết kế và trách nhiệm
 
-`AuthRepository` là contract domain. `SupabaseAuthRepository` là adapter duy nhất
-gọi Supabase Auth. `AuthController` điều phối thao tác và trạng thái async;
-`SignInScreen` validate form. `authSessionProvider` điều khiển redirect
-`/splash` → `/sign-in`; sau khi có session, router đọc trạng thái onboarding để
-đưa tài khoản mới tới `/onboarding` và tài khoản đã hoàn tất tới `/reflect`.
+`AuthRepository` là contract domain; `SupabaseAuthRepository` là adapter duy
+nhất gọi Supabase Auth. `AuthController` quản lý `AsyncValue` cho thao tác Auth.
+`SignInScreen` xác thực input và router quản lý navigation. Client không gửi
+`user_id`, quyền hoặc phần thưởng.
 
-Khi khởi động, session khôi phục từ bộ nhớ thiết bị chưa được coi là đăng nhập
-chỉ vì token còn tồn tại cục bộ. Adapter gọi Supabase Auth để xác thực user trước
-khi phát session cho router. Nếu user/session đã bị thu hồi, hết hạn hoặc không
-còn tồn tại, adapter xoá session cục bộ và router trở về `/sign-in`. Việc xoá này
-được phát ra ngay, không chờ endpoint thu hồi token trên server; điều đó đặc biệt
-quan trọng khi tài khoản vừa bị xoá và đăng ký lại bằng cùng email. Bước xác thực
-khởi động có giới hạn 15 giây, nên mạng hoặc Auth endpoint không thể giữ splash
-vĩnh viễn. Khi hết thời gian mà chưa xác thực được token, app yêu cầu đăng nhập
-lại để tránh tin cậy một session không rõ trạng thái.
+Auth session khôi phục phải được xác thực lại bằng `getUser` trước khi router
+tin cậy nó. Session đã bị xoá, hết hạn hoặc không còn user bị dọn khỏi thiết bị;
+timeout 15 giây đưa người dùng về sign-in thay vì giữ splash vô hạn. Quy tắc này
+xử lý cả trường hợp xoá tài khoản rồi đăng ký lại cùng email.
 
-Màn auth dùng cùng ngôn ngữ thị giác với Bầu trời: artwork phong cảnh và mascot
-cục bộ, nền chuyển từ xanh trời sang kem/tím pastel, logo gradient và form kính
-sáng. Ở điện thoại, thương hiệu nằm trên form; từ 820dp, màn hình tách thành vùng
-chào đón và form để tận dụng chiều ngang. Form cố định palette sáng có tương phản
-đủ trên cả theme hệ thống tối, tránh trường hợp nền tối kết hợp với surface kính
-sáng làm chữ và input bị xám/mờ. Chuyển đăng nhập/đăng ký dùng animation 220ms và
-tự bỏ focus bàn phím nhưng không thay đổi repository hay flow xác thực.
-Toàn bộ tiêu đề, form, validation, lỗi an toàn và accessibility semantics lấy từ
-ARB theo locale hiện hành; adapter Auth không tự tạo thông báo theo một ngôn ngữ
-cố định.
+## Luồng OTP trong app
 
-Phong cảnh và hai vùng sương pastel trôi ngược chiều nhau với biên độ 4–15dp,
-chu kỳ 18 giây và đường cong `easeInOutSine`. Ảnh nền được phóng nhẹ 1.035 lần để
-chuyển động không lộ mép. Đây chỉ là motion trang trí; controller tự dừng khi
-`MediaQuery.disableAnimations` bật và nội dung form hoàn toàn không chuyển vị trí.
+### Đăng ký và xác nhận email
 
-Đăng ký gửi metadata `display_name` và `language_code`; trigger DB tạo
-profile/settings và travel progress. Mã ngôn ngữ được lưu trong Auth metadata để
-template email tùy biến có thể chọn đúng ngôn ngữ trước khi profile/settings
-được tải. Tên này được điền sẵn trong onboarding, nhưng người dùng có thể đổi
-hoặc bỏ qua. UI không gửi `user_id`, role hoặc quyền.
+1. Người dùng nhập tên hiển thị, email và mật khẩu ở `/sign-in`.
+2. `signUp` gửi `display_name` cùng `language_code` trong Auth metadata để
+   template chọn đúng ngôn ngữ.
+3. Khi Supabase chấp nhận tạo account, router đi tới `/confirm-email` với email
+   đã điền sẵn.
+4. Người dùng nhập OTP 6 số từ email. Client gọi
+   `verifyOTP(type: OtpType.email)`.
+5. Chỉ OTP hợp lệ mới tạo phiên và chuyển người dùng tới `/onboarding`.
+6. Nút gửi lại mã bị khóa 60 giây kể từ lúc màn OTP mở và sau mỗi lần gửi lại
+   thành công; thời gian còn lại giảm theo từng giây trên nút. Xác nhận email
+   gọi `auth.resend(type: signup)`.
 
-Khi người dùng đổi ngôn ngữ trong Hồ sơ, app cập nhật `language_code` trong Auth
-metadata theo locale hiệu dụng (ngôn ngữ chọn tay hoặc locale thiết bị). Lỗi cập
-nhật metadata không chặn việc lưu hồ sơ/cài đặt vì đây chỉ là dữ liệu
-personalization cho email.
+### Quên mật khẩu
 
-### Web callback portal
+1. Từ sign-in, người dùng nhập email và chọn gửi mã.
+2. `requestPasswordReset` gọi `resetPasswordForEmail(email)` **không** truyền
+   `redirectTo`; phản hồi UI vẫn chung để không tiết lộ email có tồn tại hay không.
+3. App đi tới `/reset-password`, điền sẵn email, và yêu cầu email cùng OTP 6 số.
+4. `verifyOTP(type: OtpType.recovery)` phải trả recovery session hợp lệ trước
+   khi form mật khẩu mới xuất hiện.
+5. `updateUser(password: ...)` ghi mật khẩu thật lên Supabase Auth. App sign-out
+   recovery session, rồi đưa người dùng về `/sign-in?reset=success`.
+6. Nút gửi lại mã có cùng countdown 60 giây; do Supabase GoTrue không hỗ trợ
+   `resend` cho recovery, client gọi lại `resetPasswordForEmail(email)` để phát
+   mã mới. Lỗi gửi lại được báo riêng, không bị nhầm thành mã OTP sai.
 
-Build callback public trên Vercel bật `PUBLIC_AUTH_PORTAL=true`, khi đó router
-chỉ mở landing trung tính, `/email-confirmed` và
-`/reset-password`. Trang web không phải bản web của app: các route sign-in,
-onboarding và nghiệp vụ không render giao diện ứng dụng. Android/iOS giữ nguyên
-flow đăng nhập và onboarding native. Đăng ký truyền
-`emailRedirectTo=https://musemend-app.vercel.app/email-confirmed`; recovery từ
-bất kỳ nền tảng nào dùng web `/reset-password`. Trang xác nhận chỉ hiển thị
-thành công sau khi người dùng nhấn nút xác nhận và Supabase chấp nhận `TokenHash`.
-Recovery cũng cần thao tác xác minh rõ ràng; chỉ sau khi Supabase trả recovery
-session hợp lệ mới mở form đặt mật khẩu. Cách này không phụ thuộc PKCE verifier
-được lưu trên thiết bị đã gửi email. Nếu link sai/hết hạn thì hiện hướng dẫn mở
-link mới. Root chỉ hướng dẫn mở email, không giả làm trang xác nhận thành công.
+OTP dùng một lần và hết hạn sau 3.600 giây (1 giờ) theo Supabase Auth. Mã mới
+thay thế mã cũ. Client không lưu OTP, token, mật khẩu hoặc email vào DB, log hay
+persistent storage.
 
-Flutter Web local mặc định không bật callback portal để tiếp tục QA các màn app
-trên localhost. Khi cần xem giao diện callback local, chạy với
-`--dart-define=PUBLIC_AUTH_PORTAL=true`.
+Router trong app được tạo một lần và chỉ `refresh()` khi auth session, profile
+onboarding hoặc thông báo khởi chạy đổi trạng thái. Không theo dõi các provider
+này bằng `watch` trong provider tạo router, để quá trình khởi tạo session không
+tạo lại router và đẩy người dùng khỏi `/confirm-email` hoặc `/reset-password`.
+Khi QA Flutter Web mở thẳng một trong hai route OTP, router giữ nguyên path đó
+thay vì ép qua splash; launch Android/iOS và Web tại `/` vẫn bắt đầu ở splash.
 
-### Khôi phục mật khẩu
+## Localization, UI và validation
 
-Từ màn đăng nhập, người dùng chuyển sang form chỉ yêu cầu email. App gọi
-`AuthRepository.requestPasswordReset`, adapter dùng
-`supabase.auth.resetPasswordForEmail` và hiển thị thông báo thành công chung để
-không tiết lộ email có tồn tại hay không. Liên kết trong email luôn trỏ tới URL
-web production cố định `https://musemend-app.vercel.app/reset-password`, kể cả
-khi người dùng yêu cầu email từ app di động hoặc bản Flutter Web local. Flutter
-Web dùng `PathUrlStrategy`; Vercel rewrite callback route về app shell để giữ
-pathname riêng và session callback của Supabase. Trên web, form chỉ hiện khi có
-session hợp lệ từ link recovery; mở URL trống sẽ hiện trạng thái link không hợp
-lệ, không hiển thị form có thể submit vô ích.
+Mọi chuỗi cố định dùng ARB theo locale đang hiệu lực. Các ngôn ngữ hỗ trợ là
+`vi`, `en`, `ja`, `fr`, `es`, `it`, `de`, `ko`, `pt`, `ms`, `id`, `th`; mã khác
+fallback về tiếng Anh. Email phải đúng định dạng, OTP đúng 6 chữ số, tên 2–60 ký
+tự và mật khẩu ít nhất 8 ký tự. Lỗi Auth được ánh xạ sang thông báo an toàn, không
+hiện stack trace hay chi tiết Supabase.
 
-Màn đặt lại yêu cầu mật khẩu mới và nhập lại mật khẩu, sau đó gọi
-`supabase.auth.updateUser`. Đây là lần ghi mật khẩu thật lên Supabase Auth, không
-chỉ đổi trạng thái giao diện. Khi thành công app đăng xuất phiên recovery và
-đưa người dùng về đăng nhập với thông báo đã đổi mật khẩu. Email mới hiển thị OTP
-6 số và CTA chỉ mở `/reset-password` không chứa credential. Người dùng nhập email
-cùng OTP; web chỉ gọi `verifyOTP` sau thao tác xác nhận. Cách này không phụ thuộc
-PKCE verifier và không bị click tracking làm biến dạng token. Callback fragment
-`TokenHash` cũ vẫn được hỗ trợ tạm thời. OTP dùng một lần; Email OTP Expiration
-được đặt 3600 giây (1 giờ).
+Màn auth giữ palette sáng, dùng asset brand cục bộ, tương phản đủ ngay cả khi
+theme hệ thống tối. Giao diện phải có scroll an toàn ở text scale lớn và vùng chạm
+tối thiểu 48 px. Đăng nhập, đăng ký, xác nhận email, nhập OTP và nhập mật khẩu
+mới dùng cùng field theme (viền outline có notch cho nhãn) để nhãn của dữ liệu
+điền sẵn hoặc field đang focus không đè lên nền ô nhập.
 
-Email xác nhận đăng ký có template riêng, source hiển thị OTP 6 số và chọn nội
-dung theo `language_code`; callback hợp lệ mở trang web để nhập email cùng OTP,
-sau đó báo xác nhận thành công và hướng người dùng quay lại app. Hai HTML
-source được giữ trong `supabase/templates/confirm-sign-up.html` và
-`supabase/templates/reset-password.html`; từng template phải được đồng bộ thủ
-công với Supabase Dashboard hosted.
+## Portal thông tin công khai và callback lịch sử
 
-Nếu callback token cũ không hợp lệ hoặc đã hết hạn, public callback portal sẽ
-chuyển sang form email + OTP thay vì dừng ở màn hình liên kết hết hạn. Người
-dùng cần nhập mã mới nhất trong email mới nhất; yêu cầu gửi lại mã sẽ làm mã
-cũ không còn dùng được.
+Build `PUBLIC_AUTH_PORTAL=true` trên Vercel phục vụ landing công khai tại `/`,
+Privacy tại `/privacy`, Terms tại `/terms`, đồng thời vẫn đọc callback token lịch
+sử tại `/email-confirmed` và `/reset-password`. Các trang công khai giải thích
+mục đích app và dữ liệu Google tối thiểu dùng cho Google Sign-In; chúng không có
+sign-in, onboarding, phiên đăng nhập hay dữ liệu nghiệp vụ. `signUp`,
+`requestPasswordReset` và email template mới không gọi portal. Luồng OTP nội bộ
+được quyết định tại [ADR-0005](../other/adr-0005-in-app-email-otp.md).
 
-Supabase Auth phải allow-list URL production `/email-confirmed` và
-`/reset-password`. Không cần allow-list từng origin local cho luồng email vì
-liên kết luôn trỏ tới domain public. Không lưu token vào DB, log hoặc repository.
-CTA không chứa credential nên SMTP có thể bọc link tracking mà không chạm tới OTP.
+## Google OAuth
 
-## Validation và lỗi
+**Trạng thái:** `in-progress` — client, deep link và Supabase Google Provider
+đã có; chỉ trở thành production sau khi Vercel deploy public portal, Google
+Consent Branding hoàn tất và Audience được publish.
 
-Email phải đúng định dạng, tên 2–60 ký tự, mật khẩu tối thiểu 8 ký tự. Lỗi Auth
-được ánh xạ sang thông báo an toàn, không hiện stack trace/schema/token. Trạng thái
-loading khóa submit lặp. Nếu project bật email confirmation, user được nhắc kiểm
-tra email và vẫn ở màn hình auth cho tới khi có session.
+Nút “Tiếp tục với Google” có trên cả sign-in và sign-up. App gọi
+`signInWithOAuth(OAuthProvider.google)`, không dùng Google Sign-In SDK và không
+chứa Google Client Secret. Supabase nhận callback OAuth trước, sau đó trả:
 
-## Bảo mật và riêng tư
+- Android/iOS: `com.musemend.app://login-callback`.
+- Flutter Web QA: origin của URL đang mở.
 
-SDK quản lý session; app không log token, mật khẩu hay email. Client chỉ dùng
-publishable key. RLS vẫn là lớp phân quyền dữ liệu, không dựa vào việc ẩn UI.
+Android khai báo riêng host `login-callback`; iOS đã đăng ký URL scheme
+`com.musemend.app`. Router tiếp tục dựa vào `authSessionProvider`, do đó account
+Google mới đi tới onboarding còn account đã hoàn tất onboarding đi vào app.
+Trigger profile hiện tại lấy `full_name` và `avatar_url` từ Auth metadata, đồng
+thời nhận provider `google`; client không tự tạo hoặc cấp quyền cho profile.
+
+Google cần được bật ở Supabase và URL redirect phải nằm allow-list trước khi
+nhấn nút. Client secret chỉ được lưu tại Supabase Dashboard; không ghi vào
+Flutter config, `config/dev.json`, log hay Git. Runbook và checklist QA ở
+[Google OAuth](../other/google-oauth.md).
 
 ## Kiểm thử và nghiệm thu
 
-Widget test kiểm tra chuyển sign-up, validation và khả năng cuộn/sử dụng trên màn
-hình 320×568 ở text scale 200%; nút submit vẫn giữ vùng chạm tối thiểu 48 px.
-Widget test cũng kiểm tra màn auth ở dark theme vẫn giữ nền kem và chữ form màu
-`MuseColors.ink`, đồng thời artwork nền/mascot lấy từ asset bundle nội bộ.
-Test Reduce Motion xác nhận transform nền không đổi theo thời gian khi animation
-bị vô hiệu hóa.
-Unit test session policy xác nhận lỗi `user_not_found`/session hết hạn làm sạch
-session khôi phục, còn lỗi kết nối có thể retry không làm mất đăng nhập cục bộ.
-Luồng khôi phục phiên bị thu hồi không chờ server revoke; kiểm thử khởi động cần
-bao gồm trường hợp xoá tài khoản, đăng ký lại cùng email và đăng nhập trên thiết bị
-còn token cũ.
-Android QA đã xác nhận đăng nhập, session restore và sign-out. Database integration
-kiểm tra bootstrap cùng cách ly hai tài khoản. Widget/unit test kiểm tra việc yêu
-cầu reset dùng URL public và màn reset gọi update password rồi sign-out. Cần QA
-thực tế trên email mới để xác nhận sign-up template, callback production, link chỉ
-dùng một lần/hết hạn sau 1 giờ, đổi mật khẩu thành công rồi đăng nhập lại; không
-dùng mật khẩu người dùng thật trong automated tests.
-
-## Tương thích, rollback và việc còn lại
-
-Không có migration trong thay đổi client này. Revert adapter/UI không làm mất dữ
-liệu Auth. Còn thiếu xử lý account-disabled chi tiết và QA end-to-end trên email
-test; password reset không được xem là verified production cho tới khi người dùng
-hoàn tất lần QA thủ công này.
+- Widget test kiểm tra sign-up và reset chuyển vào route OTP nội bộ, email được
+  điền sẵn và password form chỉ xuất hiện sau recovery OTP.
+- Kiểm thử router giữ nguyên route OTP khi auth session chuyển từ loading sang
+  signed-out, và hai luồng resend chỉ bật sau 60 giây rồi reset cooldown khi gửi
+  thành công.
+- Kiểm tra `flutter analyze`, unit/widget tests và build Flutter liên quan.
+- QA với email test mới: xác nhận và reset đều gửi đúng 6 số, không có CTA/link,
+  mã chỉ dùng một lần, mã quá một giờ bị từ chối, đổi mật khẩu xong đăng nhập lại
+  được bằng mật khẩu mới.
+- Không dùng email/mật khẩu người dùng thật trong automated tests.
+- QA Google: thử một account Google mới và một account đã hoàn tất onboarding;
+  kiểm tra return deep link trên Android/iOS, web QA, cancel/error từ provider
+  và đảm bảo không có token/secret trong log.
+- Production Google: xác minh Vercel phục vụ trực tiếp `/`, `/privacy`, `/terms`
+  không yêu cầu login; đường dẫn Branding Google trùng đúng các URL này, Audience
+  là `In production`, và một account Google chưa từng là test user vẫn hoàn tất
+  OAuth rồi quay lại app.
 
 ## Liên quan
 
-- [Application foundation](./application-foundation.md)
-- [Profiles, settings và ownership](../db/profiles-settings.md)
-- [Roadmap MVP](../other/mvp-roadmap.md)
+- [Auth email templates](../be/auth-email-templates.md)
+- [ADR-0005 — OTP email trong ứng dụng](../other/adr-0005-in-app-email-otp.md)
+- [Flutter Web local](./flutter-web-local.md)

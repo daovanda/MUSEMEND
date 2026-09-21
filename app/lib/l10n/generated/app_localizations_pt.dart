@@ -93,7 +93,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get authAccountCreated =>
-      'A sua conta foi criada. Consulte o e-mail caso seja necessária confirmação.';
+      'A sua conta foi criada. Introduza o código de 6 dígitos enviado por e-mail para a confirmar.';
 
   @override
   String get webAuthLandingBody =>
@@ -111,7 +111,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get authConfirmEmailPrompt =>
-      'Toque no botão abaixo para confirmar este endereço de e-mail.';
+      'Introduza o código de 6 dígitos recebido por e-mail para confirmar a sua conta.';
 
   @override
   String get authConfirmEmailAction => 'Confirmar e-mail';
@@ -172,6 +172,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get authSignIn => 'Iniciar sessão';
 
   @override
+  String get authOr => 'ou';
+
+  @override
+  String get authContinueWithGoogle => 'Continuar com o Google';
+
+  @override
   String get authSwitchToSignIn => 'Já tem uma conta? Inicie sessão';
 
   @override
@@ -204,18 +210,18 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get authResetPasswordSubtitle =>
-      'Introduza o e-mail para receber uma ligação de reposição.';
+      'Introduza o e-mail para receber um código de reposição de 6 dígitos.';
 
   @override
   String get authCreateNewPasswordSubtitle =>
       'Escolha uma nova palavra-passe para a sua conta MuseMend.';
 
   @override
-  String get authSendResetLink => 'Enviar ligação';
+  String get authSendResetLink => 'Enviar código';
 
   @override
   String get authResetLinkSent =>
-      'A ligação foi enviada. Consulte o seu e-mail.';
+      'O código foi enviado. Consulte o seu e-mail.';
 
   @override
   String get authBackToSignIn => 'Voltar ao início de sessão';
@@ -257,6 +263,18 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get authVerifyOtp => 'Continuar';
+
+  @override
+  String get authResendCode => 'Enviar código novamente';
+
+  @override
+  String authResendCodeCountdown(int seconds) {
+    return 'Enviar código novamente em $seconds s';
+  }
+
+  @override
+  String get authResendCodeFailed =>
+      'Não foi possível reenviar o código. Tente novamente.';
 
   @override
   String get authUpdatePassword => 'Alterar palavra-passe';
@@ -1199,4 +1217,18 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get defaultCloudName => 'Nuvem';
+
+  @override
+  String get webAuthHomeTitle => 'MuseMend — um espaço tranquilo para você';
+
+  @override
+  String get webAuthHomeBody =>
+      'MuseMend é um app de escrita e bem-estar emocional. Quando você escolhe entrar com Google, usamos apenas seu nome, e-mail e foto de perfil para criar sua conta; nunca lemos o conteúdo do Gmail, seus contatos ou o Google Drive.';
+
+  @override
+  String get webAuthPrivacyGoogleData =>
+      'Os dados do Google são usados somente para autenticar você e criar seu perfil MuseMend. Não acessamos nem compartilhamos o conteúdo do Gmail, seus contatos ou o Google Drive.';
+
+  @override
+  String get webAuthBackHome => 'Voltar ao MuseMend';
 }

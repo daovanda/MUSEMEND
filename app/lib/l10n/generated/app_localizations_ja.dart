@@ -90,7 +90,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get retry => 'もう一度試す';
 
   @override
-  String get authAccountCreated => 'アカウントを作成しました。確認が必要な場合はメールをご確認ください。';
+  String get authAccountCreated => 'アカウントを作成しました。メールに届く6桁のコードを入力して確認してください。';
 
   @override
   String get webAuthLandingBody =>
@@ -107,7 +107,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get authConfirmEmailTitle => 'メールアドレスの確認';
 
   @override
-  String get authConfirmEmailPrompt => '下のボタンをタップして、このメールアドレスを確認してください。';
+  String get authConfirmEmailPrompt => 'メールに届いた6桁のコードを入力してアカウントを確認してください。';
 
   @override
   String get authConfirmEmailAction => 'メールアドレスを確認';
@@ -162,6 +162,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get authSignIn => 'ログイン';
 
   @override
+  String get authOr => 'または';
+
+  @override
+  String get authContinueWithGoogle => 'Google で続ける';
+
+  @override
   String get authSwitchToSignIn => 'アカウントをお持ちですか？ ログイン';
 
   @override
@@ -189,17 +195,17 @@ class AppLocalizationsJa extends AppLocalizations {
   String get authResetPasswordTitle => 'パスワードを再設定';
 
   @override
-  String get authResetPasswordSubtitle => 'メールアドレスを入力すると、再設定用リンクが届きます。';
+  String get authResetPasswordSubtitle => 'メールアドレスを入力すると、6桁の再設定コードが届きます。';
 
   @override
   String get authCreateNewPasswordSubtitle =>
       'MuseMendアカウントの新しいパスワードを設定してください。';
 
   @override
-  String get authSendResetLink => 'リンクを送信';
+  String get authSendResetLink => '再設定コードを送信';
 
   @override
-  String get authResetLinkSent => 'リンクを送信しました。メールを確認してください。';
+  String get authResetLinkSent => 'コードを送信しました。メールをご確認ください。';
 
   @override
   String get authBackToSignIn => 'ログインに戻る';
@@ -238,6 +244,17 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get authVerifyOtp => '続ける';
+
+  @override
+  String get authResendCode => 'コードを再送信';
+
+  @override
+  String authResendCodeCountdown(int seconds) {
+    return '$seconds秒後にコードを再送信';
+  }
+
+  @override
+  String get authResendCodeFailed => 'コードを再送信できませんでした。もう一度お試しください。';
 
   @override
   String get authUpdatePassword => 'パスワードを変更';
@@ -1122,4 +1139,18 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get defaultCloudName => '雲';
+
+  @override
+  String get webAuthHomeTitle => 'MuseMend — あなたのための静かな場所';
+
+  @override
+  String get webAuthHomeBody =>
+      'MuseMendは、書くことと心の健やかさを支えるアプリです。Googleでログインする場合、アカウント作成のために名前、メールアドレス、プロフィール写真のみを使用します。Gmailの内容、連絡先、Google Driveを読むことはありません。';
+
+  @override
+  String get webAuthPrivacyGoogleData =>
+      'Googleのデータは、認証とMuseMendプロフィールの作成にのみ使用します。Gmailの内容、連絡先、Google Driveにアクセスしたり共有したりすることはありません。';
+
+  @override
+  String get webAuthBackHome => 'MuseMendに戻る';
 }
