@@ -63,6 +63,7 @@ class _EmailConfirmationScreenState
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context);
+    final publicPortal = ref.watch(publicAuthPortalModeProvider);
     if (_tokenVerified == true) {
       return AuthWebNotice(
         title: strings.authEmailConfirmedTitle,
@@ -71,6 +72,7 @@ class _EmailConfirmationScreenState
       );
     }
     if (_tokenVerified == false) {
+      if (publicPortal) return _buildOtpForm(context, strings);
       return AuthWebNotice(
         title: strings.authLinkInvalidTitle,
         body: strings.authLinkInvalidBody,
@@ -91,7 +93,6 @@ class _EmailConfirmationScreenState
     }
 
     final session = ref.watch(authSessionProvider);
-    final publicPortal = ref.watch(publicAuthPortalModeProvider);
     return session.when(
       data: (value) {
         if (value == null) {

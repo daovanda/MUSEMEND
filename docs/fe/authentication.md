@@ -103,6 +103,11 @@ source được giữ trong `supabase/templates/confirm-sign-up.html` và
 `supabase/templates/reset-password.html`; từng template phải được đồng bộ thủ
 công với Supabase Dashboard hosted.
 
+Nếu callback token cũ không hợp lệ hoặc đã hết hạn, public callback portal sẽ
+chuyển sang form email + OTP thay vì dừng ở màn hình liên kết hết hạn. Người
+dùng cần nhập mã mới nhất trong email mới nhất; yêu cầu gửi lại mã sẽ làm mã
+cũ không còn dùng được.
+
 Supabase Auth phải allow-list URL production `/email-confirmed` và
 `/reset-password`. Không cần allow-list từng origin local cho luồng email vì
 liên kết luôn trỏ tới domain public. Không lưu token vào DB, log hoặc repository.

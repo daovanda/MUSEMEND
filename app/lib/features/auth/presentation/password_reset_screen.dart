@@ -118,6 +118,7 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
     }
     if (callback?.type == AuthCallbackType.recovery &&
         _recoveryTokenVerified == false) {
+      if (publicPortal) return _buildOtpForm(context, strings);
       return AuthWebNotice(
         title: strings.authLinkInvalidTitle,
         body: strings.authLinkInvalidBody,
