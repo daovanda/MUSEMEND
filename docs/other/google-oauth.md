@@ -1,6 +1,6 @@
 # Google OAuth qua Supabase
 
-**Trạng thái:** `in-progress`
+**Trạng thái:** `implemented`
 **Cập nhật:** 2026-09-21
 
 ## Mục tiêu và phạm vi
@@ -75,6 +75,24 @@ Google khuyến nghị tách Cloud project development/QA và production; khi t�
 tạo Client ID/Secret Web mới cho project production và thay cấu hình Provider
 trên Supabase tương ứng.
 
+### Trạng thái triển khai hiện tại
+
+Ngày 2026-09-21, cấu hình production đã được xác minh trực tiếp:
+
+- Vercel Production phục vụ được `/`, `/privacy` và `/terms` không cần đăng
+  nhập; ba trang này là các URL đã lưu ở Google Auth Platform → Branding.
+- Google Audience là `External` và `In production`; không còn danh sách
+  test-user là điều kiện để người dùng Google thông thường bắt đầu OAuth.
+- Supabase Google Provider đang bật, dùng đúng callback broker
+  `https://jpoktrdyehalxkhdhkzu.supabase.co/auth/v1/callback`; secret vẫn chỉ
+  nằm trong Supabase Dashboard.
+- Supabase URL Configuration có deep link
+  `com.musemend.app://login-callback`; Android và iOS đã đăng ký scheme
+  `com.musemend.app` để nhận callback sau cùng.
+- Probe không đăng nhập tới Supabase `/auth/v1/authorize?provider=google` trả
+  `302` tới `accounts.google.com`, xác nhận chuỗi Supabase → Google đang hoạt
+  động mà không ghi token vào log.
+
 ## Bảo mật và privacy
 
 - Chỉ yêu cầu scopes chuẩn `openid`, `email`, `profile`; không thêm scope nhạy
@@ -100,17 +118,17 @@ trên Supabase tương ứng.
 
 ## Rollout, rollback và giới hạn
 
-Provider Google đã bật trong Supabase Development, nhưng app chưa là public
-production khi Vercel/Google Consent chưa hoàn tất. Google không thu phí riêng
-để publish OAuth consent; nếu branding hoặc scope cần verification thì thời
-gian review là yếu tố cần theo dõi. Nếu cần rollback, tắt Google Provider ở
-Supabase trước; app sẽ nhận lỗi an toàn từ Auth, không làm mất account hoặc dữ
-liệu. Có thể phát hành bản app bỏ nút ở một bản sau nếu cần, nhưng không xoá
-Google identity của người dùng trong rollback.
+Google không thu phí riêng để publish OAuth consent. Cấu hình hiện chỉ yêu cầu
+`openid`, `email`, `profile`, không có logo và không có scope nhạy cảm hoặc
+restricted; vì vậy không có yêu cầu verification tại thời điểm publish. Nếu
+sau này thêm logo, domain riêng hoặc scope mở rộng, phải kiểm tra lại yêu cầu
+verification của Google trước khi release.
 
-Google consent screen ở chế độ testing chỉ cho test users và authorization của
-test user hết hạn sau bảy ngày; phải chuẩn bị publishing/verification trước
-public release. Các scope mở rộng có thể cần review của Google.
+Nếu cần rollback, tắt Google Provider ở Supabase trước; app sẽ nhận lỗi an
+toàn từ Auth, không làm mất account hoặc dữ liệu. Có thể phát hành bản app bỏ
+nút ở một bản sau nếu cần, nhưng không xoá Google identity của người dùng trong
+rollback. Chuyển Audience về `Testing` chỉ phù hợp khi tạm dừng public OAuth;
+khi đó phải quản lý test user theo chính sách Google hiện hành.
 
 ## Liên quan
 

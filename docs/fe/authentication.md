@@ -88,9 +88,9 @@ sign-in, onboarding, phiên đăng nhập hay dữ liệu nghiệp vụ. `signUp
 
 ## Google OAuth
 
-**Trạng thái:** `in-progress` — client, deep link và Supabase Google Provider
-đã có; chỉ trở thành production sau khi Vercel deploy public portal, Google
-Consent Branding hoàn tất và Audience được publish.
+**Trạng thái:** `implemented` — public portal Vercel, Google Consent Branding
+và Audience `External · In production` đã được cấu hình. Google Provider ở
+Supabase đang bật; callback broker và deep link native đều nằm trong allow-list.
 
 Nút “Tiếp tục với Google” có trên cả sign-in và sign-up. App gọi
 `signInWithOAuth(OAuthProvider.google)`, không dùng Google Sign-In SDK và không
