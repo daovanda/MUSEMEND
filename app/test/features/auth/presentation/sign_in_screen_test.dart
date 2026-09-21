@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:musemend/app/theme/muse_colors.dart';
 import 'package:musemend/features/auth/application/auth_providers.dart';
 import 'package:musemend/features/auth/domain/auth_repository.dart';
@@ -27,11 +28,15 @@ void main() {
     );
 
     expect(find.text('Chào bạn trở lại'), findsOneWidget);
-    await tester.tap(find.text('Chưa có tài khoản? Đăng ký'));
+    final signUpLink = find.text('Chưa có tài khoản? Đăng ký');
+    await tester.ensureVisible(signUpLink);
+    await tester.tap(signUpLink);
     await tester.pump();
 
     expect(find.text('Tên hiển thị'), findsOneWidget);
-    await tester.tap(find.text('Tạo tài khoản'));
+    final createAccountButton = find.text('Tạo tài khoản');
+    await tester.ensureVisible(createAccountButton);
+    await tester.tap(createAccountButton);
     await tester.pump();
 
     expect(find.text('Tên cần từ 2 đến 60 ký tự.'), findsOneWidget);
@@ -39,7 +44,49 @@ void main() {
     expect(find.text('Mật khẩu cần ít nhất 8 ký tự.'), findsOneWidget);
   });
 
-  testWidgets('requests a password reset link from the sign-in form', (
+  testWidgets('moves to in-app password recovery after sending an OTP', (
+    tester,
+  ) async {
+    final repository = _FakeAuthRepository();
+    final router = GoRouter(
+      initialLocation: '/sign-in',
+      routes: [
+        GoRoute(path: '/sign-in', builder: (_, _) => const SignInScreen()),
+        GoRoute(
+          path: '/reset-password',
+          builder:
+              (_, state) => Scaffold(body: Text('reset-target:${state.extra}')),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [authRepositoryProvider.overrideWithValue(repository)],
+        child: MaterialApp.router(
+          locale: Locale('vi'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: router,
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Quên mật khẩu?'));
+    await tester.pump();
+    expect(find.text('Đặt lại mật khẩu'), findsOneWidget);
+    expect(find.text('Mật khẩu'), findsNothing);
+    expect(find.text('Tiếp tục với Google'), findsNothing);
+
+    await tester.enterText(find.byType(TextFormField), 'qa@example.com');
+    await tester.tap(find.text('Gửi mã đặt lại mật khẩu'));
+    await tester.pumpAndSettle();
+
+    expect(repository.resetEmail, 'qa@example.com');
+    expect(find.text('reset-target:qa@example.com'), findsOneWidget);
+  });
+
+  testWidgets('starts Google OAuth from both sign-in and sign-up', (
     tester,
   ) async {
     final repository = _FakeAuthRepository();
@@ -55,63 +102,68 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('Quên mật khẩu?'));
+    final googleButton = find.text('Tiếp tục với Google');
+    await tester.ensureVisible(googleButton);
+    await tester.tap(googleButton);
     await tester.pump();
-    expect(find.text('Đặt lại mật khẩu'), findsOneWidget);
-    expect(find.text('Mật khẩu'), findsNothing);
+    expect(repository.googleSignInRequests, 1);
 
-    await tester.enterText(find.byType(TextFormField), 'qa@example.com');
-    await tester.tap(find.text('Gửi liên kết đặt lại mật khẩu'));
+    final signUpLink = find.text('Chưa có tài khoản? Đăng ký');
+    await tester.ensureVisible(signUpLink);
+    await tester.tap(signUpLink);
     await tester.pump();
-
-    expect(repository.resetEmail, 'qa@example.com');
-    expect(
-      repository.resetRedirectTo,
-      'https://musemend-app.vercel.app/reset-password',
-    );
-    expect(
-      find.text('Liên kết đã được gửi. Hãy kiểm tra email của bạn.'),
-      findsOneWidget,
-    );
+    final signUpGoogleButton = find.text('Tiếp tục với Google');
+    expect(signUpGoogleButton, findsOneWidget);
+    await tester.ensureVisible(signUpGoogleButton);
+    await tester.tap(signUpGoogleButton);
+    await tester.pump();
+    expect(repository.googleSignInRequests, 2);
   });
 
-  testWidgets('sends new account confirmation to the public success page', (
+  testWidgets('moves to in-app email confirmation after sign-up', (
     tester,
   ) async {
     final repository = _FakeAuthRepository();
+    final router = GoRouter(
+      initialLocation: '/sign-in',
+      routes: [
+        GoRoute(path: '/sign-in', builder: (_, _) => const SignInScreen()),
+        GoRoute(
+          path: '/confirm-email',
+          builder:
+              (_, state) =>
+                  Scaffold(body: Text('confirmation-target:${state.extra}')),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [authRepositoryProvider.overrideWithValue(repository)],
-        child: MaterialApp(
+        child: MaterialApp.router(
           locale: Locale('vi'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: Builder(
-            builder:
-                (context) => MediaQuery(
-                  data: MediaQuery.of(
-                    context,
-                  ).copyWith(disableAnimations: true),
-                  child: const SignInScreen(),
-                ),
-          ),
+          routerConfig: router,
         ),
       ),
     );
 
-    await tester.tap(find.text('Chưa có tài khoản? Đăng ký'));
+    final signUpLink = find.text('Chưa có tài khoản? Đăng ký');
+    await tester.ensureVisible(signUpLink);
+    await tester.tap(signUpLink);
     await tester.pump();
     final fields = find.byType(TextFormField);
     await tester.enterText(fields.at(0), 'QA User');
     await tester.enterText(fields.at(1), 'qa@example.com');
     await tester.enterText(fields.at(2), 'MuseMend-QA-passphrase');
-    await tester.tap(find.text('Tạo tài khoản'));
+    final createAccountButton = find.text('Tạo tài khoản');
+    await tester.ensureVisible(createAccountButton);
+    await tester.tap(createAccountButton);
     await tester.pumpAndSettle();
 
-    expect(
-      repository.signUpRedirectTo,
-      'https://musemend-app.vercel.app/email-confirmed',
-    );
+    expect(repository.signUpEmail, 'qa@example.com');
+    expect(find.text('confirmation-target:qa@example.com'), findsOneWidget);
   });
 
   testWidgets('remains usable on a small screen at 200 percent text scale', (
@@ -226,8 +278,8 @@ void main() {
 
 class _FakeAuthRepository implements AuthRepository {
   String? resetEmail;
-  String? resetRedirectTo;
-  String? signUpRedirectTo;
+  String? signUpEmail;
+  var googleSignInRequests = 0;
 
   @override
   AuthSession? get currentSession => null;
@@ -239,6 +291,9 @@ class _FakeAuthRepository implements AuthRepository {
   }) async {}
 
   @override
+  Future<void> signInWithGoogle() async => googleSignInRequests++;
+
+  @override
   Future<void> signOut() async {}
 
   @override
@@ -247,19 +302,20 @@ class _FakeAuthRepository implements AuthRepository {
     required String email,
     required String password,
     required String languageCode,
-    required String emailRedirectTo,
   }) async {
-    signUpRedirectTo = emailRedirectTo;
+    signUpEmail = email;
   }
 
   @override
-  Future<void> requestPasswordReset({
-    required String email,
-    required String redirectTo,
-  }) async {
+  Future<void> requestPasswordReset({required String email}) async {
     resetEmail = email;
-    resetRedirectTo = redirectTo;
   }
+
+  @override
+  Future<void> resendEmailConfirmationOtp({required String email}) async {}
+
+  @override
+  Future<void> resendPasswordRecoveryOtp({required String email}) async {}
 
   @override
   Future<void> verifyEmailConfirmation({required String tokenHash}) async {}

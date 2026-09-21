@@ -7,18 +7,22 @@ abstract interface class AuthRepository {
 
   Future<void> signIn({required String email, required String password});
 
+  /// Starts the Google OAuth flow. On Android/iOS the provider returns to the
+  /// application's registered deep link; Flutter Web returns to its origin.
+  Future<void> signInWithGoogle();
+
   Future<void> signUp({
     required String displayName,
     required String email,
     required String password,
     required String languageCode,
-    required String emailRedirectTo,
   });
 
-  Future<void> requestPasswordReset({
-    required String email,
-    required String redirectTo,
-  });
+  Future<void> requestPasswordReset({required String email});
+
+  Future<void> resendEmailConfirmationOtp({required String email});
+
+  Future<void> resendPasswordRecoveryOtp({required String email});
 
   Future<void> verifyEmailConfirmation({required String tokenHash});
 

@@ -1,7 +1,11 @@
 # ADR-0004 — Web chỉ phục vụ callback Auth
 
-**Trạng thái:** accepted, implementation in-progress
-**Cập nhật:** 2026-09-19
+**Trạng thái:** superseded by ADR-0005
+**Cập nhật:** 2026-09-21
+
+> ADR này chỉ mô tả portal callback lịch sử. Luồng Auth mới dùng OTP 6 số ngay
+> trong ứng dụng và không còn gửi email tới portal; xem
+> [ADR-0005](./adr-0005-in-app-email-otp.md).
 
 ## Bối cảnh
 

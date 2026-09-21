@@ -1,14 +1,15 @@
 # Flutter Web callback portal QA
 
-**Trạng thái:** in-progress
+**Trạng thái:** implemented
 
 ## Mục đích
 
-Flutter Web public trên Vercel chỉ xử lý callback email xác nhận và đặt lại mật
-khẩu; nó không phải bản web để đăng nhập hay sử dụng nghiệp vụ. Flutter Web
-local mặc định chạy app đầy đủ để QA; có thể bật callback portal riêng bằng
-`--dart-define=PUBLIC_AUTH_PORTAL=true`. Dùng Android Emulator hoặc thiết bị thật
-để QA permission và tích hợp native.
+Flutter Web local mặc định chạy app đầy đủ để QA. Xác nhận email và đặt lại mật
+khẩu hiện dùng OTP 6 số ngay trong app, vì vậy không cần mở Vercel từ email.
+Callback portal public cũ vẫn có thể bật riêng bằng
+`--dart-define=PUBLIC_AUTH_PORTAL=true` để xử lý liên kết lịch sử, nhưng không
+phải luồng mới. Dùng Android Emulator hoặc thiết bị thật để QA permission và
+tích hợp native.
 
 ## Chạy local
 
@@ -25,10 +26,9 @@ thêm `--dart-define=PUBLIC_AUTH_PORTAL=true` vào lệnh trên.
 
 ## Phạm vi phù hợp
 
-- kiểm tra giao diện responsive của trang xác nhận email và đặt lại mật khẩu
-  khi bật callback portal;
-- xác minh callback URL mở đúng route và token/session được xử lý bởi Supabase
-  Development;
+- kiểm tra giao diện responsive của màn nhập OTP xác nhận email và khôi phục
+  mật khẩu;
+- xác minh OTP 6 số được xác minh bởi Supabase Development;
 - kiểm tra form đổi mật khẩu, trạng thái thành công và lỗi.
 
 ## Giới hạn
@@ -39,9 +39,8 @@ cấu hình `vercel.json`. Nếu Vercel Project Root Directory là repo root, d�
 `/app/vercel.json`. Cả hai file giữ cùng rewrite để không phụ thuộc cấu hình
 monorepo hiện tại. Supabase Auth allow-list phải có hai URL production.
 
-Web callback portal không cung cấp sign-in hay dữ liệu nghiệp vụ. Người dùng
-xác nhận email xong hoặc đổi mật khẩu xong sẽ quay lại ứng dụng MuseMend để
-tiếp tục. Đây là hành vi có chủ đích, không phải fallback về trang đăng nhập.
+Web callback portal không cung cấp sign-in hay dữ liệu nghiệp vụ. Nó chỉ giữ
+tương thích cho liên kết lịch sử; email mới không còn đưa người dùng tới portal.
 
 Web không thay thế Android/iOS QA. Permission native, local notification, image
 picker, back button, hiệu năng GPU và gesture cảm ứng phải được kiểm tra trên

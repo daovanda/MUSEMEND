@@ -92,7 +92,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get authAccountCreated =>
-      'Đã tạo tài khoản. Hãy kiểm tra email nếu cần xác nhận.';
+      'Đã tạo tài khoản. Nhập mã 6 số đã gửi đến email để xác nhận.';
 
   @override
   String get webAuthLandingBody =>
@@ -110,7 +110,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get authConfirmEmailPrompt =>
-      'Nhấn nút bên dưới để xác nhận địa chỉ email này.';
+      'Nhập mã 6 số trong email để xác nhận tài khoản.';
 
   @override
   String get authConfirmEmailAction => 'Xác nhận email';
@@ -167,6 +167,12 @@ class AppLocalizationsVi extends AppLocalizations {
   String get authSignIn => 'Đăng nhập';
 
   @override
+  String get authOr => 'hoặc';
+
+  @override
+  String get authContinueWithGoogle => 'Tiếp tục với Google';
+
+  @override
   String get authSwitchToSignIn => 'Đã có tài khoản? Đăng nhập';
 
   @override
@@ -196,18 +202,17 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get authResetPasswordSubtitle =>
-      'Nhập email để nhận liên kết đặt lại mật khẩu.';
+      'Nhập email để nhận mã đặt lại mật khẩu gồm 6 số.';
 
   @override
   String get authCreateNewPasswordSubtitle =>
       'Tạo mật khẩu mới cho tài khoản MuseMend của bạn.';
 
   @override
-  String get authSendResetLink => 'Gửi liên kết đặt lại mật khẩu';
+  String get authSendResetLink => 'Gửi mã đặt lại mật khẩu';
 
   @override
-  String get authResetLinkSent =>
-      'Liên kết đã được gửi. Hãy kiểm tra email của bạn.';
+  String get authResetLinkSent => 'Mã đã được gửi. Hãy kiểm tra email của bạn.';
 
   @override
   String get authBackToSignIn => 'Quay lại đăng nhập';
@@ -248,6 +253,17 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get authVerifyOtp => 'Tiếp tục';
+
+  @override
+  String get authResendCode => 'Gửi lại mã';
+
+  @override
+  String authResendCodeCountdown(int seconds) {
+    return 'Gửi lại mã sau $seconds giây';
+  }
+
+  @override
+  String get authResendCodeFailed => 'Chưa thể gửi lại mã. Hãy thử lại.';
 
   @override
   String get authUpdatePassword => 'Đổi mật khẩu';
@@ -1176,4 +1192,18 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get defaultCloudName => 'Mây';
+
+  @override
+  String get webAuthHomeTitle => 'MuseMend — một khoảng lặng cho riêng bạn';
+
+  @override
+  String get webAuthHomeBody =>
+      'MuseMend là ứng dụng viết và chăm sóc cảm xúc. Khi bạn chọn đăng nhập bằng Google, chúng tôi chỉ dùng tên, email và ảnh đại diện để tạo tài khoản; không đọc nội dung Gmail, danh bạ hoặc Google Drive của bạn.';
+
+  @override
+  String get webAuthPrivacyGoogleData =>
+      'Dữ liệu Google chỉ được dùng để xác thực và tạo hồ sơ MuseMend. Chúng tôi không truy cập hoặc chia sẻ nội dung Gmail, danh bạ hoặc Google Drive.';
+
+  @override
+  String get webAuthBackHome => 'Về trang MuseMend';
 }

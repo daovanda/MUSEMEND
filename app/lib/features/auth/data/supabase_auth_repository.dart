@@ -65,18 +65,40 @@ class SupabaseAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<void> signInWithGoogle() async {
+    try {
+      await _client.auth.signInWithOAuth(
+        OAuthProvider.google,
+        // Keep Google consent limited to the identity data MuseMend needs.
+        // Do not add Gmail, Contacts, Drive, or other product scopes here
+        // without a privacy review and corresponding Google verification.
+        scopes: 'openid email profile',
+        // Browser-based OAuth needs a return route the app can safely receive.
+        // The Google client itself always redirects to Supabase first; this
+        // redirect is only the final hand-off after Supabase verifies the flow.
+        redirectTo:
+            kIsWeb ? Uri.base.origin : 'com.musemend.app://login-callback',
+        authScreenLaunchMode:
+            kIsWeb
+                ? LaunchMode.platformDefault
+                : LaunchMode.externalApplication,
+      );
+    } on AuthException catch (error) {
+      throw _mapFailure(error);
+    }
+  }
+
+  @override
   Future<void> signUp({
     required String displayName,
     required String email,
     required String password,
     required String languageCode,
-    required String emailRedirectTo,
   }) async {
     try {
       await _client.auth.signUp(
         email: email.trim(),
         password: password,
-        emailRedirectTo: emailRedirectTo,
         data: {
           'display_name': displayName.trim(),
           // Auth email templates can use .Data.language_code to render the
@@ -90,17 +112,31 @@ class SupabaseAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<void> requestPasswordReset({
-    required String email,
-    required String redirectTo,
-  }) async {
+  Future<void> requestPasswordReset({required String email}) async {
     try {
-      await _client.auth.resetPasswordForEmail(
-        email.trim(),
-        redirectTo: redirectTo,
-      );
+      await _client.auth.resetPasswordForEmail(email.trim());
     } on AuthException catch (_) {
       throw AuthFailure(AuthFailureCode.passwordResetFailed);
+    }
+  }
+
+  @override
+  Future<void> resendEmailConfirmationOtp({required String email}) async {
+    try {
+      await _client.auth.resend(type: OtpType.signup, email: email.trim());
+    } on AuthException {
+      throw const AuthFailure(AuthFailureCode.emailConfirmationFailed);
+    }
+  }
+
+  @override
+  Future<void> resendPasswordRecoveryOtp({required String email}) async {
+    // gotrue's resend endpoint doesn't support password recovery. Requesting a
+    // fresh recovery email issues a new code using the configured auth template.
+    try {
+      await _client.auth.resetPasswordForEmail(email.trim());
+    } on AuthException {
+      throw const AuthFailure(AuthFailureCode.passwordResetFailed);
     }
   }
 

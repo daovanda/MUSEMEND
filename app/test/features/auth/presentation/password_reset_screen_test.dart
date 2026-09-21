@@ -10,7 +10,7 @@ import 'package:musemend/features/auth/presentation/password_reset_screen.dart';
 import 'package:musemend/l10n/generated/app_localizations.dart';
 
 void main() {
-  testWidgets('submits the new password and returns to sign in', (
+  testWidgets('verifies a sign-up OTP in app and continues to onboarding', (
     tester,
   ) async {
     tester.binding.platformDispatcher.accessibilityFeaturesTestValue =
@@ -18,18 +18,19 @@ void main() {
     addTearDown(
       tester.binding.platformDispatcher.clearAccessibilityFeaturesTestValue,
     );
-    final repository = _FakeAuthRepository();
+    final repository = _FakeAuthRepository(withSession: false);
     final router = GoRouter(
-      initialLocation: '/reset-password',
+      initialLocation: '/confirm-email',
       routes: [
         GoRoute(
-          path: '/reset-password',
-          builder: (context, state) => const PasswordResetScreen(),
+          path: '/confirm-email',
+          builder:
+              (_, _) =>
+                  const EmailConfirmationScreen(initialEmail: 'qa@example.com'),
         ),
         GoRoute(
-          path: '/sign-in',
-          builder:
-              (context, state) => const Scaffold(body: Text('sign-in-target')),
+          path: '/onboarding',
+          builder: (_, _) => const Scaffold(body: Text('onboarding-target')),
         ),
       ],
     );
@@ -49,25 +50,178 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.text('Tạo mật khẩu mới cho tài khoản MuseMend của bạn.'),
-      findsOneWidget,
+      tester
+          .widget<TextFormField>(find.byType(TextFormField).first)
+          .controller
+          ?.text,
+      'qa@example.com',
     );
-    expect(
-      find.text('Nhập email để nhận liên kết đặt lại mật khẩu.'),
-      findsNothing,
-    );
-    final fields = find.byType(TextFormField);
-    await tester.enterText(fields.at(0), 'MuseMend-QA-passphrase');
-    await tester.enterText(fields.at(1), 'MuseMend-QA-passphrase');
-    await tester.tap(find.text('Đổi mật khẩu'));
+    _expectOutlinedOtpFields(tester);
+    await tester.enterText(find.byType(TextFormField).at(1), '123456');
+    await tester.tap(find.widgetWithText(FilledButton, 'Xác nhận email'));
     await tester.pumpAndSettle();
 
-    expect(repository.updatedPassword, 'MuseMend-QA-passphrase');
-    expect(repository.didSignOut, isTrue);
-    expect(find.text('sign-in-target'), findsOneWidget);
+    expect(find.text('onboarding-target'), findsOneWidget);
   });
 
-  testWidgets('does not show the password form without a recovery session', (
+  testWidgets(
+    'verifies the recovery OTP, updates the password, and returns to sign in',
+    (tester) async {
+      tester.binding.platformDispatcher.accessibilityFeaturesTestValue =
+          const FakeAccessibilityFeatures(disableAnimations: true);
+      addTearDown(
+        tester.binding.platformDispatcher.clearAccessibilityFeaturesTestValue,
+      );
+      final repository = _FakeAuthRepository();
+      final router = GoRouter(
+        initialLocation: '/reset-password',
+        routes: [
+          GoRoute(
+            path: '/reset-password',
+            builder: (context, state) => const PasswordResetScreen(),
+          ),
+          GoRoute(
+            path: '/sign-in',
+            builder:
+                (context, state) =>
+                    const Scaffold(body: Text('sign-in-target')),
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [authRepositoryProvider.overrideWithValue(repository)],
+          child: MaterialApp.router(
+            locale: const Locale('vi'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            routerConfig: router,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Nhập email và mã 6 số trong email MuseMend mới nhất.'),
+        findsOneWidget,
+      );
+      var fields = find.byType(TextFormField);
+      await tester.enterText(fields.at(0), 'qa@example.com');
+      await tester.enterText(fields.at(1), '123456');
+      await tester.tap(find.widgetWithText(FilledButton, 'Tiếp tục'));
+      await tester.pumpAndSettle();
+
+      fields = find.byType(TextFormField);
+      await tester.enterText(fields.at(0), 'MuseMend-QA-passphrase');
+      await tester.enterText(fields.at(1), 'MuseMend-QA-passphrase');
+      _expectOutlinedOtpFields(tester);
+      await tester.tap(find.text('Đổi mật khẩu'));
+      await tester.pumpAndSettle();
+
+      expect(repository.updatedPassword, 'MuseMend-QA-passphrase');
+      expect(repository.didSignOut, isTrue);
+      expect(find.text('sign-in-target'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'always requests a recovery OTP before showing the password form',
+    (tester) async {
+      tester.binding.platformDispatcher.accessibilityFeaturesTestValue =
+          const FakeAccessibilityFeatures(disableAnimations: true);
+      addTearDown(
+        tester.binding.platformDispatcher.clearAccessibilityFeaturesTestValue,
+      );
+      final repository = _FakeAuthRepository(withSession: false);
+      final router = GoRouter(
+        initialLocation: '/reset-password',
+        routes: [
+          GoRoute(
+            path: '/reset-password',
+            builder: (context, state) => const PasswordResetScreen(),
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [authRepositoryProvider.overrideWithValue(repository)],
+          child: MaterialApp.router(
+            locale: const Locale('vi'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            routerConfig: router,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Nhập email và mã 6 số trong email MuseMend mới nhất.'),
+        findsOneWidget,
+      );
+      expect(find.byType(TextFormField), findsNWidgets(2));
+      _expectOutlinedOtpFields(tester);
+    },
+  );
+
+  testWidgets(
+    'confirmation OTP can only be resent after the 60-second cooldown',
+    (tester) async {
+      tester.binding.platformDispatcher.accessibilityFeaturesTestValue =
+          const FakeAccessibilityFeatures(disableAnimations: true);
+      addTearDown(
+        tester.binding.platformDispatcher.clearAccessibilityFeaturesTestValue,
+      );
+      final repository = _FakeAuthRepository(withSession: false);
+      final router = GoRouter(
+        initialLocation: '/confirm-email',
+        routes: [
+          GoRoute(
+            path: '/confirm-email',
+            builder:
+                (_, _) => const EmailConfirmationScreen(
+                  initialEmail: 'qa@example.com',
+                ),
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [authRepositoryProvider.overrideWithValue(repository)],
+          child: MaterialApp.router(
+            locale: const Locale('vi'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            routerConfig: router,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Gửi lại mã sau 60 giây'), findsOneWidget);
+      await tester.tap(find.text('Gửi lại mã sau 60 giây'));
+      await tester.pump();
+      expect(repository.emailOtpResendCount, 0);
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.text('Gửi lại mã sau 59 giây'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 59));
+      await tester.pump();
+      expect(find.text('Gửi lại mã'), findsOneWidget);
+      await tester.tap(find.text('Gửi lại mã'));
+      await tester.pumpAndSettle();
+
+      expect(repository.emailOtpResendCount, 1);
+      expect(find.text('Gửi lại mã sau 60 giây'), findsOneWidget);
+    },
+  );
+
+  testWidgets('recovery OTP resend also observes the 60-second cooldown', (
     tester,
   ) async {
     tester.binding.platformDispatcher.accessibilityFeaturesTestValue =
@@ -99,9 +253,22 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextFormField).first, 'qa@example.com');
 
-    expect(find.text('Liên kết không hợp lệ hoặc đã hết hạn'), findsOneWidget);
-    expect(find.byType(TextFormField), findsNothing);
+    expect(find.text('Gửi lại mã sau 60 giây'), findsOneWidget);
+    await tester.tap(find.text('Gửi lại mã sau 60 giây'));
+    await tester.pump();
+    expect(repository.recoveryOtpResendCount, 0);
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Gửi lại mã sau 59 giây'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 59));
+    await tester.pump();
+    expect(find.text('Gửi lại mã'), findsOneWidget);
+    await tester.tap(find.text('Gửi lại mã'));
+    await tester.pumpAndSettle();
+
+    expect(repository.recoveryOtpResendCount, 1);
+    expect(find.text('Gửi lại mã sau 60 giây'), findsOneWidget);
   });
 
   testWidgets('public portal verifies email OTP before showing password form', (
@@ -261,6 +428,17 @@ void main() {
   );
 }
 
+void _expectOutlinedOtpFields(WidgetTester tester) {
+  for (final fieldFinder in find.byType(TextField).evaluate()) {
+    final field = fieldFinder.widget as TextField;
+    final decoration = field.decoration!.applyDefaults(
+      Theme.of(fieldFinder).inputDecorationTheme,
+    );
+    expect(decoration.enabledBorder, isA<OutlineInputBorder>());
+    expect(decoration.focusedBorder, isA<OutlineInputBorder>());
+  }
+}
+
 class _FakeAuthRepository implements AuthRepository {
   _FakeAuthRepository({
     this.withSession = true,
@@ -278,16 +456,25 @@ class _FakeAuthRepository implements AuthRepository {
   String? updatedPassword;
   String? recoveryOtpEmail;
   String? recoveryOtp;
+  var recoveryOtpResendCount = 0;
+  var emailOtpResendCount = 0;
   var didSignOut = false;
 
   @override
   AuthSession? get currentSession => withSession ? session : null;
 
   @override
-  Future<void> requestPasswordReset({
-    required String email,
-    required String redirectTo,
-  }) async {}
+  Future<void> requestPasswordReset({required String email}) async {}
+
+  @override
+  Future<void> resendEmailConfirmationOtp({required String email}) async {
+    emailOtpResendCount++;
+  }
+
+  @override
+  Future<void> resendPasswordRecoveryOtp({required String email}) async {
+    recoveryOtpResendCount++;
+  }
 
   @override
   Future<void> verifyEmailConfirmation({required String tokenHash}) async {
@@ -321,6 +508,9 @@ class _FakeAuthRepository implements AuthRepository {
   }) async {}
 
   @override
+  Future<void> signInWithGoogle() async {}
+
+  @override
   Future<void> signOut() async {
     didSignOut = true;
   }
@@ -331,7 +521,6 @@ class _FakeAuthRepository implements AuthRepository {
     required String email,
     required String password,
     required String languageCode,
-    required String emailRedirectTo,
   }) async {}
 
   @override

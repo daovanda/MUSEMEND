@@ -35,12 +35,14 @@ class AuthController extends Notifier<AsyncValue<void>> {
     );
   }
 
+  Future<bool> signInWithGoogle() =>
+      _run(() => ref.read(authRepositoryProvider).signInWithGoogle());
+
   Future<bool> signUp({
     required String displayName,
     required String email,
     required String password,
     required String languageCode,
-    required String emailRedirectTo,
   }) async {
     return _run(
       () => ref
@@ -50,21 +52,27 @@ class AuthController extends Notifier<AsyncValue<void>> {
             email: email,
             password: password,
             languageCode: languageCode,
-            emailRedirectTo: emailRedirectTo,
           ),
     );
   }
 
-  Future<bool> requestPasswordReset({
-    required String email,
-    required String redirectTo,
-  }) async {
+  Future<bool> requestPasswordReset({required String email}) async {
     return _run(
-      () => ref
-          .read(authRepositoryProvider)
-          .requestPasswordReset(email: email, redirectTo: redirectTo),
+      () => ref.read(authRepositoryProvider).requestPasswordReset(email: email),
     );
   }
+
+  Future<bool> resendEmailConfirmationOtp({required String email}) => _run(
+    () => ref
+        .read(authRepositoryProvider)
+        .resendEmailConfirmationOtp(email: email),
+  );
+
+  Future<bool> resendPasswordRecoveryOtp({required String email}) => _run(
+    () => ref
+        .read(authRepositoryProvider)
+        .resendPasswordRecoveryOtp(email: email),
+  );
 
   Future<bool> verifyEmailConfirmation({required String tokenHash}) => _run(
     () => ref

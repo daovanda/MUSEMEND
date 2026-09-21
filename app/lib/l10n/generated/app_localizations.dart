@@ -283,7 +283,7 @@ abstract class AppLocalizations {
   /// No description provided for @authAccountCreated.
   ///
   /// In en, this message translates to:
-  /// **'Your account has been created. Please check your email if confirmation is required.'**
+  /// **'Your account has been created. Enter the 6-digit code sent to your email to confirm it.'**
   String get authAccountCreated;
 
   /// No description provided for @webAuthLandingBody.
@@ -313,7 +313,7 @@ abstract class AppLocalizations {
   /// No description provided for @authConfirmEmailPrompt.
   ///
   /// In en, this message translates to:
-  /// **'Tap the button below to confirm this email address.'**
+  /// **'Enter the 6-digit code from your email to confirm your account.'**
   String get authConfirmEmailPrompt;
 
   /// No description provided for @authConfirmEmailAction.
@@ -418,6 +418,18 @@ abstract class AppLocalizations {
   /// **'Sign in'**
   String get authSignIn;
 
+  /// No description provided for @authOr.
+  ///
+  /// In en, this message translates to:
+  /// **'or'**
+  String get authOr;
+
+  /// No description provided for @authContinueWithGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Google'**
+  String get authContinueWithGoogle;
+
   /// No description provided for @authSwitchToSignIn.
   ///
   /// In en, this message translates to:
@@ -475,7 +487,7 @@ abstract class AppLocalizations {
   /// No description provided for @authResetPasswordSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Enter your email to receive a password reset link.'**
+  /// **'Enter your email to receive a 6-digit password reset code.'**
   String get authResetPasswordSubtitle;
 
   /// No description provided for @authCreateNewPasswordSubtitle.
@@ -487,13 +499,13 @@ abstract class AppLocalizations {
   /// No description provided for @authSendResetLink.
   ///
   /// In en, this message translates to:
-  /// **'Send reset link'**
+  /// **'Send reset code'**
   String get authSendResetLink;
 
   /// No description provided for @authResetLinkSent.
   ///
   /// In en, this message translates to:
-  /// **'The link is on its way. Check your email.'**
+  /// **'Your code is on its way. Check your email.'**
   String get authResetLinkSent;
 
   /// No description provided for @authBackToSignIn.
@@ -567,6 +579,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Continue'**
   String get authVerifyOtp;
+
+  /// No description provided for @authResendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend code'**
+  String get authResendCode;
+
+  /// No description provided for @authResendCodeCountdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend code in {seconds}s'**
+  String authResendCodeCountdown(int seconds);
+
+  /// No description provided for @authResendCodeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not resend the code. Please try again.'**
+  String get authResendCodeFailed;
 
   /// No description provided for @authUpdatePassword.
   ///
@@ -2192,6 +2222,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cloud'**
   String get defaultCloudName;
+
+  /// No description provided for @webAuthHomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'MuseMend — a quiet space for you'**
+  String get webAuthHomeTitle;
+
+  /// No description provided for @webAuthHomeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'MuseMend is a journaling and emotional wellbeing app. When you choose Google sign-in, we use only your name, email address, and profile photo to create your account; we never read your Gmail content, contacts, or Google Drive.'**
+  String get webAuthHomeBody;
+
+  /// No description provided for @webAuthPrivacyGoogleData.
+  ///
+  /// In en, this message translates to:
+  /// **'Google data is used solely to authenticate you and create your MuseMend profile. We do not access or share your Gmail content, contacts, or Google Drive.'**
+  String get webAuthPrivacyGoogleData;
+
+  /// No description provided for @webAuthBackHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to MuseMend'**
+  String get webAuthBackHome;
 }
 
 class _AppLocalizationsDelegate

@@ -1,116 +1,77 @@
 # Auth email templates
 
-**Trạng thái:** `in-progress`
-**Cập nhật:** 2026-09-19
+**Trạng thái:** `implemented`
+**Cập nhật:** 2026-09-21
 
 ## Mục tiêu
 
-Email xác nhận đăng ký và khôi phục mật khẩu có hai nội dung riêng, cùng giọng
-điệu MuseMend và bản dịch theo `language_code` đã lưu trong Auth metadata. Link
-reset hướng tới web production `https://musemend-app.vercel.app/reset-password`;
-link xác nhận hướng tới `https://musemend-app.vercel.app/email-confirmed`, kể cả
-khi yêu cầu được gửi từ app local hoặc app di động.
+Supabase Auth gửi hai email riêng: Confirm Sign Up và Reset Password. Cả hai
+email chỉ hiển thị OTP 6 số, hướng dẫn người dùng quay lại ứng dụng MuseMend và
+không có liên kết/callback web. Luồng này hoạt động trên thiết bị nhận email khác
+với thiết bị đang chạy app, không phụ thuộc PKCE verifier hay click-tracking.
 
-## Triển khai
+## Source và đồng bộ hosted
 
-- Source template chuẩn trong repository:
-  - `supabase/templates/confirm-sign-up.html`
-  - `supabase/templates/reset-password.html`
-- Hosted template của Supabase được quản lý riêng tại Authentication → Emails;
-  Vercel/Git deploy không tự cập nhật các template này. Ngày 2026-09-19, QA một
-  email reset cho thấy link cuối có query `?code=...`; template Reset Password
-  production khi đó còn 11 CTA `{{ .ConfirmationURL }}`. Đã thay các CTA đó bằng
-  callback `#token_hash={{ .TokenHash }}&amp;type=recovery`, lưu và tải lại trang
-  để xác nhận không còn `{{ .ConfirmationURL }}` trong hosted template. Template
-  Ngày 2026-09-19, cả Reset Password và Confirm Sign Up production đã được đổi
-  sang mẫu OTP 6 số; tải lại trang xác nhận Save changes đã hoàn tất.
-- Client gửi `language_code` khi đăng ký. Template chọn `vi`, `en`, `ja`, `fr`,
-  `es`, `it`, `de`, `ko`, `pt`, `ms`, `id`, `th`; mã khác fallback về tiếng Anh.
-- Email mới hiển thị `{{ .Token }}` (OTP 6 số). CTA chỉ mở `/email-confirmed`
-  hoặc `/reset-password` và không mang credential, nên click tracking hoặc
-  scanner của SMTP không thể làm biến dạng hay dùng trước OTP.
-- Người dùng nhập email và OTP trên web. Client chỉ gửi chúng trực tiếp tới
-  Supabase `verifyOTP` sau thao tác xác nhận; không lưu OTP trong URL, log, DB
-  hoặc persistent storage. Callback `TokenHash` cũ vẫn được hỗ trợ tạm thời.
-- Subject giữ ngắn, ổn định; nội dung và CTA được bản địa hoá trong body.
-- Email reset và confirmation là hai mẫu độc lập, mỗi mẫu chỉ có một CTA và
-  một khối HTML hoàn chỉnh.
+Source chuẩn được version-control tại:
 
-## Link reset: thời hạn, tính dùng một lần và điều hướng
+- `supabase/templates/confirm-sign-up.html`
+- `supabase/templates/reset-password.html`
 
-Supabase Auth tạo recovery token cho mỗi yêu cầu. Link/token có thể dùng một lần;
-Email OTP Expiration trong production được xác minh là `3600` giây (1 giờ). Hạn
-này cũng áp dụng cho confirmation. Template hiển thị OTP `{{ .Token }}` và CTA
-không credential tới `/reset-password` hoặc `/email-confirmed`. Người dùng nhập
-email cùng mã; trang gửi POST `verifyOTP` đến đúng Supabase project. Recovery chỉ
-mở form khi verify trả session hợp lệ, sau đó `updateUser` mới ghi mật khẩu.
+Supabase Dashboard tại Authentication → Emails là nơi chạy template thực tế;
+Vercel, Git deploy và Flutter build **không** tự đồng bộ template. Khi thay đổi:
 
-Public Flutter Web chỉ cung cấp ba trạng thái: trang hướng dẫn trung tính ở `/`,
-thành công xác nhận tại `/email-confirmed`, và form recovery tại `/reset-password`.
-Không có đăng nhập, onboarding hay màn nghiệp vụ trên web. Hai redirect được
-truyền trực tiếp trong `signUp(emailRedirectTo: ...)` và
-`resetPasswordForEmail(redirectTo: ...)`; template email dùng token hash và OTP
-type cụ thể để callback có thể xác minh cả khi email được gửi từ app native rồi
-mở trên trình duyệt/thiết bị khác. Web dùng Path URL strategy.
+1. Thay thế toàn bộ source của đúng loại template bằng file tương ứng.
+2. Save changes, mở lại source/preview và xác minh body chỉ có một `<!doctype html>`.
+3. Xác minh không còn `<a`, `href=`, `redirectTo` hay URL Vercel trong cả hai body.
+4. Gửi email test mới. Email cũ không đại diện cho source mới.
 
-Vercel cần rewrite hai pathname callback về `index.html`. Repository đặt cấu hình
-tại `vercel.json` và `app/vercel.json` để khớp cấu hình project root dù được đặt
-ở repo root hay `app`; deployment phải chứa Flutter web `index.html` ở output
-root. Supabase Site URL là `https://musemend-app.vercel.app`; URL allow-list phải
-có origin, `/email-confirmed` và `/reset-password`. Không dùng URL hash cũ cho
-luồng email mới.
+Ngày 2026-09-21, source đã được làm sạch sau khi phát hiện hosted body từng bị
+nối nhiều template lịch sử. Bản chuẩn hiện tại có duy nhất một khối HTML và không
+đưa credential hay link vào email.
 
-Trang xác nhận chỉ báo thành công sau khi Supabase chấp nhận token hash; trang
-reset chỉ hiện form sau khi Supabase chấp nhận recovery token và trả session.
-Callback cũ có session vẫn được đọc trong giai đoạn chuyển tiếp. Sau đổi mật
-khẩu web hiển thị xác nhận và đăng xuất; người dùng quay lại app để tiếp tục.
-Link reset luôn đi đến web utility
-trên mọi nền tảng, không về trang sign-in web.
+## Locale và nội dung
 
-Supabase khuyến nghị không để SMTP provider rewrite link trong email Auth. Mục
-Brevo Transactional → Settings → Tracking hiện chỉ cho chọn tracking ẩn danh và
-không có công tắc tắt click tracking trên gói hiện tại. Vì vậy credential đã được
-tách khỏi CTA: Brevo có thể bọc URL mở portal nhưng không thể thay đổi OTP trong
-nội dung. Về lâu dài vẫn nên tắt click tracking hoặc dùng provider giữ nguyên link.
+Client đưa `language_code` vào Auth metadata lúc sign-up. Template chọn `vi`,
+`en`, `ja`, `fr`, `es`, `it`, `de`, `ko`, `pt`, `ms`, `id`, `th`; mã không hỗ trợ
+fallback về tiếng Anh. Đặt lại mật khẩu không tạo metadata mới, nên dùng metadata
+ngôn ngữ đã lưu của user. Hai template đều dùng `{{ .Token }}`; độ dài là 6 do
+cấu hình Auth Email OTP length của project.
 
-## Bảo mật và lỗi
+Subject, h1 và nội dung của Confirm Sign Up phải nói về xác nhận email. Reset
+Password phải nói về mã đặt mật khẩu mới. Cả hai nói rõ mã dùng một lần, hết hạn
+sau một giờ, và người dùng có thể bỏ qua email nếu không phải mình yêu cầu.
 
-- Reset endpoint luôn trả thông báo thành công chung để không tiết lộ email có
-  tồn tại hay không.
-- Token chỉ do Supabase phát hành, có thời hạn, dùng một lần; không đặt trong
-  query string, không gửi tới server qua HTTP, và client không lưu token vào DB,
-  persistent storage hoặc log.
-- Chỉ sau callback hợp lệ, màn reset gọi `supabase.auth.updateUser` để ghi mật
-  khẩu mới thực sự vào Auth. Sau thành công app đóng recovery session và đưa
-  người dùng về đăng nhập.
-- Không tạo email/link test bằng tài khoản thật trong automated tests và không
-  submit đổi mật khẩu thay người dùng.
+## Contract và bảo mật
 
-## Kiểm thử, nghiệm thu và rollback
+- Flutter gọi `signUp` và `resetPasswordForEmail` không truyền `emailRedirectTo`
+  hay `redirectTo`.
+- App gửi email + mã thẳng tới `verifyOTP`: `OtpType.email` khi xác nhận, và
+  `OtpType.recovery` khi reset.
+- Recovery form chỉ mở khi Supabase trả recovery session; `updateUser` mới đổi
+  mật khẩu thực sự.
+- OTP không nằm trong URL, không ghi DB, persistent storage hoặc log. Mã dùng
+  một lần, có hạn 3.600 giây; request mới làm mã cũ mất hiệu lực.
+- API reset vẫn trả phản hồi UI chung để không tiết lộ email tồn tại hay không.
+- Không commit SMTP key, token Supabase, email người dùng thật hoặc nội dung mail
+  chứa credential.
 
-- Chạy Flutter analyze, widget/unit tests và build web.
-- Kiểm tra URL production `/reset-password` mở form khi callback recovery hợp lệ;
-  `/email-confirmed` hiển thị xác nhận sau callback đăng ký hợp lệ.
-- Mở root và URL không xác định để chắc chắn website không hiển thị form đăng
-  nhập; trang trung tính không được tự tuyên bố email đã xác nhận.
-- Kiểm tra Vercel rewrite cho hai pathname và Supabase allow-list chứa chính xác
-  hai URL callback.
-- Supabase UI hiện Email OTP Expiration `3600`; không thay đổi nếu đã đúng.
-- Hosted templates phải được kiểm tra source và Preview để chắc chắn không còn
-  phần template mặc định nối thêm hoặc text HTML thô.
-- Hosted Supabase templates cần được đồng bộ thủ công từ file source tương ứng;
-  CI/Vercel deploy không tự cập nhật email template trên Supabase. Reset Password
-  và Confirm Sign Up production đã được đồng bộ sang OTP ngày 2026-09-19.
-- URL QA dạng `/reset-password?code=...` là kết quả của PKCE redirect và không
-  dùng cho flow đa thiết bị. Email mới phải có OTP 6 số và CTA chỉ mở pathname
-  không credential; trang chỉ xác minh sau khi người dùng nhập email, OTP và bấm
-  xác nhận. Auth Logs production chưa có dữ liệu tại lúc kiểm tra;
-  tính năng ghi audit log trong Auth đang tắt nên không thể suy ra mã lỗi server
-  hoặc thời điểm hết hạn chỉ từ log.
-- QA thủ công với email test: mỗi request tạo email/link mới; cùng link thứ hai
-  không dùng lại được; link quá 1 giờ bị từ chối; link còn hạn mở form, đổi mật
-  khẩu thành công, rồi đăng nhập được bằng mật khẩu mới. Không xem bước này là
-  hoàn tất khi chưa kiểm tra trên Supabase/Vercel production thật.
-- Rollback: khôi phục source template trước đó và redeploy app path routing; không
-  thay đổi Auth users hay dữ liệu nhật ký. Nếu token bị lộ, gửi yêu cầu reset mới
-  thay vì lưu hoặc phát tán link cũ.
+## Tương thích và vận hành
+
+Vercel callback portal còn tồn tại để tương thích liên kết lịch sử, nhưng không
+phải destination của email mới. Vì vậy không cần thêm URL Vercel vào lời gọi Auth
+mới. Nếu lỡ thấy email có URL/CTA, trước tiên kiểm tra source hosted trong
+Supabase, không kết luận từ file repository.
+
+## Kiểm thử và rollback
+
+- Xác minh UI Auth settings: Email OTP Expiration là 3.600 giây và OTP length là 6.
+- Với email test mới, kiểm tra không có CTA/link; copy mã vào app để xác nhận hoặc
+  đổi mật khẩu, rồi đăng nhập lại bằng mật khẩu mới.
+- Test mã sai, mã cũ sau request mới và mã quá hạn; cả ba phải bị từ chối.
+- Rollback chỉ dùng khi cần: restore source template đã được duyệt, Save changes,
+  rồi kiểm tra lại preview. Không vô hiệu hóa user hoặc sửa mật khẩu thay người dùng.
+
+## Liên quan
+
+- [Authentication client](../fe/authentication.md)
+- [ADR-0005 — OTP email trong ứng dụng](../other/adr-0005-in-app-email-otp.md)

@@ -54,6 +54,9 @@ class _SignedOutRepository implements AuthRepository {
   }) async {}
 
   @override
+  Future<void> signInWithGoogle() async {}
+
+  @override
   Future<void> signOut() async {}
 
   @override
@@ -62,14 +65,16 @@ class _SignedOutRepository implements AuthRepository {
     required String email,
     required String password,
     required String languageCode,
-    required String emailRedirectTo,
   }) async {}
 
   @override
-  Future<void> requestPasswordReset({
-    required String email,
-    required String redirectTo,
-  }) async {}
+  Future<void> requestPasswordReset({required String email}) async {}
+
+  @override
+  Future<void> resendEmailConfirmationOtp({required String email}) async {}
+
+  @override
+  Future<void> resendPasswordRecoveryOtp({required String email}) async {}
 
   @override
   Future<void> verifyEmailConfirmation({required String tokenHash}) async {}
