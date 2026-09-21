@@ -163,8 +163,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                                         emailController: _emailController,
                                         passwordController: _passwordController,
                                         onSubmit: _submit,
-                                        onContinueWithGoogle:
-                                            _signInWithGoogle,
+                                        onContinueWithGoogle: _signInWithGoogle,
                                         onToggleMode: _toggleMode,
                                         onForgotPassword: _showPasswordReset,
                                         onBackToSignIn: _backToSignIn,
@@ -199,8 +198,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                                         emailController: _emailController,
                                         passwordController: _passwordController,
                                         onSubmit: _submit,
-                                        onContinueWithGoogle:
-                                            _signInWithGoogle,
+                                        onContinueWithGoogle: _signInWithGoogle,
                                         onToggleMode: _toggleMode,
                                         onForgotPassword: _showPasswordReset,
                                         onBackToSignIn: _backToSignIn,
