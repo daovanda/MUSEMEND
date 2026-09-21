@@ -239,6 +239,24 @@ class AppLocalizationsEn extends AppLocalizations {
       'Could not reset your password. Please try again.';
 
   @override
+  String get authRecoveryOtpPrompt =>
+      'Enter your email and the 6-digit code from the latest MuseMend email.';
+
+  @override
+  String get authEmailOtpPrompt =>
+      'Enter your email and the 6-digit code from your MuseMend confirmation email.';
+
+  @override
+  String get authOtpCode => '6-digit code';
+
+  @override
+  String get authOtpInvalid =>
+      'Enter the valid 6-digit code from your latest email.';
+
+  @override
+  String get authVerifyOtp => 'Continue';
+
+  @override
   String get authUpdatePassword => 'Update password';
 
   @override

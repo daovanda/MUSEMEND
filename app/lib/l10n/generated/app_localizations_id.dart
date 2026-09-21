@@ -235,6 +235,24 @@ class AppLocalizationsId extends AppLocalizations {
       'Kata sandi belum dapat diatur ulang. Silakan coba lagi.';
 
   @override
+  String get authRecoveryOtpPrompt =>
+      'Masukkan email dan kode 6 digit dari email MuseMend terbaru.';
+
+  @override
+  String get authEmailOtpPrompt =>
+      'Masukkan email dan kode 6 digit dari email konfirmasi MuseMend.';
+
+  @override
+  String get authOtpCode => 'Kode 6 digit';
+
+  @override
+  String get authOtpInvalid =>
+      'Masukkan kode 6 digit yang valid dari email terbaru.';
+
+  @override
+  String get authVerifyOtp => 'Lanjutkan';
+
+  @override
   String get authUpdatePassword => 'Ubah kata sandi';
 
   @override

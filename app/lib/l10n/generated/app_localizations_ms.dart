@@ -237,6 +237,24 @@ class AppLocalizationsMs extends AppLocalizations {
       'Kata laluan tidak dapat ditetapkan semula. Sila cuba lagi.';
 
   @override
+  String get authRecoveryOtpPrompt =>
+      'Masukkan e-mel dan kod 6 digit daripada e-mel MuseMend terkini.';
+
+  @override
+  String get authEmailOtpPrompt =>
+      'Masukkan e-mel dan kod 6 digit daripada e-mel pengesahan MuseMend.';
+
+  @override
+  String get authOtpCode => 'Kod 6 digit';
+
+  @override
+  String get authOtpInvalid =>
+      'Masukkan kod 6 digit yang sah daripada e-mel terkini.';
+
+  @override
+  String get authVerifyOtp => 'Teruskan';
+
+  @override
   String get authUpdatePassword => 'Tukar kata laluan';
 
   @override

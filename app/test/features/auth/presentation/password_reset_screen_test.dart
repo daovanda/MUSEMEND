@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:musemend/features/auth/application/auth_providers.dart';
 import 'package:musemend/features/auth/domain/auth_repository.dart';
 import 'package:musemend/features/auth/domain/auth_session.dart';
+import 'package:musemend/features/auth/presentation/email_confirmation_screen.dart';
 import 'package:musemend/features/auth/presentation/password_reset_screen.dart';
 import 'package:musemend/l10n/generated/app_localizations.dart';
 
@@ -102,17 +103,181 @@ void main() {
     expect(find.text('Liên kết không hợp lệ hoặc đã hết hạn'), findsOneWidget);
     expect(find.byType(TextFormField), findsNothing);
   });
+
+  testWidgets('public portal verifies email OTP before showing password form', (
+    tester,
+  ) async {
+    tester.binding.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures(disableAnimations: true);
+    addTearDown(
+      tester.binding.platformDispatcher.clearAccessibilityFeaturesTestValue,
+    );
+    final repository = _FakeAuthRepository(withSession: false);
+    final router = GoRouter(
+      initialLocation: '/reset-password',
+      routes: [
+        GoRoute(
+          path: '/reset-password',
+          builder: (context, state) => const PasswordResetScreen(),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          publicAuthPortalModeProvider.overrideWithValue(true),
+          authRepositoryProvider.overrideWithValue(repository),
+        ],
+        child: MaterialApp.router(
+          locale: const Locale('vi'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: router,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Nhập email và mã 6 số trong email MuseMend mới nhất.'),
+      findsOneWidget,
+    );
+    var fields = find.byType(TextFormField);
+    expect(fields, findsNWidgets(2));
+    await tester.enterText(fields.at(0), 'qa@example.com');
+    await tester.enterText(fields.at(1), '123456');
+    await tester.tap(find.widgetWithText(FilledButton, 'Tiếp tục'));
+    await tester.pumpAndSettle();
+
+    expect(repository.recoveryOtpEmail, 'qa@example.com');
+    expect(repository.recoveryOtp, '123456');
+    fields = find.byType(TextFormField);
+    expect(fields, findsNWidgets(2));
+    expect(find.text('Mật khẩu mới'), findsOneWidget);
+  });
+
+  testWidgets('public portal falls back to OTP after an invalid legacy link', (
+    tester,
+  ) async {
+    tester.binding.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures(disableAnimations: true);
+    addTearDown(
+      tester.binding.platformDispatcher.clearAccessibilityFeaturesTestValue,
+    );
+    final repository = _FakeAuthRepository(
+      withSession: false,
+      tokenVerificationSucceeds: false,
+    );
+    final router = GoRouter(
+      initialLocation: '/reset-password#token_hash=stale&type=recovery',
+      routes: [
+        GoRoute(
+          path: '/reset-password',
+          builder:
+              (context, state) => PasswordResetScreen(callbackUri: state.uri),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          publicAuthPortalModeProvider.overrideWithValue(true),
+          authRepositoryProvider.overrideWithValue(repository),
+        ],
+        child: MaterialApp.router(
+          locale: const Locale('vi'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: router,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Đổi mật khẩu'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Liên kết không hợp lệ hoặc đã hết hạn'), findsNothing);
+    expect(
+      find.text('Nhập email và mã 6 số trong email MuseMend mới nhất.'),
+      findsOneWidget,
+    );
+    expect(find.byType(TextFormField), findsNWidgets(2));
+  });
+
+  testWidgets(
+    'public confirmation portal falls back to OTP after an invalid legacy link',
+    (tester) async {
+      tester.binding.platformDispatcher.accessibilityFeaturesTestValue =
+          const FakeAccessibilityFeatures(disableAnimations: true);
+      addTearDown(
+        tester.binding.platformDispatcher.clearAccessibilityFeaturesTestValue,
+      );
+      final repository = _FakeAuthRepository(
+        withSession: false,
+        emailTokenVerificationSucceeds: false,
+      );
+      final router = GoRouter(
+        initialLocation: '/email-confirmed#token_hash=stale&type=email',
+        routes: [
+          GoRoute(
+            path: '/email-confirmed',
+            builder:
+                (context, state) =>
+                    EmailConfirmationScreen(callbackUri: state.uri),
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            publicAuthPortalModeProvider.overrideWithValue(true),
+            authRepositoryProvider.overrideWithValue(repository),
+          ],
+          child: MaterialApp.router(
+            locale: const Locale('vi'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            routerConfig: router,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Xác nhận email'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Liên kết không hợp lệ hoặc đã hết hạn'), findsNothing);
+      expect(
+        find.text('Nhập email và mã 6 số trong email xác nhận từ MuseMend.'),
+        findsOneWidget,
+      );
+      expect(find.byType(TextFormField), findsNWidgets(2));
+    },
+  );
 }
 
 class _FakeAuthRepository implements AuthRepository {
-  _FakeAuthRepository({this.withSession = true});
+  _FakeAuthRepository({
+    this.withSession = true,
+    this.tokenVerificationSucceeds = true,
+    this.emailTokenVerificationSucceeds = true,
+  });
 
   final bool withSession;
+  final bool tokenVerificationSucceeds;
+  final bool emailTokenVerificationSucceeds;
   static const session = AuthSession(
     userId: '00000000-0000-4000-8000-000000000001',
     email: 'qa@example.com',
   );
   String? updatedPassword;
+  String? recoveryOtpEmail;
+  String? recoveryOtp;
   var didSignOut = false;
 
   @override
@@ -125,10 +290,29 @@ class _FakeAuthRepository implements AuthRepository {
   }) async {}
 
   @override
-  Future<void> verifyEmailConfirmation({required String tokenHash}) async {}
+  Future<void> verifyEmailConfirmation({required String tokenHash}) async {
+    if (!emailTokenVerificationSucceeds) throw StateError('expired');
+  }
 
   @override
-  Future<void> verifyPasswordRecovery({required String tokenHash}) async {}
+  Future<void> verifyPasswordRecovery({required String tokenHash}) async {
+    if (!tokenVerificationSucceeds) throw StateError('expired');
+  }
+
+  @override
+  Future<void> verifyEmailOtp({
+    required String email,
+    required String otp,
+  }) async {}
+
+  @override
+  Future<void> verifyPasswordRecoveryOtp({
+    required String email,
+    required String otp,
+  }) async {
+    recoveryOtpEmail = email;
+    recoveryOtp = otp;
+  }
 
   @override
   Future<void> signIn({

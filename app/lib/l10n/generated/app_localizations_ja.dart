@@ -223,6 +223,23 @@ class AppLocalizationsJa extends AppLocalizations {
   String get authPasswordResetFailed => 'パスワードを再設定できませんでした。もう一度お試しください。';
 
   @override
+  String get authRecoveryOtpPrompt =>
+      'メールアドレスと、最新のMuseMendメールに記載された6桁のコードを入力してください。';
+
+  @override
+  String get authEmailOtpPrompt =>
+      'メールアドレスと、MuseMendの確認メールに記載された6桁のコードを入力してください。';
+
+  @override
+  String get authOtpCode => '6桁のコード';
+
+  @override
+  String get authOtpInvalid => '最新のメールに記載された有効な6桁のコードを入力してください。';
+
+  @override
+  String get authVerifyOtp => '続ける';
+
+  @override
   String get authUpdatePassword => 'パスワードを変更';
 
   @override

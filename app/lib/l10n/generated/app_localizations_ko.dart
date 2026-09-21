@@ -224,6 +224,22 @@ class AppLocalizationsKo extends AppLocalizations {
   String get authPasswordResetFailed => '비밀번호를 재설정할 수 없어요. 다시 시도해 주세요.';
 
   @override
+  String get authRecoveryOtpPrompt =>
+      '이메일 주소와 최신 MuseMend 이메일의 6자리 코드를 입력해 주세요.';
+
+  @override
+  String get authEmailOtpPrompt => '이메일 주소와 MuseMend 확인 이메일의 6자리 코드를 입력해 주세요.';
+
+  @override
+  String get authOtpCode => '6자리 코드';
+
+  @override
+  String get authOtpInvalid => '최신 이메일의 올바른 6자리 코드를 입력해 주세요.';
+
+  @override
+  String get authVerifyOtp => '계속';
+
+  @override
   String get authUpdatePassword => '비밀번호 변경';
 
   @override

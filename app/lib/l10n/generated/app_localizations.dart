@@ -538,6 +538,36 @@ abstract class AppLocalizations {
   /// **'Could not reset your password. Please try again.'**
   String get authPasswordResetFailed;
 
+  /// No description provided for @authRecoveryOtpPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email and the 6-digit code from the latest MuseMend email.'**
+  String get authRecoveryOtpPrompt;
+
+  /// No description provided for @authEmailOtpPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email and the 6-digit code from your MuseMend confirmation email.'**
+  String get authEmailOtpPrompt;
+
+  /// No description provided for @authOtpCode.
+  ///
+  /// In en, this message translates to:
+  /// **'6-digit code'**
+  String get authOtpCode;
+
+  /// No description provided for @authOtpInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the valid 6-digit code from your latest email.'**
+  String get authOtpInvalid;
+
+  /// No description provided for @authVerifyOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get authVerifyOtp;
+
   /// No description provided for @authUpdatePassword.
   ///
   /// In en, this message translates to:

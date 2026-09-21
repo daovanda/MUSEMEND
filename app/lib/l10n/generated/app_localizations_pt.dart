@@ -241,6 +241,24 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não foi possível repor a palavra-passe. Tente novamente.';
 
   @override
+  String get authRecoveryOtpPrompt =>
+      'Introduza o seu e-mail e o código de 6 dígitos do e-mail mais recente da MuseMend.';
+
+  @override
+  String get authEmailOtpPrompt =>
+      'Introduza o seu e-mail e o código de 6 dígitos do e-mail de confirmação da MuseMend.';
+
+  @override
+  String get authOtpCode => 'Código de 6 dígitos';
+
+  @override
+  String get authOtpInvalid =>
+      'Introduza o código válido de 6 dígitos do seu e-mail mais recente.';
+
+  @override
+  String get authVerifyOtp => 'Continuar';
+
+  @override
   String get authUpdatePassword => 'Alterar palavra-passe';
 
   @override
