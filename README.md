@@ -61,11 +61,17 @@ flutter pub get
 flutter run --dart-define-from-file=config/dev.json
 ```
 
-Để kiểm tra nhanh giao diện mà không chạy Android Emulator, dùng Flutter Web:
+Để kiểm tra nhanh giao diện mà không chạy Android Emulator, dùng Flutter Web
+runbook. Runbook build release mới, dừng đúng server QA cũ và không phục vụ
+bundle/service worker từ cache của lượt trước:
 
 ```powershell
-flutter run -d chrome --dart-define-from-file=config/dev.json
+cd app
+.\tool\start-local-web-qa.ps1
 ```
+
+Chi tiết về cache, quản lý tiến trình và giới hạn OAuth Web ở
+[Flutter Web local QA](./docs/fe/flutter-web-local.md).
 
 Target Web chỉ dùng cho QA local; các permission native, notification, image
 picker và gesture cảm ứng vẫn phải kiểm tra trên Android/iOS.
