@@ -13,16 +13,53 @@ tích hợp native.
 
 ## Chạy local
 
-Từ thư mục `app/`, tạo `config/dev.json` từ file mẫu nếu chưa có rồi chạy:
+Từ thư mục `app/`, tạo `config/dev.json` từ file mẫu nếu chưa có. Cách chuẩn để
+khởi động một lượt QA Web mới là:
 
 ```powershell
-flutter pub get
-flutter run -d chrome --dart-define-from-file=config/dev.json
+.\tool\start-local-web-qa.ps1
 ```
 
-Flutter sẽ mở một URL `http://localhost:<port>`. Giữ terminal chạy trong suốt
-thời gian QA; dừng bằng `q` hoặc `Ctrl+C`. Muốn chạy callback portal local thì
-thêm `--dart-define=PUBLIC_AUTH_PORTAL=true` vào lệnh trên.
+Script build Web release từ source hiện tại với `config/dev.json`, sau đó phục
+vụ tại `http://127.0.0.1:64580` và in URL có `qa=<run-id>` để mở. Chỉ dùng
+Supabase Development URL và publishable key trong `config/dev.json`; không đặt
+service-role key, password hay token ở đây.
+
+Mỗi lần chạy, script làm theo thứ tự:
+
+1. Dừng **cây tiến trình do chính script khởi động ở lượt trước**, bằng PID mà
+   static server thật tự ghi sau khi bind cổng trong
+   `.dart_tool/musemend-local-web-qa.json`. Runbook còn đối chiếu mốc khởi động
+   của PID, nên PID đã bị Windows tái sử dụng sẽ không bị dừng nhầm.
+2. Từ chối dừng một tiến trình không thuộc runbook nếu nó đang chiếm cổng. Cách
+   này tránh vô tình giết server hoặc ứng dụng khác của developer.
+3. Sửa file khóa Flutter bị sót chỉ khi không còn Dart/Flutter process, build
+   lại với `--pwa-strategy=none`, rồi chạy static server cục bộ có header
+   `Cache-Control: no-store`.
+4. Sinh `qa=<run-id>` mới. Kết hợp với PWA bị tắt và header không cache, trình
+   duyệt không thể tái sử dụng service worker/bundle của lượt QA cũ.
+
+Vì cổng mặc định `64580` đã có trong Supabase Development redirect allow-list,
+hãy giữ cổng này khi kiểm thử Google OAuth trên Web. Nếu thực sự cần đổi cổng,
+thêm origin tương ứng vào allow-list Supabase Development trước; nếu không,
+OAuth Web sẽ bị từ chối redirect.
+
+Tùy chọn hữu ích:
+
+```powershell
+# Mở URL mới bằng trình duyệt mặc định sau khi server sẵn sàng.
+.\tool\start-local-web-qa.ps1 -OpenBrowser
+
+# Dừng đúng server do runbook quản lý, không chạm tiến trình khác.
+.\tool\start-local-web-qa.ps1 -Stop
+```
+
+Nếu cổng 64580 đang thuộc một tiến trình không do runbook tạo, script dừng với
+PID để developer tự xác minh và dừng tiến trình đó. Không dùng `taskkill` theo
+tên process hoặc đóng toàn bộ Dart/Flutter process.
+
+Muốn chạy callback portal lịch sử local, vẫn dùng build riêng với
+`--dart-define=PUBLIC_AUTH_PORTAL=true`; đó không phải luồng auth OTP hiện tại.
 
 ## Phạm vi phù hợp
 
