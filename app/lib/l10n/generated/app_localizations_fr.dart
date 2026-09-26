@@ -484,19 +484,19 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get moodAwful => 'EN COLÈRE';
+  String get moodAwful => 'PESANT';
 
   @override
-  String get moodSad => 'VIDE';
+  String get moodSad => 'UN PEU BAS';
 
   @override
-  String get moodOkay => 'ÇA VA';
+  String get moodOkay => 'ORDINAIRE';
 
   @override
-  String get moodGood => 'DÉTENDU·E';
+  String get moodGood => 'PLUS LÉGER';
 
   @override
-  String get moodGreat => 'EN GUÉRISON';
+  String get moodGreat => 'RAYONNANT';
 
   @override
   String moodRecorded(String mood) {
@@ -695,6 +695,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get missionPeriodMorning => 'Matin';
+
+  @override
+  String get missionPeriodNoon => 'Midi';
 
   @override
   String get missionPeriodAfternoon => 'Après-midi';
@@ -1241,4 +1244,115 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get webAuthBackHome => 'Retour à MuseMend';
+
+  @override
+  String skyTodayMood(String mood) {
+    return 'Aujourd’hui : $mood';
+  }
+
+  @override
+  String get skyEditMood => 'Modifier';
+
+  @override
+  String get skyMorningOpening1 => 'Bonjour. Nuage est là avec toi.';
+
+  @override
+  String get skyMorningOpening2 => 'Un nouveau jour commence tout doucement.';
+
+  @override
+  String get skyMorningOpening3 => 'Ce matin, rien ne presse.';
+
+  @override
+  String get skyMorningOpening4 => 'Nuage te souhaite une matinée douce.';
+
+  @override
+  String get skyMorningEnding1 => 'Une respiration lente est déjà un début.';
+
+  @override
+  String get skyMorningEnding2 =>
+      'Tu peux choisir une petite chose à ta portée.';
+
+  @override
+  String get skyMorningEnding3 => 'Laisse ton corps s\'éveiller à son rythme.';
+
+  @override
+  String get skyMorningEnding4 =>
+      'Pas besoin de prévoir toute la journée ; commence ici.';
+
+  @override
+  String get skyMorningEnding5 =>
+      'Il y a aussi de la place pour un peu de repos ce matin.';
+
+  @override
+  String get skyResponseEnding1 =>
+      'Une gorgée d\'eau peut être un petit début.';
+
+  @override
+  String get skyResponseEnding2 =>
+      'Relâche tes épaules le temps d\'une respiration.';
+
+  @override
+  String get skyResponseEnding3 => 'Une courte pause a aussi sa place.';
+
+  @override
+  String get skyResponseEnding4 => 'Tu peux choisir ce qui te semble faisable.';
+
+  @override
+  String get skyResponseEnding5 => 'Pas besoin de tout faire en même temps.';
+
+  @override
+  String get skyResponseEnding6 => 'Si tu veux, regarde dehors un instant.';
+
+  @override
+  String get skyResponseEnding7 => 'Nuage reste là, à ton rythme.';
+
+  @override
+  String get skyResponseEnding8 =>
+      'Un petit geste suffit pour commencer aujourd\'hui.';
+
+  @override
+  String get skyResponseEnding9 =>
+      'Écoute ce dont ton corps pourrait avoir besoin.';
+
+  @override
+  String get skyResponseEnding10 =>
+      'Tu n\'as pas à expliquer ce ressenti tout de suite.';
+
+  @override
+  String get skyAwfulOpening1 =>
+      'Si cette journée te pèse, tu n\'as pas à faire semblant.';
+
+  @override
+  String get skyAwfulOpening2 =>
+      'Certains jours sont difficiles à traverser ; avance doucement.';
+
+  @override
+  String get skySadOpening1 => 'Si tu te sens un peu bas, tu peux ralentir.';
+
+  @override
+  String get skySadOpening2 =>
+      'Aujourd\'hui, tu peux accueillir ce que tu ressens.';
+
+  @override
+  String get skyOkayOpening1 =>
+      'Une journée ordinaire mérite aussi d\'être reconnue.';
+
+  @override
+  String get skyOkayOpening2 =>
+      'Si aujourd\'hui est simplement ordinaire, c\'est suffisant.';
+
+  @override
+  String get skyGoodOpening1 =>
+      'Nuage est heureux que tu te sentes plus léger.';
+
+  @override
+  String get skyGoodOpening2 => 'Tu peux rester un instant dans ce bien-être.';
+
+  @override
+  String get skyGreatOpening1 =>
+      'Nuage voit une belle lumière dans ta journée.';
+
+  @override
+  String get skyGreatOpening2 =>
+      'Il y a un peu de clarté dans ta journée aujourd\'hui.';
 }

@@ -417,13 +417,16 @@ class _SkyMissionPanel extends StatelessWidget {
   _MissionPeriod _periodFor(UserMission mission) {
     final vietnamHour =
         mission.startAt.toUtc().add(const Duration(hours: 7)).hour;
-    if (vietnamHour >= 5 && vietnamHour < 12) {
+    if (vietnamHour >= 5 && vietnamHour < 11) {
       return _MissionPeriod.morning;
     }
-    if (vietnamHour >= 12 && vietnamHour < 17) {
+    if (vietnamHour >= 11 && vietnamHour < 14) {
+      return _MissionPeriod.noon;
+    }
+    if (vietnamHour >= 14 && vietnamHour < 18) {
       return _MissionPeriod.afternoon;
     }
-    if (vietnamHour >= 17 && vietnamHour < 22) {
+    if (vietnamHour >= 18) {
       return _MissionPeriod.evening;
     }
     return _MissionPeriod.anytime;
@@ -534,7 +537,7 @@ class _SkySuggestionRow extends StatelessWidget {
   }
 }
 
-enum _MissionPeriod { morning, afternoon, evening, anytime }
+enum _MissionPeriod { morning, noon, afternoon, evening, anytime }
 
 class _DynamicStickerPlaceholder extends StatelessWidget {
   const _DynamicStickerPlaceholder({this.assetPath});
@@ -928,8 +931,7 @@ class _CreateMissionSheetState extends State<_CreateMissionSheet> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   late MissionType _missionType;
-  TimeOfDay _dailyStart = const TimeOfDay(hour: 9, minute: 0);
-  TimeOfDay _dailyEnd = const TimeOfDay(hour: 10, minute: 0);
+  _MissionPeriod _dailyPeriod = _MissionPeriod.morning;
   late DateTime _customStartDate;
   late DateTime _customEndDate;
   TimeOfDay _customStartTime = const TimeOfDay(hour: 9, minute: 0);
@@ -945,16 +947,20 @@ class _CreateMissionSheetState extends State<_CreateMissionSheet> {
       1438,
     );
     final endMinutes = (startMinutes + 60).clamp(1, 1439);
-    _dailyStart = TimeOfDay(
-      hour: startMinutes ~/ 60,
-      minute: startMinutes % 60,
-    );
-    _dailyEnd = TimeOfDay(hour: endMinutes ~/ 60, minute: endMinutes % 60);
+    _dailyPeriod = switch (vietnamNow.hour) {
+      < 11 => _MissionPeriod.morning,
+      < 14 => _MissionPeriod.noon,
+      < 18 => _MissionPeriod.afternoon,
+      _ => _MissionPeriod.evening,
+    };
     _missionType = widget.template?.missionType ?? MissionType.daily;
     _customStartDate = today;
     _customEndDate = today.add(const Duration(days: 1));
-    _customStartTime = _dailyStart;
-    _customEndTime = _dailyEnd;
+    _customStartTime = TimeOfDay(
+      hour: startMinutes ~/ 60,
+      minute: startMinutes % 60,
+    );
+    _customEndTime = TimeOfDay(hour: endMinutes ~/ 60, minute: endMinutes % 60);
     if (widget.template case final template?) {
       _titleController.text = template.title;
       _descriptionController.text = template.description ?? '';
@@ -1089,34 +1095,28 @@ class _CreateMissionSheetState extends State<_CreateMissionSheet> {
     final strings = AppLocalizations.of(context);
     switch (_missionType) {
       case MissionType.daily:
-        final start = _TimeField(
-          label: strings.missionStart,
-          value: _dailyStart,
-          onChanged: (value) => setState(() => _dailyStart = value),
-        );
-        final end = _TimeField(
-          label: strings.missionEnd,
-          value: _dailyEnd,
-          onChanged: (value) => setState(() => _dailyEnd = value),
-        );
-        final isNarrow = MediaQuery.sizeOf(context).width < 420;
         return [
-          if (isNarrow) ...[
-            start,
-            const SizedBox(height: 8),
-            end,
-          ] else
-            Row(
-              children: [
-                Expanded(child: start),
-                const SizedBox(width: 10),
-                Expanded(child: end),
-              ],
-            ),
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: [
+              for (final period in const [
+                _MissionPeriod.morning,
+                _MissionPeriod.noon,
+                _MissionPeriod.afternoon,
+                _MissionPeriod.evening,
+              ])
+                ChoiceChip(
+                  label: Text(_missionPeriodLabel(strings, period)),
+                  selected: _dailyPeriod == period,
+                  onSelected: (_) => setState(() => _dailyPeriod = period),
+                ),
+            ],
+          ),
           const SizedBox(height: 8),
           Text(
             strings.missionDailyRenewal(
-              _periodLabelForTime(strings, _dailyStart),
+              _missionPeriodLabel(strings, _dailyPeriod),
             ),
             style: Theme.of(context).textTheme.bodySmall,
           ),
@@ -1168,13 +1168,16 @@ class _CreateMissionSheetState extends State<_CreateMissionSheet> {
     DateTime? startAt;
     DateTime? dueAt;
     if (_missionType == MissionType.daily) {
-      if (_minutes(_dailyEnd) <= _minutes(_dailyStart)) {
-        _showValidation(AppLocalizations.of(context).missionEndTimeAfterStart);
-        return;
-      }
       final today = _vietnamToday();
-      startAt = _vietnamInstant(today, _dailyStart);
-      dueAt = _vietnamInstant(today, _dailyEnd);
+      final startHour = switch (_dailyPeriod) {
+        _MissionPeriod.morning => 6,
+        _MissionPeriod.noon => 12,
+        _MissionPeriod.afternoon => 15,
+        _MissionPeriod.evening => 19,
+        _MissionPeriod.anytime => 6,
+      };
+      startAt = _vietnamInstant(today, TimeOfDay(hour: startHour, minute: 0));
+      dueAt = _vietnamInstant(today, const TimeOfDay(hour: 23, minute: 59));
       if (!dueAt.isAfter(DateTime.now().toUtc())) {
         _showValidation(AppLocalizations.of(context).missionEndTimeFuture);
         return;
@@ -1204,8 +1207,6 @@ class _CreateMissionSheetState extends State<_CreateMissionSheet> {
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
   }
-
-  int _minutes(TimeOfDay time) => time.hour * 60 + time.minute;
 }
 
 class _TimeField extends StatefulWidget {
@@ -1734,15 +1735,6 @@ DateTime _vietnamInstant(DateTime date, TimeOfDay time) {
   ).subtract(const Duration(hours: 7));
 }
 
-String _periodLabelForTime(AppLocalizations strings, TimeOfDay time) {
-  if (time.hour >= 5 && time.hour < 12) return strings.missionPeriodMorning;
-  if (time.hour >= 12 && time.hour < 17) {
-    return strings.missionPeriodAfternoon;
-  }
-  if (time.hour >= 17 && time.hour < 22) return strings.missionPeriodEvening;
-  return strings.missionPeriodAnytime;
-}
-
 String _formatDate(DateTime date) =>
     '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year.toString().padLeft(4, '0')}';
 
@@ -1803,6 +1795,7 @@ String _missionTypeLabel(AppLocalizations strings, MissionType type) =>
 String _missionPeriodLabel(AppLocalizations strings, _MissionPeriod period) =>
     switch (period) {
       _MissionPeriod.morning => strings.missionPeriodMorning,
+      _MissionPeriod.noon => strings.missionPeriodNoon,
       _MissionPeriod.afternoon => strings.missionPeriodAfternoon,
       _MissionPeriod.evening => strings.missionPeriodEvening,
       _MissionPeriod.anytime => strings.missionPeriodAnytime,

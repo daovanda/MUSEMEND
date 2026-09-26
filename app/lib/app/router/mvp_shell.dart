@@ -5,7 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:musemend/app/theme/muse_colors.dart';
 import 'package:musemend/features/checkin/application/reflect_providers.dart';
+import 'package:musemend/features/checkin/application/sky_clock_provider.dart';
 import 'package:musemend/features/checkin/domain/mood.dart';
+import 'package:musemend/features/checkin/domain/sky_day.dart';
 import 'package:musemend/features/checkin/presentation/mood_visuals.dart';
 import 'package:musemend/features/notifications/application/notification_providers.dart';
 import 'package:musemend/l10n/generated/app_localizations.dart';
@@ -22,11 +24,13 @@ class MvpShell extends ConsumerStatefulWidget {
 class _MvpShellState extends ConsumerState<MvpShell>
     with WidgetsBindingObserver {
   StreamSubscription<String>? _notificationSubscription;
+  Timer? _skyBoundaryTimer;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _scheduleSkyBoundary();
     final service = ref.read(notificationServiceProvider);
     _notificationSubscription = service.journalOpenRequests.listen(
       _openJournal,
@@ -43,6 +47,7 @@ class _MvpShellState extends ConsumerState<MvpShell>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _notificationSubscription?.cancel();
+    _skyBoundaryTimer?.cancel();
     super.dispose();
   }
 
@@ -56,6 +61,7 @@ class _MvpShellState extends ConsumerState<MvpShell>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      _refreshSkyClock();
       ref.read(reflectControllerProvider.notifier).recordAppOpen();
     }
   }
@@ -63,6 +69,7 @@ class _MvpShellState extends ConsumerState<MvpShell>
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context);
+    final canChooseMood = canCheckInAt(ref.watch(skyNowProvider));
     final todayMood =
         ref.watch(reflectControllerProvider).asData?.value.today?.mood;
     return Scaffold(
@@ -70,7 +77,9 @@ class _MvpShellState extends ConsumerState<MvpShell>
       bottomNavigationBar: _MuseBottomNavigation(
         shell: widget.navigationShell,
         mood: todayMood,
+        canChooseMood: canChooseMood,
         onMoodSelected: (mood) async {
+          if (!canCheckInAt(DateTime.now())) return;
           final saved = await ref
               .read(reflectControllerProvider.notifier)
               .updateMood(mood);
@@ -90,17 +99,39 @@ class _MvpShellState extends ConsumerState<MvpShell>
       ),
     );
   }
+
+  void _refreshSkyClock() {
+    final previous = ref.read(skyNowProvider);
+    final current = DateTime.now();
+    ref.read(skyNowProvider.notifier).update(current);
+    if (skyDayNumber(previous) != skyDayNumber(current)) {
+      ref.invalidate(reflectControllerProvider);
+    }
+    _scheduleSkyBoundary();
+  }
+
+  void _scheduleSkyBoundary() {
+    _skyBoundaryTimer?.cancel();
+    final now = DateTime.now();
+    final delay = nextSkyBoundary(now).difference(now);
+    _skyBoundaryTimer = Timer(
+      delay.isNegative ? const Duration(seconds: 1) : delay,
+      _refreshSkyClock,
+    );
+  }
 }
 
 class _MuseBottomNavigation extends StatelessWidget {
   const _MuseBottomNavigation({
     required this.shell,
     required this.mood,
+    required this.canChooseMood,
     required this.onMoodSelected,
   });
 
   final StatefulNavigationShell shell;
   final Mood? mood;
+  final bool canChooseMood;
   final Future<void> Function(Mood mood) onMoodSelected;
 
   @override
@@ -169,6 +200,7 @@ class _MuseBottomNavigation extends StatelessWidget {
                 top: -19,
                 child: _MoodCloudButton(
                   mood: mood,
+                  canChooseMood: canChooseMood,
                   onMoodSelected: onMoodSelected,
                   onTap:
                       () => shell.goBranch(
@@ -201,11 +233,13 @@ class _MuseBottomNavigation extends StatelessWidget {
 class _MoodCloudButton extends StatefulWidget {
   const _MoodCloudButton({
     required this.mood,
+    required this.canChooseMood,
     required this.onMoodSelected,
     required this.onTap,
   });
 
   final Mood? mood;
+  final bool canChooseMood;
   final Future<void> Function(Mood mood) onMoodSelected;
   final VoidCallback onTap;
 
@@ -218,6 +252,7 @@ class _MoodCloudButtonState extends State<_MoodCloudButton> {
   bool _saving = false;
 
   Future<void> _showMoodPicker() async {
+    if (!widget.canChooseMood || !canCheckInAt(DateTime.now())) return;
     final strings = AppLocalizations.of(context);
     final mood = await showModalBottomSheet<Mood>(
       context: context,
@@ -277,7 +312,7 @@ class _MoodCloudButtonState extends State<_MoodCloudButton> {
         onTapUp: (_) => setState(() => _pressed = false),
         onTapCancel: () => setState(() => _pressed = false),
         onTap: _saving ? null : widget.onTap,
-        onLongPress: _saving ? null : _showMoodPicker,
+        onLongPress: _saving || !widget.canChooseMood ? null : _showMoodPicker,
         child: AnimatedScale(
           scale: _pressed ? .9 : 1,
           duration: const Duration(milliseconds: 140),

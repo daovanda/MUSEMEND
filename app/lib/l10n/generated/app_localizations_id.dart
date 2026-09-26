@@ -473,19 +473,19 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
-  String get moodAwful => 'KESAL';
+  String get moodAwful => 'BERAT';
 
   @override
-  String get moodSad => 'HAMPA';
+  String get moodSad => 'SEDIKIT MURUNG';
 
   @override
-  String get moodOkay => 'LUMAYAN';
+  String get moodOkay => 'BIASA SAJA';
 
   @override
-  String get moodGood => 'RILEKS';
+  String get moodGood => 'LEGA';
 
   @override
-  String get moodGreat => 'PULIH';
+  String get moodGreat => 'BERSERI';
 
   @override
   String moodRecorded(String mood) {
@@ -679,6 +679,9 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get missionPeriodMorning => 'Pagi';
+
+  @override
+  String get missionPeriodNoon => 'Tengah hari';
 
   @override
   String get missionPeriodAfternoon => 'Siang';
@@ -1218,4 +1221,114 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get webAuthBackHome => 'Kembali ke MuseMend';
+
+  @override
+  String skyTodayMood(String mood) {
+    return 'Hari ini: $mood';
+  }
+
+  @override
+  String get skyEditMood => 'Ubah';
+
+  @override
+  String get skyMorningOpening1 => 'Selamat pagi. Awan ada di sini bersamamu.';
+
+  @override
+  String get skyMorningOpening2 => 'Hari baru dimulai dengan tenang.';
+
+  @override
+  String get skyMorningOpening3 => 'Pagi ini kamu tidak perlu terburu-buru.';
+
+  @override
+  String get skyMorningOpening4 => 'Awan berharap pagimu terasa lembut.';
+
+  @override
+  String get skyMorningEnding1 =>
+      'Satu tarikan napas pelan sudah menjadi awal.';
+
+  @override
+  String get skyMorningEnding2 =>
+      'Kamu boleh memilih satu hal kecil yang terasa mungkin.';
+
+  @override
+  String get skyMorningEnding3 =>
+      'Biarkan tubuhmu bangun dengan ritmenya sendiri.';
+
+  @override
+  String get skyMorningEnding4 =>
+      'Tak perlu tahu seluruh hari ini; mulai saja dari sini.';
+
+  @override
+  String get skyMorningEnding5 =>
+      'Pagi ini juga boleh ada sedikit waktu istirahat.';
+
+  @override
+  String get skyResponseEnding1 => 'Seteguk air bisa menjadi awal kecil.';
+
+  @override
+  String get skyResponseEnding2 =>
+      'Rilekskan bahumu selama satu tarikan napas.';
+
+  @override
+  String get skyResponseEnding3 => 'Jeda singkat juga berarti.';
+
+  @override
+  String get skyResponseEnding4 =>
+      'Kamu boleh memilih yang terasa sanggup dilakukan.';
+
+  @override
+  String get skyResponseEnding5 => 'Tak harus melakukan semuanya sekaligus.';
+
+  @override
+  String get skyResponseEnding6 => 'Kalau mau, lihatlah ke luar sebentar.';
+
+  @override
+  String get skyResponseEnding7 => 'Awan tetap di sini, mengikuti ritmemu.';
+
+  @override
+  String get skyResponseEnding8 =>
+      'Satu hal kecil cukup untuk memulai hari ini.';
+
+  @override
+  String get skyResponseEnding9 =>
+      'Perhatikan apa yang mungkin dibutuhkan tubuhmu.';
+
+  @override
+  String get skyResponseEnding10 =>
+      'Kamu tak perlu menjelaskan perasaan ini sekarang.';
+
+  @override
+  String get skyAwfulOpening1 =>
+      'Jika hari ini terasa berat, kamu tak perlu berpura-pura baik-baik saja.';
+
+  @override
+  String get skyAwfulOpening2 =>
+      'Awan tahu hari ini mungkin sulit; jalani perlahan.';
+
+  @override
+  String get skySadOpening1 => 'Jika hatimu sedang turun, kamu boleh melambat.';
+
+  @override
+  String get skySadOpening2 =>
+      'Hari ini kamu boleh memberi ruang untuk perasaanmu.';
+
+  @override
+  String get skyOkayOpening1 => 'Hari yang biasa pun layak dihargai.';
+
+  @override
+  String get skyOkayOpening2 =>
+      'Jika hari ini terasa biasa saja, itu sudah cukup.';
+
+  @override
+  String get skyGoodOpening1 => 'Awan senang kamu merasa lebih lega.';
+
+  @override
+  String get skyGoodOpening2 =>
+      'Kamu boleh tinggal sejenak dalam rasa nyaman ini.';
+
+  @override
+  String get skyGreatOpening1 => 'Awan melihat sedikit cahaya dalam harimu.';
+
+  @override
+  String get skyGreatOpening2 => 'Hari ini ada sinar kecil di sekitarmu.';
 }

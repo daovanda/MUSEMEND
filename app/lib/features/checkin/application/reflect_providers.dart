@@ -6,6 +6,8 @@ import 'package:musemend/features/checkin/data/supabase_checkin_repository.dart'
 import 'package:musemend/features/checkin/domain/checkin_repository.dart';
 import 'package:musemend/features/checkin/domain/daily_checkin.dart';
 import 'package:musemend/features/checkin/domain/mood.dart';
+import 'package:musemend/features/checkin/domain/sky_day.dart';
+import 'package:musemend/features/checkin/application/sky_clock_provider.dart';
 
 final checkinRepositoryProvider = Provider<CheckinRepository>((ref) {
   return SupabaseCheckinRepository(ref.watch(supabaseClientProvider));
@@ -46,6 +48,7 @@ class ReflectController extends AsyncNotifier<ReflectState> {
     required int? energyLevel,
     required String? note,
   }) async {
+    if (!canCheckInAt(ref.read(skyNowProvider))) return false;
     final current = state.value;
     if (current == null) return false;
     state = const AsyncLoading();

@@ -52,6 +52,11 @@ Miền `features/journey/` tách theo:
 Khi hoàn thành nhiệm vụ, Missions controller invalidate Journey controller để tab
 Library không giữ energy/checkpoint cũ trong `StatefulShellRoute.indexedStack`.
 
+Khi người dùng vào Bầu trời và journey vẫn `notStarted`, controller gọi
+`start_journey()` rồi nạp lại dashboard. RPC máy chủ giữ việc chọn điểm đến,
+checkpoint và idempotence; client không tự chọn hành trình. Journey đã bắt đầu
+hoặc tạm dừng không bị khởi động lại khi mở màn hình.
+
 ## Hợp đồng Supabase và bảo mật
 
 Client chỉ `SELECT` catalog active và dữ liệu hành trình được RLS giới hạn theo

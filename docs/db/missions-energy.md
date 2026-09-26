@@ -1,7 +1,7 @@
 # Missions và energy
 
 Trạng thái: `in-progress`
-Cập nhật: 2026-09-11
+Cập nhật: 2026-09-27
 
 ## Mục tiêu và phạm vi
 
@@ -36,8 +36,10 @@ tạo, cùng lịch cần thiết; không được gửi reward.
 
 - `daily`: bắt buộc `start_at`/`due_at`, cùng ngày Việt Nam hiện tại và end sau
   start. Server tạo `recurrence_series_id`; ngày sau `refresh_scheduled_missions`
-  sinh occurrence giống gần nhất. Buổi được suy ra từ giờ bắt đầu: sáng 05:00–
-  11:59, chiều 12:00–16:59, tối 17:00–21:59, còn lại là bất kỳ lúc nào.
+  sinh occurrence giống gần nhất. Client mới ánh xạ lựa chọn sáng/trưa/chiều/tối
+  thành giờ bắt đầu 06:00/12:00/15:00/19:00, tất cả hết hạn 23:59 cùng ngày.
+  Buổi chỉ là nhóm hiển thị; server vẫn quyết định hiệu lực và thưởng. Bản ghi
+  cũ trước 05:00 thuộc nhóm bất kỳ lúc nào.
 - `weekly`: server bỏ qua mốc client và đặt hết hạn 00:00 thứ Hai kế tiếp.
 - `monthly`: hết hạn 00:00 ngày đầu tháng kế tiếp.
 - `yearly`: hết hạn 00:00 ngày 01/01 năm kế tiếp.

@@ -27,6 +27,7 @@ quyết định, hệ quả và trạng thái.
 - [Android QA 1.8](./release-v1-8.md): giới hạn gợi ý Muse và làm mới nội dung catalog đa ngôn ngữ.
 - [Android QA 1.8.1](./release-v1-8-1.md): đồng bộ logo mascot ở onboarding.
 - [Android QA 1.8.2](./release-v1-8-2.md): auth callback web, khôi phục mật khẩu và hoàn thiện onboarding.
+- [Android QA 1.8.3](./release-v1-8-3.md): chăm sóc theo giờ Việt Nam trên Bầu trời và gợi ý theo cảm xúc.
 - [Nghiệm thu Android trên thiết bị thật](./android-device-qa-acceptance.md):
   checklist P0, bảo mật, lỗi mạng và biên bản PASS/FAIL.
 - [Android Internal Testing cũ](./android-internal-testing.md): phương án Google Play đã deprecated.

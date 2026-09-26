@@ -107,6 +107,19 @@ INSERT INTO auth.users(id,email,raw_user_meta_data,raw_app_meta_data) VALUES
  ('20000000-0000-4000-8000-000000000002','b@example.invalid','{"display_name":"B"}','{"provider":"email"}');
 DO $$
 BEGIN
+ IF muse_private.checkin_is_open('2026-09-26 04:59:59+00'::timestamptz)
+    OR NOT muse_private.checkin_is_open('2026-09-26 05:00:00+00'::timestamptz)
+    OR NOT muse_private.checkin_is_open('2026-09-26 16:59:59+00'::timestamptz)
+    OR muse_private.checkin_is_open('2026-09-26 17:00:00+00'::timestamptz)
+ THEN RAISE EXCEPTION 'Vietnam check-in boundary failed'; END IF;
+END $$;
+-- The integration suite runs at any hour. Before noon, insert a test fixture
+-- as migration owner so later journal/mission tests do not need a prohibited RPC.
+INSERT INTO public.daily_checkins(user_id,mood,mood_score,energy_level,note_short)
+SELECT '10000000-0000-4000-8000-000000000001', 'good', 4, 4, 'fixture'
+WHERE NOT muse_private.checkin_is_open(now());
+DO $$
+BEGIN
  IF EXISTS(
   SELECT 1 FROM public.user_settings
   WHERE user_id IN (
@@ -139,9 +152,19 @@ BEGIN
    SELECT content FROM public.daily_quote_translations
    WHERE quote_rotation_order=daily_quote.rotation_order AND language_code='en'
  ) THEN RAISE EXCEPTION 'unsupported quote locale did not fall back to English'; END IF;
- SELECT * INTO c FROM public.upsert_daily_checkin('sad',2,'first');
- SELECT * INTO c2 FROM public.upsert_daily_checkin('good',4,'edited');
- IF c.id<>c2.id OR c2.mood<>'good' OR (SELECT count(*) FROM public.daily_checkins)<>1 THEN RAISE EXCEPTION 'check-in failed'; END IF;
+ IF (now() AT TIME ZONE 'Asia/Ho_Chi_Minh')::time >= time '12:00' THEN
+  SELECT * INTO c FROM public.upsert_daily_checkin('sad',2,'first');
+  SELECT * INTO c2 FROM public.upsert_daily_checkin('good',4,'edited');
+  IF c.id<>c2.id OR c2.mood<>'good' OR (SELECT count(*) FROM public.daily_checkins)<>1 THEN RAISE EXCEPTION 'check-in failed'; END IF;
+ ELSE
+  BEGIN
+   PERFORM public.upsert_daily_checkin('sad',2,'before noon');
+   RAISE EXCEPTION 'check-in was accepted before noon';
+  EXCEPTION WHEN sqlstate '22023' THEN NULL;
+  END;
+  SELECT * INTO c FROM public.daily_checkins WHERE user_id=auth.uid();
+  IF c.id IS NULL OR c.mood<>'good' THEN RAISE EXCEPTION 'check-in fixture changed before noon'; END IF;
+ END IF;
  SELECT public.record_app_open() INTO v; PERFORM public.record_app_open();
  IF (v->>'streak')::int<>1 OR (SELECT count(*) FROM public.daily_visits)<>1 THEN RAISE EXCEPTION 'streak failed'; END IF;
  SELECT count(*) INTO starter_count FROM public.ensure_home_missions();
@@ -208,7 +231,9 @@ SELECT set_config('request.jwt.claim.sub','20000000-0000-4000-8000-000000000002'
 DO $$
 DECLARE j uuid:=current_setting('app.test.journal_a')::uuid; ca uuid:=current_setting('app.test.checkin_a')::uuid; media_id uuid:=current_setting('app.test.media_a')::uuid; blocked boolean:=false;
 BEGIN
- PERFORM public.upsert_daily_checkin('okay',3,NULL);
+ IF (now() AT TIME ZONE 'Asia/Ho_Chi_Minh')::time >= time '12:00' THEN
+  PERFORM public.upsert_daily_checkin('okay',3,NULL);
+ END IF;
  IF EXISTS(SELECT 1 FROM public.journals WHERE id=j) THEN RAISE EXCEPTION 'RLS leak'; END IF;
  BEGIN PERFORM public.save_journal_with_tags('daily',jsonb_build_object('content','bad','checkin_id',ca),ARRAY[]::text[],NULL);
  EXCEPTION WHEN check_violation OR raise_exception THEN blocked:=true; END;
@@ -258,5 +283,23 @@ DO $$
 BEGIN
  IF NOT EXISTS(SELECT 1 FROM public.account_deletion_requests WHERE user_id='10000000-0000-4000-8000-000000000001') THEN RAISE EXCEPTION 'account deletion request missing'; END IF;
  IF NOT EXISTS(SELECT 1 FROM public.profiles WHERE id='10000000-0000-4000-8000-000000000001' AND account_status='deleted' AND deleted_at IS NOT NULL) THEN RAISE EXCEPTION 'account not disabled'; END IF;
+END $$;
+DO $$
+DECLARE target public.target_mood_type;
+BEGIN
+  FOREACH target IN ARRAY ARRAY[
+    'awful'::public.target_mood_type, 'sad'::public.target_mood_type,
+    'okay'::public.target_mood_type, 'good'::public.target_mood_type,
+    'great'::public.target_mood_type
+  ] LOOP
+    IF (SELECT count(*) FROM public.mission_templates
+        WHERE is_active AND is_system AND target_mood = target) < 2 THEN
+      RAISE EXCEPTION 'not enough mood-specific suggestions for %', target;
+    END IF;
+  END LOOP;
+  IF (SELECT count(*) FROM public.mission_templates
+      WHERE is_active AND is_system AND target_mood = 'all') < 5 THEN
+    RAISE EXCEPTION 'not enough neutral suggestions before check-in';
+  END IF;
 END $$;
 ROLLBACK;

@@ -478,19 +478,19 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get moodAwful => 'ENFADADO';
+  String get moodAwful => 'PESADO';
 
   @override
-  String get moodSad => 'VACÍO';
+  String get moodSad => 'UN POCO BAJO';
 
   @override
-  String get moodOkay => 'ESTOY BIEN';
+  String get moodOkay => 'NORMAL';
 
   @override
-  String get moodGood => 'RELAJADO';
+  String get moodGood => 'ALIVIADO';
 
   @override
-  String get moodGreat => 'SANANDO';
+  String get moodGreat => 'RADIANTE';
 
   @override
   String moodRecorded(String mood) {
@@ -686,6 +686,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get missionPeriodMorning => 'Mañana';
+
+  @override
+  String get missionPeriodNoon => 'Mediodía';
 
   @override
   String get missionPeriodAfternoon => 'Tarde';
@@ -1226,4 +1229,106 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get webAuthBackHome => 'Volver a MuseMend';
+
+  @override
+  String skyTodayMood(String mood) {
+    return 'Hoy: $mood';
+  }
+
+  @override
+  String get skyEditMood => 'Cambiar';
+
+  @override
+  String get skyMorningOpening1 => 'Buenos días. Nube está aquí contigo.';
+
+  @override
+  String get skyMorningOpening2 => 'Un nuevo día empieza en calma.';
+
+  @override
+  String get skyMorningOpening3 => 'Esta mañana no hay prisa.';
+
+  @override
+  String get skyMorningOpening4 => 'Nube te desea una mañana amable.';
+
+  @override
+  String get skyMorningEnding1 => 'Respirar despacio ya es un comienzo.';
+
+  @override
+  String get skyMorningEnding2 => 'Puedes elegir algo pequeño a tu alcance.';
+
+  @override
+  String get skyMorningEnding3 => 'Deja que tu cuerpo despierte a su ritmo.';
+
+  @override
+  String get skyMorningEnding4 =>
+      'No hace falta saber cómo será todo el día; empieza aquí.';
+
+  @override
+  String get skyMorningEnding5 =>
+      'También hay espacio para descansar un poco esta mañana.';
+
+  @override
+  String get skyResponseEnding1 =>
+      'Un sorbo de agua puede ser un pequeño comienzo.';
+
+  @override
+  String get skyResponseEnding2 =>
+      'Relaja los hombros durante una respiración.';
+
+  @override
+  String get skyResponseEnding3 => 'Una pausa breve también importa.';
+
+  @override
+  String get skyResponseEnding4 => 'Puedes elegir lo que te resulte posible.';
+
+  @override
+  String get skyResponseEnding5 => 'No tienes que hacerlo todo a la vez.';
+
+  @override
+  String get skyResponseEnding6 => 'Si quieres, mira afuera un momento.';
+
+  @override
+  String get skyResponseEnding7 => 'Nube sigue aquí, a tu ritmo.';
+
+  @override
+  String get skyResponseEnding8 => 'Una cosa pequeña basta para empezar hoy.';
+
+  @override
+  String get skyResponseEnding9 => 'Observa qué podría necesitar tu cuerpo.';
+
+  @override
+  String get skyResponseEnding10 =>
+      'No tienes que explicar este sentimiento ahora mismo.';
+
+  @override
+  String get skyAwfulOpening1 =>
+      'Si hoy pesa, no tienes que fingir que estás bien.';
+
+  @override
+  String get skyAwfulOpening2 => 'Nube sabe que hoy puede costar; ve despacio.';
+
+  @override
+  String get skySadOpening1 => 'Si te sientes decaído, puedes bajar el ritmo.';
+
+  @override
+  String get skySadOpening2 =>
+      'Hoy puedes darte espacio para sentir lo que sientes.';
+
+  @override
+  String get skyOkayOpening1 => 'Un día normal también merece atención.';
+
+  @override
+  String get skyOkayOpening2 => 'Si hoy es simplemente normal, eso basta.';
+
+  @override
+  String get skyGoodOpening1 => 'A Nube le alegra que te sientas más aliviado.';
+
+  @override
+  String get skyGoodOpening2 => 'Puedes quedarte un rato con esta calma.';
+
+  @override
+  String get skyGreatOpening1 => 'Nube ve algo de brillo en tu día.';
+
+  @override
+  String get skyGreatOpening2 => 'Hoy hay un poco de luz en tu día.';
 }

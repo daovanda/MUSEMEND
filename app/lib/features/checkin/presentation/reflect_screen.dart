@@ -9,8 +9,11 @@ import 'package:musemend/core/presentation/catalog_artwork.dart';
 import 'package:musemend/core/presentation/muse_ui.dart';
 import 'package:musemend/features/checkin/application/reflect_providers.dart';
 import 'package:musemend/features/checkin/application/reflect_state.dart';
+import 'package:musemend/features/checkin/application/sky_clock_provider.dart';
 import 'package:musemend/features/checkin/domain/mood.dart';
+import 'package:musemend/features/checkin/domain/sky_day.dart';
 import 'package:musemend/features/checkin/presentation/mood_visuals.dart';
+import 'package:musemend/features/checkin/presentation/sky_daily_content.dart';
 import 'package:musemend/features/checkin/presentation/sky_scene.dart';
 import 'package:musemend/features/journey/application/journey_providers.dart';
 import 'package:musemend/features/journey/domain/journey_checkpoint.dart';
@@ -31,6 +34,7 @@ class _ReflectScreenState extends ConsumerState<ReflectScreen> {
   Mood? _selectedMood;
   double? _energyLevel;
   String? _hydratedCheckinId;
+  bool _editingMood = false;
 
   @override
   void dispose() {
@@ -63,6 +67,7 @@ class _ReflectScreenState extends ConsumerState<ReflectScreen> {
           note: _noteController.text,
         );
     if (!mounted) return succeeded;
+    if (succeeded) setState(() => _editingMood = false);
     final strings = AppLocalizations.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -81,6 +86,7 @@ class _ReflectScreenState extends ConsumerState<ReflectScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(reflectControllerProvider);
+    final skyNow = ref.watch(skyNowProvider);
     // Keep the retry state self-contained instead of starting a second
     // Supabase request while check-in data is unavailable.
     final journeyState =
@@ -110,6 +116,11 @@ class _ReflectScreenState extends ConsumerState<ReflectScreen> {
                 selectedMood: selected,
                 journey: journey,
                 hasExistingCheckin: data.today != null,
+                canCheckIn: canCheckInAt(skyNow),
+                savedMood: data.today?.mood,
+                editingMood: _editingMood,
+                skyNow: skyNow,
+                onEditMood: () => setState(() => _editingMood = true),
                 onMoodSelected: (mood) => setState(() => _selectedMood = mood),
                 onSave: selected == null ? null : _save,
                 onSaveAndWrite: selected == null ? null : _saveAndWrite,
@@ -162,6 +173,11 @@ class _HomeSkyHero extends StatelessWidget {
     required this.selectedMood,
     required this.journey,
     required this.hasExistingCheckin,
+    required this.canCheckIn,
+    required this.savedMood,
+    required this.editingMood,
+    required this.skyNow,
+    required this.onEditMood,
     required this.onMoodSelected,
     required this.onSave,
     required this.onSaveAndWrite,
@@ -172,6 +188,11 @@ class _HomeSkyHero extends StatelessWidget {
   final Mood? selectedMood;
   final JourneyDashboard? journey;
   final bool hasExistingCheckin;
+  final bool canCheckIn;
+  final Mood? savedMood;
+  final bool editingMood;
+  final DateTime skyNow;
+  final VoidCallback onEditMood;
   final ValueChanged<Mood> onMoodSelected;
   final VoidCallback? onSave;
   final VoidCallback? onSaveAndWrite;
@@ -217,13 +238,31 @@ class _HomeSkyHero extends StatelessWidget {
             const SizedBox(height: 11),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 29),
-              child: _MoodCheckinCard(
-                selected: selectedMood,
-                hasExistingCheckin: hasExistingCheckin,
-                onSelected: onMoodSelected,
-                onSave: onSave,
-                onSaveAndWrite: onSaveAndWrite,
-              ),
+              child:
+                  !canCheckIn
+                      ? _SkyCompanionMessage(
+                        message: morningMessage(
+                          AppLocalizations.of(context),
+                          skyNow,
+                        ),
+                      )
+                      : savedMood != null && !editingMood
+                      ? _SkyCompanionMessage(
+                        message: moodResponse(
+                          AppLocalizations.of(context),
+                          savedMood!,
+                          skyNow,
+                        ),
+                        mood: savedMood,
+                        onEdit: onEditMood,
+                      )
+                      : _MoodCheckinCard(
+                        selected: selectedMood,
+                        hasExistingCheckin: hasExistingCheckin,
+                        onSelected: onMoodSelected,
+                        onSave: onSave,
+                        onSaveAndWrite: onSaveAndWrite,
+                      ),
             ),
             const SizedBox(height: 104),
             MuseContentFrame(
@@ -235,6 +274,63 @@ class _HomeSkyHero extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+class _SkyCompanionMessage extends StatelessWidget {
+  const _SkyCompanionMessage({required this.message, this.mood, this.onEdit});
+
+  final String message;
+  final Mood? mood;
+  final VoidCallback? onEdit;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(48),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
+          width: 332,
+          constraints: const BoxConstraints(minHeight: 179),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: .60),
+            borderRadius: BorderRadius.circular(48),
+            border: Border.all(color: Colors.white.withValues(alpha: .50)),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Color(0xFF565C5E),
+                  fontSize: 14,
+                  height: 1.4,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              if (mood case final selected?) ...[
+                const SizedBox(height: 12),
+                Text(
+                  strings.skyTodayMood(selected.localizedLabel(strings)),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Color(0xFF647A78),
+                    fontSize: 11,
+                  ),
+                ),
+                TextButton(onPressed: onEdit, child: Text(strings.skyEditMood)),
+              ],
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

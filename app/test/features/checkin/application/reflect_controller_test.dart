@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:musemend/features/checkin/application/reflect_providers.dart';
+import 'package:musemend/features/checkin/application/sky_clock_provider.dart';
 import 'package:musemend/features/checkin/domain/app_visit.dart';
 import 'package:musemend/features/checkin/domain/checkin_repository.dart';
 import 'package:musemend/features/checkin/domain/daily_checkin.dart';
@@ -13,6 +14,7 @@ void main() {
       overrides: [checkinRepositoryProvider.overrideWithValue(repository)],
     );
     addTearDown(container.dispose);
+    container.read(skyNowProvider.notifier).update(DateTime.utc(2026, 9, 7, 6));
 
     await container.read(reflectControllerProvider.future);
     final saved = await container

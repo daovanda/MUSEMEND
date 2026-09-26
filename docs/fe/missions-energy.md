@@ -1,7 +1,7 @@
 # Missions và energy client
 
 **Trạng thái:** `in-progress`
-**Cập nhật:** 2026-09-14
+**Cập nhật:** 2026-09-27
 
 ## Mục tiêu và phạm vi
 
@@ -29,8 +29,11 @@ UI `MissionsSection` nằm sau check-in trên Reflect:
 - Home/Bầu trời materialize hai nhiệm vụ mẫu nhẹ mỗi ngày (`Uống một cốc nước`,
   `Đi bộ 5 phút`) qua RPC server và hiển thị tối đa năm gợi ý còn lại ngay bên
   dưới để người dùng chọn thêm; chưa có route nhiệm vụ riêng trong MVP;
-- bottom sheet bắt buộc chọn loại khi tạo thủ công. Daily chọn giờ/phút bắt đầu và
-  kết thúc trong hôm nay; custom chọn đủ ngày/giờ; tuần/tháng/năm hiển thị mốc
+- bottom sheet bắt buộc chọn loại khi tạo thủ công. Daily chọn một trong bốn buổi
+  sáng/trưa/chiều/tối; client ánh xạ thành 06:00/12:00/15:00/19:00 giờ Việt Nam
+  với hạn cuối 23:59 cùng ngày để giữ nguyên RPC và tự lặp hằng ngày. Buổi là
+  nhóm trình bày, không khóa thời điểm hoàn thành. Custom chọn đủ ngày/giờ;
+  tuần/tháng/năm hiển thị mốc
   kết thúc cố định do server tính;
 - khi chọn template daily/custom, sheet lịch tương ứng mở trước khi gửi command;
   template tuần/tháng/năm dùng boundary server;
@@ -60,8 +63,9 @@ trước khi `occurrence_key` được áp dụng. Các template đã có occurr
 ngày hiện tại (kể cả đã hoàn thành hoặc bỏ qua) không còn hiện nút thêm lần nữa;
 nhiệm vụ tự tạo không bị gộp theo tên.
 
-Các nhóm daily là `Buổi sáng` (05:00–11:59), `Buổi chiều` (12:00–16:59),
-`Buổi tối` (17:00–21:59) và `Bất kỳ lúc nào` (22:00–04:59), suy ra từ startAt.
+Các nhóm daily là `Buổi sáng` (05:00–10:59), `Buổi trưa` (11:00–13:59),
+`Buổi chiều` (14:00–17:59), `Buổi tối` (18:00–23:59) và `Bất kỳ lúc nào`
+(00:00–04:59 cho nhiệm vụ cũ), suy ra từ startAt.
 Sticker bên phải header hiện là
 placeholder code-native vì landmark/food thuộc catalog động; không crop cứng sprite
 Figma vào nhiệm vụ. Toàn nhóm nằm trên panel gradient xanh nhạt sang tím nhạt,
@@ -71,8 +75,11 @@ Mọi nhãn, loại nhiệm vụ, validation, lịch và trạng thái rỗng/l�
 từ ARB. Tên/mô tả gợi ý Muse vẫn là catalog động từ
 `mission_template_translations`; nhiệm vụ do user tự viết không bị dịch. Icon của
 gợi ý dùng ký hiệu trung tính thay vì đoán theo từ khóa tiếng Việt trong nội dung.
-Home chỉ hiển thị tối đa năm gợi ý Muse được chọn ngẫu nhiên từ các template phù
-hợp locale/mood và chưa được dùng trong ngày. Toàn bộ catalog vẫn nằm ở DB; giới
+Home chỉ hiển thị tối đa năm gợi ý Muse chưa được dùng trong ngày. Sau check-in,
+template khớp mood được ưu tiên trước rồi mới điền chỗ trống bằng template
+trung tính; trước check-in chỉ hiện template trung tính. Các template cũ phù hợp
+được gán mood bằng migration `20260926171000_mood_aware_mission_catalog.sql`.
+Toàn bộ catalog vẫn nằm ở DB; giới
 hạn năm chỉ là chính sách trình bày để màn hình không quá dài.
 
 ## RPC và mapping
