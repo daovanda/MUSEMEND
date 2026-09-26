@@ -125,13 +125,18 @@ class SupabaseMissionRepository implements MissionRepository {
                   template.targetMood == todayMood?.databaseValue),
         )
         .toList(growable: true);
-    // The catalog can contain many approved suggestions. Keep Home calm and
-    // useful by showing a fresh sample of five on each dashboard load while
-    // leaving the complete catalog available to the add-mission flow.
-    templates.shuffle(Random());
-    final visibleSuggestions = templates
-        .take(_suggestionLimit)
-        .toList(growable: false);
+    // Prefer suggestions tailored to today's check-in. Neutral suggestions
+    // fill the remaining slots and are the only options before check-in.
+    final tailored =
+        templates.where((item) => item.targetMood != 'all').toList()
+          ..shuffle(Random());
+    final neutral =
+        templates.where((item) => item.targetMood == 'all').toList()
+          ..shuffle(Random());
+    final visibleSuggestions = [
+      ...tailored,
+      ...neutral,
+    ].take(_suggestionLimit).toList(growable: false);
     final progress = Map<String, dynamic>.from(results[3] as Map);
 
     return MissionDashboard(

@@ -1,7 +1,7 @@
 # Daily check-in và streak
 
 Trạng thái: `implemented`  
-Cập nhật: 2026-09-05
+Cập nhật: 2026-09-27
 
 ## Mục tiêu và phạm vi
 
@@ -28,7 +28,11 @@ hôm nay đã được ghi nhận.
 - Trả về: row `daily_checkins` vừa tạo hoặc cập nhật.
 - Hành vi: upsert theo user/ngày Việt Nam; lần gọi sau sửa cùng row và khôi phục
   `deleted_at` về `NULL`.
-- Lỗi: chưa đăng nhập/tài khoản không active; enum mood sai; energy ngoài 1–5.
+- Chỉ ghi từ 12:00 đến trước 00:00 theo `Asia/Ho_Chi_Minh`; RPC kiểm tra giờ
+  máy chủ trước khi upsert. Migration `20260926170000_checkin_after_noon.sql`
+  giữ nguyên chữ ký RPC, vì vậy client cũ gọi trước trưa nhận lỗi thay vì ghi.
+- Lỗi: chưa đến 12:00; chưa đăng nhập/tài khoản không active; enum mood sai;
+  energy ngoài 1–5.
 - Client không truyền `user_id`, `mood_score`, `checkin_date` hay timestamp.
 
 ### `record_app_open()`

@@ -448,19 +448,19 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get moodAwful => '짜증나요';
+  String get moodAwful => '무거워요';
 
   @override
-  String get moodSad => '공허해요';
+  String get moodSad => '조금 가라앉아요';
 
   @override
-  String get moodOkay => '괜찮아요';
+  String get moodOkay => '평범해요';
 
   @override
-  String get moodGood => '편안해요';
+  String get moodGood => '한결 가벼워요';
 
   @override
-  String get moodGreat => '회복 중이에요';
+  String get moodGreat => '환하게 빛나요';
 
   @override
   String moodRecorded(String mood) {
@@ -648,6 +648,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get missionPeriodMorning => '아침';
+
+  @override
+  String get missionPeriodNoon => '점심';
 
   @override
   String get missionPeriodAfternoon => '오후';
@@ -1157,4 +1160,99 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get webAuthBackHome => 'MuseMend로 돌아가기';
+
+  @override
+  String skyTodayMood(String mood) {
+    return '오늘의 마음: $mood';
+  }
+
+  @override
+  String get skyEditMood => '바꾸기';
+
+  @override
+  String get skyMorningOpening1 => '좋은 아침이에요. 구름이 곁에 있어요.';
+
+  @override
+  String get skyMorningOpening2 => '새로운 하루가 조용히 시작됐어요.';
+
+  @override
+  String get skyMorningOpening3 => '오늘 아침은 서두르지 않아도 돼요.';
+
+  @override
+  String get skyMorningOpening4 => '구름이 다정한 아침을 빌어요.';
+
+  @override
+  String get skyMorningEnding1 => '느린 숨 한 번도 좋은 시작이에요.';
+
+  @override
+  String get skyMorningEnding2 => '할 수 있는 작은 일 하나를 골라도 돼요.';
+
+  @override
+  String get skyMorningEnding3 => '몸이 자기 속도로 깨어나게 두어요.';
+
+  @override
+  String get skyMorningEnding4 => '하루 전체를 미리 알 필요 없어요. 지금부터 시작해요.';
+
+  @override
+  String get skyMorningEnding5 => '아침에도 잠깐 쉴 자리가 있어요.';
+
+  @override
+  String get skyResponseEnding1 => '물 한 모금으로 작게 시작해도 돼요.';
+
+  @override
+  String get skyResponseEnding2 => '숨 한 번 쉬며 어깨의 힘을 풀어요.';
+
+  @override
+  String get skyResponseEnding3 => '짧은 쉼에도 의미가 있어요.';
+
+  @override
+  String get skyResponseEnding4 => '감당할 수 있는 일을 골라도 돼요.';
+
+  @override
+  String get skyResponseEnding5 => '모든 일을 한 번에 하지 않아도 돼요.';
+
+  @override
+  String get skyResponseEnding6 => '원한다면 잠깐 바깥을 바라봐요.';
+
+  @override
+  String get skyResponseEnding7 => '구름은 당신의 속도에 맞춰 곁에 있어요.';
+
+  @override
+  String get skyResponseEnding8 => '오늘은 작은 일 하나로 시작해도 충분해요.';
+
+  @override
+  String get skyResponseEnding9 => '몸에 필요한 것이 무엇인지 살펴봐요.';
+
+  @override
+  String get skyResponseEnding10 => '지금 이 감정을 설명하지 않아도 돼요.';
+
+  @override
+  String get skyAwfulOpening1 => '오늘이 무겁다면 괜찮은 척하지 않아도 돼요.';
+
+  @override
+  String get skyAwfulOpening2 => '구름도 오늘이 쉽지 않을 수 있음을 알아요. 천천히 가요.';
+
+  @override
+  String get skySadOpening1 => '마음이 가라앉는다면 조금 느려져도 돼요.';
+
+  @override
+  String get skySadOpening2 => '오늘은 느끼는 그대로 있어도 괜찮아요.';
+
+  @override
+  String get skyOkayOpening1 => '평범한 하루도 소중해요.';
+
+  @override
+  String get skyOkayOpening2 => '오늘이 그저 평범하다면 그것으로 충분해요.';
+
+  @override
+  String get skyGoodOpening1 => '마음이 한결 가벼워져서 구름도 기뻐요.';
+
+  @override
+  String get skyGoodOpening2 => '이 편안함에 잠시 머물러도 돼요.';
+
+  @override
+  String get skyGreatOpening1 => '구름은 오늘 당신의 빛을 봐요.';
+
+  @override
+  String get skyGreatOpening2 => '오늘 하루에 작은 빛이 있어요.';
 }

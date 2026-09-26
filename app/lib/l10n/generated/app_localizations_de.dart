@@ -482,19 +482,19 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get moodAwful => 'WÜTEND';
+  String get moodAwful => 'SCHWER';
 
   @override
-  String get moodSad => 'LEER';
+  String get moodSad => 'BEDRÜCKT';
 
   @override
-  String get moodOkay => 'GANZ OKAY';
+  String get moodOkay => 'NORMAL';
 
   @override
-  String get moodGood => 'ENTSPANNT';
+  String get moodGood => 'ERLEICHTERT';
 
   @override
-  String get moodGreat => 'HEILEND';
+  String get moodGreat => 'STRAHLEND';
 
   @override
   String moodRecorded(String mood) {
@@ -693,6 +693,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get missionPeriodMorning => 'Morgens';
+
+  @override
+  String get missionPeriodNoon => 'Mittags';
 
   @override
   String get missionPeriodAfternoon => 'Nachmittags';
@@ -1237,4 +1240,115 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get webAuthBackHome => 'Zurück zu MuseMend';
+
+  @override
+  String skyTodayMood(String mood) {
+    return 'Heute: $mood';
+  }
+
+  @override
+  String get skyEditMood => 'Ändern';
+
+  @override
+  String get skyMorningOpening1 => 'Guten Morgen. Wolke ist bei dir.';
+
+  @override
+  String get skyMorningOpening2 => 'Ein neuer Tag beginnt ganz leise.';
+
+  @override
+  String get skyMorningOpening3 => 'Heute Morgen musst du dich nicht beeilen.';
+
+  @override
+  String get skyMorningOpening4 => 'Wolke wünscht dir einen sanften Morgen.';
+
+  @override
+  String get skyMorningEnding1 => 'Ein ruhiger Atemzug ist schon ein Anfang.';
+
+  @override
+  String get skyMorningEnding2 =>
+      'Du kannst eine kleine, machbare Sache wählen.';
+
+  @override
+  String get skyMorningEnding3 =>
+      'Lass deinen Körper in seinem Tempo wach werden.';
+
+  @override
+  String get skyMorningEnding4 =>
+      'Du musst noch nicht den ganzen Tag kennen; fang hier an.';
+
+  @override
+  String get skyMorningEnding5 =>
+      'Auch am Morgen darf es eine kleine Pause geben.';
+
+  @override
+  String get skyResponseEnding1 =>
+      'Ein Schluck Wasser kann ein kleiner Anfang sein.';
+
+  @override
+  String get skyResponseEnding2 =>
+      'Lass für einen Atemzug die Schultern locker.';
+
+  @override
+  String get skyResponseEnding3 => 'Auch eine kurze Pause ist wertvoll.';
+
+  @override
+  String get skyResponseEnding4 =>
+      'Du darfst wählen, was sich machbar anfühlt.';
+
+  @override
+  String get skyResponseEnding5 => 'Du musst nicht alles auf einmal tun.';
+
+  @override
+  String get skyResponseEnding6 =>
+      'Wenn du magst, schau einen Moment nach draußen.';
+
+  @override
+  String get skyResponseEnding7 => 'Wolke bleibt bei dir, in deinem Tempo.';
+
+  @override
+  String get skyResponseEnding8 => 'Eine kleine Sache reicht heute als Anfang.';
+
+  @override
+  String get skyResponseEnding9 =>
+      'Spüre nach, was dein Körper gerade braucht.';
+
+  @override
+  String get skyResponseEnding10 =>
+      'Du musst dieses Gefühl jetzt nicht erklären.';
+
+  @override
+  String get skyAwfulOpening1 =>
+      'Wenn sich heute alles schwer anfühlt, musst du nichts vorspielen.';
+
+  @override
+  String get skyAwfulOpening2 =>
+      'Wolke weiß, dass dieser Tag schwer sein kann; geh behutsam vor.';
+
+  @override
+  String get skySadOpening1 =>
+      'Wenn du bedrückt bist, darfst du langsamer werden.';
+
+  @override
+  String get skySadOpening2 => 'Heute darf dein Gefühl einfach da sein.';
+
+  @override
+  String get skyOkayOpening1 => 'Auch ein gewöhnlicher Tag verdient Beachtung.';
+
+  @override
+  String get skyOkayOpening2 =>
+      'Wenn heute einfach normal ist, reicht das aus.';
+
+  @override
+  String get skyGoodOpening1 =>
+      'Wolke freut sich, dass du dich leichter fühlst.';
+
+  @override
+  String get skyGoodOpening2 =>
+      'Du darfst noch einen Moment bei diesem Gefühl bleiben.';
+
+  @override
+  String get skyGreatOpening1 => 'Wolke sieht heute ein Leuchten in dir.';
+
+  @override
+  String get skyGreatOpening2 => 'Heute ist ein wenig Licht in deinem Tag.';
 }

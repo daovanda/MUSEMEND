@@ -955,31 +955,31 @@ abstract class AppLocalizations {
   /// No description provided for @moodAwful.
   ///
   /// In en, this message translates to:
-  /// **'ANGRY'**
+  /// **'HEAVY'**
   String get moodAwful;
 
   /// No description provided for @moodSad.
   ///
   /// In en, this message translates to:
-  /// **'EMPTY'**
+  /// **'A LITTLE LOW'**
   String get moodSad;
 
   /// No description provided for @moodOkay.
   ///
   /// In en, this message translates to:
-  /// **'OKAY'**
+  /// **'STEADY'**
   String get moodOkay;
 
   /// No description provided for @moodGood.
   ///
   /// In en, this message translates to:
-  /// **'RELAXED'**
+  /// **'AT EASE'**
   String get moodGood;
 
   /// No description provided for @moodGreat.
   ///
   /// In en, this message translates to:
-  /// **'HEALING'**
+  /// **'RADIANT'**
   String get moodGreat;
 
   /// No description provided for @moodRecorded.
@@ -1323,6 +1323,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Morning'**
   String get missionPeriodMorning;
+
+  /// No description provided for @missionPeriodNoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Noon'**
+  String get missionPeriodNoon;
 
   /// No description provided for @missionPeriodAfternoon.
   ///
@@ -2246,6 +2252,192 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Back to MuseMend'**
   String get webAuthBackHome;
+
+  /// No description provided for @skyTodayMood.
+  ///
+  /// In en, this message translates to:
+  /// **'Today: {mood}'**
+  String skyTodayMood(String mood);
+
+  /// No description provided for @skyEditMood.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get skyEditMood;
+
+  /// No description provided for @skyMorningOpening1.
+  ///
+  /// In en, this message translates to:
+  /// **'Good morning. Cloud is here with you.'**
+  String get skyMorningOpening1;
+
+  /// No description provided for @skyMorningOpening2.
+  ///
+  /// In en, this message translates to:
+  /// **'A new day has begun quietly.'**
+  String get skyMorningOpening2;
+
+  /// No description provided for @skyMorningOpening3.
+  ///
+  /// In en, this message translates to:
+  /// **'This morning, there is no need to rush.'**
+  String get skyMorningOpening3;
+
+  /// No description provided for @skyMorningOpening4.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud wishes you a gentle morning.'**
+  String get skyMorningOpening4;
+
+  /// No description provided for @skyMorningEnding1.
+  ///
+  /// In en, this message translates to:
+  /// **'One slow breath is already a beginning.'**
+  String get skyMorningEnding1;
+
+  /// No description provided for @skyMorningEnding2.
+  ///
+  /// In en, this message translates to:
+  /// **'You can choose one small thing within reach.'**
+  String get skyMorningEnding2;
+
+  /// No description provided for @skyMorningEnding3.
+  ///
+  /// In en, this message translates to:
+  /// **'Let your body wake at its own pace.'**
+  String get skyMorningEnding3;
+
+  /// No description provided for @skyMorningEnding4.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not need to know the whole day yet; start here.'**
+  String get skyMorningEnding4;
+
+  /// No description provided for @skyMorningEnding5.
+  ///
+  /// In en, this message translates to:
+  /// **'There is room for a little rest this morning.'**
+  String get skyMorningEnding5;
+
+  /// No description provided for @skyResponseEnding1.
+  ///
+  /// In en, this message translates to:
+  /// **'A sip of water can be a small beginning.'**
+  String get skyResponseEnding1;
+
+  /// No description provided for @skyResponseEnding2.
+  ///
+  /// In en, this message translates to:
+  /// **'Let your shoulders soften for one breath.'**
+  String get skyResponseEnding2;
+
+  /// No description provided for @skyResponseEnding3.
+  ///
+  /// In en, this message translates to:
+  /// **'A short pause has its place.'**
+  String get skyResponseEnding3;
+
+  /// No description provided for @skyResponseEnding4.
+  ///
+  /// In en, this message translates to:
+  /// **'You can choose what feels manageable.'**
+  String get skyResponseEnding4;
+
+  /// No description provided for @skyResponseEnding5.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have to do everything at once.'**
+  String get skyResponseEnding5;
+
+  /// No description provided for @skyResponseEnding6.
+  ///
+  /// In en, this message translates to:
+  /// **'If you like, look outside for a moment.'**
+  String get skyResponseEnding6;
+
+  /// No description provided for @skyResponseEnding7.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud is here, moving at your pace.'**
+  String get skyResponseEnding7;
+
+  /// No description provided for @skyResponseEnding8.
+  ///
+  /// In en, this message translates to:
+  /// **'One small thing is enough to begin today.'**
+  String get skyResponseEnding8;
+
+  /// No description provided for @skyResponseEnding9.
+  ///
+  /// In en, this message translates to:
+  /// **'Notice what your body might need.'**
+  String get skyResponseEnding9;
+
+  /// No description provided for @skyResponseEnding10.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have to explain this feeling right now.'**
+  String get skyResponseEnding10;
+
+  /// No description provided for @skyAwfulOpening1.
+  ///
+  /// In en, this message translates to:
+  /// **'If today feels heavy, you do not have to pretend otherwise.'**
+  String get skyAwfulOpening1;
+
+  /// No description provided for @skyAwfulOpening2.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud knows today may be hard to move through; go gently.'**
+  String get skyAwfulOpening2;
+
+  /// No description provided for @skySadOpening1.
+  ///
+  /// In en, this message translates to:
+  /// **'If you are feeling low, you can slow down a little.'**
+  String get skySadOpening1;
+
+  /// No description provided for @skySadOpening2.
+  ///
+  /// In en, this message translates to:
+  /// **'You can make room for how you feel today.'**
+  String get skySadOpening2;
+
+  /// No description provided for @skyOkayOpening1.
+  ///
+  /// In en, this message translates to:
+  /// **'An ordinary day deserves to be noticed too.'**
+  String get skyOkayOpening1;
+
+  /// No description provided for @skyOkayOpening2.
+  ///
+  /// In en, this message translates to:
+  /// **'If today feels simply steady, that is enough.'**
+  String get skyOkayOpening2;
+
+  /// No description provided for @skyGoodOpening1.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud is glad things feel a little lighter.'**
+  String get skyGoodOpening1;
+
+  /// No description provided for @skyGoodOpening2.
+  ///
+  /// In en, this message translates to:
+  /// **'You can stay with this ease for a moment.'**
+  String get skyGoodOpening2;
+
+  /// No description provided for @skyGreatOpening1.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud can see some brightness in your day.'**
+  String get skyGreatOpening1;
+
+  /// No description provided for @skyGreatOpening2.
+  ///
+  /// In en, this message translates to:
+  /// **'There is a little light in your day right now.'**
+  String get skyGreatOpening2;
 }
 
 class _AppLocalizationsDelegate

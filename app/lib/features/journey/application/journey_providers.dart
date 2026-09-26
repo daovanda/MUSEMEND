@@ -6,6 +6,7 @@ import 'package:musemend/core/supabase/supabase_client_provider.dart';
 import 'package:musemend/features/journey/data/supabase_journey_repository.dart';
 import 'package:musemend/features/journey/domain/journey_dashboard.dart';
 import 'package:musemend/features/journey/domain/journey_repository.dart';
+import 'package:musemend/features/journey/domain/journey_status.dart';
 import 'package:musemend/features/profile/application/profile_providers.dart';
 
 final journeyRepositoryProvider = Provider<JourneyRepository>((ref) {
@@ -21,8 +22,13 @@ class JourneyController extends AsyncNotifier<JourneyDashboard> {
   JourneyRepository get _repository => ref.read(journeyRepositoryProvider);
 
   @override
-  Future<JourneyDashboard> build() {
+  Future<JourneyDashboard> build() async {
     ref.watch(appLanguageCodeProvider);
+    final dashboard = await _repository.loadDashboard(
+      languageCode: _languageCode,
+    );
+    if (dashboard.status != JourneyStatus.notStarted) return dashboard;
+    await _repository.startJourney();
     return _repository.loadDashboard(languageCode: _languageCode);
   }
 

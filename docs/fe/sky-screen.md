@@ -1,7 +1,7 @@
 # Màn Bầu trời (Reflect)
 
 - **Trạng thái:** in-progress
-- **Cập nhật:** 2026-09-13
+- **Cập nhật:** 2026-09-27
 - **Nguồn tham chiếu:** page Home, Figma frame `Bầu trời` (`233:893`) và biến thể mood mở (`57:24`)
 
 ## Phạm vi
@@ -34,10 +34,17 @@ tiến độ vẫn do RPC/database xác định; các con số hiển thị ch�
 - Logo `MuseMend` ở header dùng `ShaderMask` với gradient ngang xanh teal →
   xanh lá nhạt, giữ chữ là text để sắc nét ở mọi mật độ màn hình.
 - Mood bubble rộng `332`, tối thiểu cao `179`, radius `48`, white 60%, border
-  white 50% và background blur `12`. Năm artwork ánh xạ nhãn `QUẠO`,
-  `TRỐNG RỖNG`, `ỔN ÁP`, `THƯ GIÃN`, `CHỮA LÀNH` về đúng enum DB.
+  white 50% và background blur `12`. Năm artwork/enum DB giữ nguyên; nhãn mới
+  lần lượt là `Nặng nề`, `Chùng xuống`, `Bình thường`, `Nhẹ lòng`, `Rạng rỡ`.
+- Từ 00:00 đến 11:59 giờ Việt Nam, bubble hiển thị một lời chào buổi sáng ổn
+  định trong ngày, luân phiên qua 20 câu. Từ 12:00, người dùng có thể chọn mood;
+  sau khi lưu hiện một trong 20 lời đáp phù hợp mood, ổn định trong ngày. Shell
+  cập nhật ở đúng mốc 12:00/00:00 và khi app resume. Server cũng chặn ghi trước
+  12:00, không tin vào đồng hồ client.
 - `LƯU NHANH` lưu check-in; `LƯU VÀ VIẾT TÂM TƯ` lưu rồi mở `/journal`.
-- Journey hiển thị điểm đến, trạm và tối đa năm checkpoint từ `JourneyDashboard`;
+- Journey tự khởi hành bằng RPC idempotent khi dashboard được tải mà trạng thái
+  còn `notStarted`; các trạng thái đã bắt đầu/tạm dừng không bị khởi động lại.
+  Journey hiển thị điểm đến, trạm và tối đa năm checkpoint từ `JourneyDashboard`;
   `destination_checkpoints.asset_path` được truyền tới `CatalogArtwork` khi đã có
   export được duyệt, còn `NULL` dùng placeholder. Không dùng sprite cố định thay
   cho dữ liệu hiện tại.
@@ -45,7 +52,8 @@ tiến độ vẫn do RPC/database xác định; các con số hiển thị ch�
   lần đầu trong ngày, server tạo idempotent hai nhiệm vụ starter (`Uống một cốc
   nước`, `Đi bộ 5 phút`). Daily còn hạn được nhóm theo giờ `startAt` thành sáng,
   chiều, tối, bất kỳ lúc nào; tuần/tháng/năm/custom có nhóm riêng. Nhiệm vụ quá
-  hạn được server đánh dấu expired khi tải dashboard và không hiển thị. Bên dưới
+  hạn được server đánh dấu expired khi tải dashboard và không hiển thị. Tạo daily
+  chọn sáng/trưa/chiều/tối thay cho nhập giờ cố định. Bên dưới
   là catalog gợi ý có nhãn loại; thêm daily/custom mở sheet chọn lịch trước khi
   gọi `create_scheduled_mission()` qua repository. Tiến độ cạnh sticker là
   `earned_energy/required_energy` của

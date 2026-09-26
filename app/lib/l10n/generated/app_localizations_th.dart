@@ -467,19 +467,19 @@ class AppLocalizationsTh extends AppLocalizations {
   }
 
   @override
-  String get moodAwful => 'หงุดหงิด';
+  String get moodAwful => 'หนักใจ';
 
   @override
-  String get moodSad => 'ว่างเปล่า';
+  String get moodSad => 'ใจแผ่วลง';
 
   @override
-  String get moodOkay => 'โอเค';
+  String get moodOkay => 'ธรรมดา';
 
   @override
-  String get moodGood => 'ผ่อนคลาย';
+  String get moodGood => 'โล่งใจ';
 
   @override
-  String get moodGreat => 'กำลังเยียวยา';
+  String get moodGreat => 'สดใส';
 
   @override
   String moodRecorded(String mood) {
@@ -671,6 +671,9 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get missionPeriodMorning => 'เช้า';
+
+  @override
+  String get missionPeriodNoon => 'เที่ยง';
 
   @override
   String get missionPeriodAfternoon => 'บ่าย';
@@ -1194,4 +1197,100 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get webAuthBackHome => 'กลับไปที่ MuseMend';
+
+  @override
+  String skyTodayMood(String mood) {
+    return 'วันนี้: $mood';
+  }
+
+  @override
+  String get skyEditMood => 'เปลี่ยน';
+
+  @override
+  String get skyMorningOpening1 => 'สวัสดีตอนเช้า เมฆอยู่ตรงนี้กับคุณ';
+
+  @override
+  String get skyMorningOpening2 => 'วันใหม่เริ่มขึ้นอย่างแผ่วเบา';
+
+  @override
+  String get skyMorningOpening3 => 'เช้านี้ไม่ต้องรีบก็ได้';
+
+  @override
+  String get skyMorningOpening4 => 'เมฆขอให้เช้านี้อ่อนโยนกับคุณ';
+
+  @override
+  String get skyMorningEnding1 => 'หายใจช้า ๆ หนึ่งครั้งก็เป็นการเริ่มต้นแล้ว';
+
+  @override
+  String get skyMorningEnding2 => 'คุณเลือกทำเรื่องเล็ก ๆ ที่ไหวได้';
+
+  @override
+  String get skyMorningEnding3 => 'ปล่อยให้ร่างกายตื่นตามจังหวะของตัวเอง';
+
+  @override
+  String get skyMorningEnding4 =>
+      'ยังไม่ต้องรู้ว่าทั้งวันจะเป็นอย่างไร เริ่มจากตรงนี้ก่อน';
+
+  @override
+  String get skyMorningEnding5 => 'เช้านี้มีที่ว่างให้พักสักนิดเสมอ';
+
+  @override
+  String get skyResponseEnding1 => 'จิบน้ำสักอึกก็เป็นการเริ่มต้นเล็ก ๆ';
+
+  @override
+  String get skyResponseEnding2 => 'ผ่อนคลายไหล่พร้อมลมหายใจหนึ่งครั้ง';
+
+  @override
+  String get skyResponseEnding3 => 'การพักสั้น ๆ ก็มีความหมาย';
+
+  @override
+  String get skyResponseEnding4 => 'คุณเลือกสิ่งที่พอไหวสำหรับตัวเองได้';
+
+  @override
+  String get skyResponseEnding5 => 'ไม่ต้องทำทุกอย่างพร้อมกัน';
+
+  @override
+  String get skyResponseEnding6 => 'ถ้าอยาก ลองมองออกไปข้างนอกสักครู่';
+
+  @override
+  String get skyResponseEnding7 => 'เมฆยังอยู่ตรงนี้ตามจังหวะของคุณ';
+
+  @override
+  String get skyResponseEnding8 => 'วันนี้เริ่มจากเรื่องเล็ก ๆ เรื่องเดียวก็พอ';
+
+  @override
+  String get skyResponseEnding9 => 'ลองฟังดูว่าร่างกายต้องการอะไร';
+
+  @override
+  String get skyResponseEnding10 => 'คุณไม่ต้องอธิบายความรู้สึกนี้ทันที';
+
+  @override
+  String get skyAwfulOpening1 => 'ถ้าวันนี้หนักใจ คุณไม่ต้องแกล้งทำว่าไหว';
+
+  @override
+  String get skyAwfulOpening2 => 'เมฆรู้ว่าวันนี้อาจผ่านไปยาก ค่อย ๆ ไปนะ';
+
+  @override
+  String get skySadOpening1 => 'ถ้าใจแผ่วลง คุณค่อย ๆ ช้าลงได้';
+
+  @override
+  String get skySadOpening2 => 'วันนี้คุณให้พื้นที่กับความรู้สึกตัวเองได้';
+
+  @override
+  String get skyOkayOpening1 => 'วันธรรมดาก็ควรได้รับการใส่ใจ';
+
+  @override
+  String get skyOkayOpening2 => 'ถ้าวันนี้แค่ธรรมดา ก็เพียงพอแล้ว';
+
+  @override
+  String get skyGoodOpening1 => 'เมฆดีใจที่คุณรู้สึกโล่งขึ้น';
+
+  @override
+  String get skyGoodOpening2 => 'คุณอยู่กับความสบายใจนี้อีกสักนิดได้';
+
+  @override
+  String get skyGreatOpening1 => 'เมฆเห็นความสดใสในวันนี้ของคุณ';
+
+  @override
+  String get skyGreatOpening2 => 'วันนี้มีแสงเล็ก ๆ อยู่กับคุณ';
 }

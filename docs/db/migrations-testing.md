@@ -43,6 +43,8 @@ Các migration tới `20260907150000` đã có trên nhánh phát triển; dòng
 | `20260912180000` | `new_user_onboarding` | Trạng thái onboarding, cách xưng hô và RPC hoàn tất owner-scoped |
 | `20260912200000` | `default_light_theme` | Đặt theme mặc định sáng và chuyển default `system` cũ sang `light` |
 | `20260912210000` | `multilingual_catalog_reset` | 12 locale, 7 bảng dịch, fallback English và reset toàn bộ dữ liệu Development |
+| `20260926170000` | `checkin_after_noon` | RPC từ chối check-in trước 12:00 giờ Việt Nam |
+| `20260926171000` | `mood_aware_mission_catalog` | Phân loại thêm gợi ý sẵn có theo mood, giữ gợi ý trung tính |
 
 ## Quy ước migration
 

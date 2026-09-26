@@ -1,7 +1,7 @@
 # Curated travel và mission catalog
 
 Trạng thái: `implemented`  
-Cập nhật: 2026-09-13
+Cập nhật: 2026-09-27
 
 ## Phạm vi
 
@@ -21,6 +21,12 @@ Các route curated đứng trước ba route `demo-*` đối với user chưa kh
 Đây là dữ liệu mẫu hư cấu theo phong cách MuseMend, không phải hướng dẫn du lịch
 hay nội dung thương mại. Tọa độ chỉ phục vụ metadata catalog; app MVP chưa dùng
 cho chỉ đường.
+
+Migration `20260926171000_mood_aware_mission_catalog.sql` chỉ cập nhật
+`target_mood` cho 10 template hệ thống hiện có: mỗi mood có thêm hai gợi ý phù
+hợp. Starter và nhiều template khác vẫn `all` để hiện trước check-in hoặc lấp
+chỗ trống sau check-in. Không đổi bản dịch, reward, ID hay dữ liệu nhiệm vụ người
+dùng; client vẫn phải lấy catalog qua RLS và server kiểm tra mood khi tạo.
 
 ## Mô hình điểm đến toàn cầu
 

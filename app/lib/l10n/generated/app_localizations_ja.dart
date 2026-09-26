@@ -445,19 +445,19 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get moodAwful => 'イライラ';
+  String get moodAwful => 'つらい';
 
   @override
-  String get moodSad => 'からっぽ';
+  String get moodSad => '少し沈む';
 
   @override
-  String get moodOkay => 'まあまあ';
+  String get moodOkay => 'ふつう';
 
   @override
-  String get moodGood => 'リラックス';
+  String get moodGood => '気が軽い';
 
   @override
-  String get moodGreat => '癒やされている';
+  String get moodGreat => '晴れやか';
 
   @override
   String moodRecorded(String mood) {
@@ -645,6 +645,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get missionPeriodMorning => '朝';
+
+  @override
+  String get missionPeriodNoon => '昼';
 
   @override
   String get missionPeriodAfternoon => '午後';
@@ -1153,4 +1156,99 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get webAuthBackHome => 'MuseMendに戻る';
+
+  @override
+  String skyTodayMood(String mood) {
+    return '今日の気持ち: $mood';
+  }
+
+  @override
+  String get skyEditMood => '変更する';
+
+  @override
+  String get skyMorningOpening1 => 'おはよう。雲はここにいるよ。';
+
+  @override
+  String get skyMorningOpening2 => '新しい一日が静かに始まったね。';
+
+  @override
+  String get skyMorningOpening3 => '今朝は急がなくて大丈夫。';
+
+  @override
+  String get skyMorningOpening4 => '穏やかな朝になりますように。';
+
+  @override
+  String get skyMorningEnding1 => 'ゆっくり一息つくだけでも始まりになるよ。';
+
+  @override
+  String get skyMorningEnding2 => 'できそうな小さなことを一つ選んでね。';
+
+  @override
+  String get skyMorningEnding3 => '体が自分のペースで目覚めるのを待とう。';
+
+  @override
+  String get skyMorningEnding4 => '一日全部を考えなくても、今ここからでいい。';
+
+  @override
+  String get skyMorningEnding5 => '朝にも少し休む時間があっていいよ。';
+
+  @override
+  String get skyResponseEnding1 => '一口の水から始めてもいいよ。';
+
+  @override
+  String get skyResponseEnding2 => '一呼吸だけ肩の力を抜いてね。';
+
+  @override
+  String get skyResponseEnding3 => '短い休みも大切だよ。';
+
+  @override
+  String get skyResponseEnding4 => 'できる範囲のことを選んでいい。';
+
+  @override
+  String get skyResponseEnding5 => '全部を一度にしなくて大丈夫。';
+
+  @override
+  String get skyResponseEnding6 => 'よかったら少し外を眺めてみて。';
+
+  @override
+  String get skyResponseEnding7 => '雲はきみのペースでそばにいるよ。';
+
+  @override
+  String get skyResponseEnding8 => '今日は小さな一歩だけでも十分。';
+
+  @override
+  String get skyResponseEnding9 => '体が何を必要としているか感じてみて。';
+
+  @override
+  String get skyResponseEnding10 => '今すぐこの気持ちを説明しなくていいよ。';
+
+  @override
+  String get skyAwfulOpening1 => '今日はつらいなら、平気なふりをしなくていい。';
+
+  @override
+  String get skyAwfulOpening2 => '進みにくい日もあるね。ゆっくりでいいよ。';
+
+  @override
+  String get skySadOpening1 => '気持ちが沈むなら、少しペースを落としていい。';
+
+  @override
+  String get skySadOpening2 => '今日はその気持ちのままでいても大丈夫。';
+
+  @override
+  String get skyOkayOpening1 => 'ふつうの日にも意味があるよ。';
+
+  @override
+  String get skyOkayOpening2 => '今日はただふつう。それでも十分だよ。';
+
+  @override
+  String get skyGoodOpening1 => '少し気が軽くなって、雲もうれしいよ。';
+
+  @override
+  String get skyGoodOpening2 => 'この心地よさに少しとどまってもいいよ。';
+
+  @override
+  String get skyGreatOpening1 => '今日は晴れやかな気持ちが見えるよ。';
+
+  @override
+  String get skyGreatOpening2 => '今日の中に小さな光があるね。';
 }

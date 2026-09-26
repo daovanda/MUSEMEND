@@ -1,7 +1,7 @@
 # Daily check-in và streak client
 
 **Trạng thái:** `in-progress`
-**Cập nhật:** 2026-09-13
+**Cập nhật:** 2026-09-27
 
 ## Mục tiêu và phạm vi
 
@@ -20,13 +20,17 @@ phụ thuộc trực tiếp vào tên cột Postgres.
 
 Page Home dùng artwork tĩnh cho năm mức `awful/sad/okay/good/great`. Mapping ảnh
 nằm tại `features/checkin/presentation/mood_visuals.dart`; nhãn mood lấy từ ARB
-(tiếng Việt lần lượt là `QUẠO`, `TRỐNG RỖNG`, `ỔN ÁP`, `THƯ GIÃN`, `CHỮA LÀNH`).
+(tiếng Việt lần lượt là `Nặng nề`, `Chùng xuống`, `Bình thường`, `Nhẹ lòng`,
+`Rạng rỡ`).
 Domain chỉ giữ năm giá trị DB cùng score, không chứa nhãn hoặc biểu tượng theo một
 ngôn ngữ cố định.
 
 ## Quy tắc dữ liệu và lỗi
 
 - Ngày client dùng UTC+7 để truy vấn nhất quán với DB.
+- Check-in chỉ mở từ 12:00 đến 23:59 giờ Việt Nam. Trước mốc này, Home hiện
+  lời chào buổi sáng theo ngày; sau khi lưu hiện lời đáp theo mood. Client khóa
+  thao tác, RPC kiểm tra lại giờ máy chủ.
 - Mood ánh xạ cố định; mood score, user, ngày và timestamp do DB quyết định.
 - Energy level không bắt buộc, nếu có là 1–5; note tối đa 500 ký tự ở UI.
 - Check-in lần sau cập nhật row cùng ngày thay vì tạo row mới.
